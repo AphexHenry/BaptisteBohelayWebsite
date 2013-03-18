@@ -1,0 +1,366 @@
+<!DOCTYPE HTML>
+<html lang="en">
+	<head>
+		<title>three.js webgl - lensflares</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<style type="text/css">
+			body {
+				background:#000;
+				padding:0;
+				margin:0;
+				font-weight: bold;
+				overflow:hidden;
+			}
+			#info {
+				position: absolute;
+				top: 10px; width: 100%;
+				color: #ffffff;
+				padding: 5px;
+				font-family: Monospace;
+				font-size: 13px;
+				text-align: center;
+				z-index:100;
+			}
+
+			a {
+				color: orange;
+				text-decoration: none;
+			}
+
+			a:hover {
+				color: #0080ff;
+			}
+
+		</style>
+	</head>
+
+	<body>
+		<div id="info">
+			lens flares textures from <a href="http://ro.me">ro.me</a>
+		</div>
+
+		<script src="../build/Three.js"></script>
+
+		<script src="js/Tween.js"></script>
+
+		<script src="js/ShaderExtras.js"></script>
+
+		<script src="js/postprocessing/EffectComposer.js"></script>
+		<script src="js/postprocessing/RenderPass.js"></script>
+		<script src="js/postprocessing/BloomPass.js"></script>
+		<script src="js/postprocessing/ShaderPass.js"></script>
+		<script src="js/postprocessing/MaskPass.js"></script>
+		<script src="js/postprocessing/SavePass.js"></script>
+		<script src="js/postprocessing/FilmPass.js"></script>
+
+		<script src='../GlobalTools/GlobalTools.js'></script>
+
+		<script>
+
+			var container;
+
+			var camera, scene, renderer;
+			var cameraTimer = 0.;
+			var lensflare1;
+
+			var clock = new THREE.Clock();
+
+			var composer;
+
+			var projector;
+
+			init();
+			animate();
+
+			function init() {
+
+			var SCREEN_WIDTH = window.innerWidth;
+			var SCREEN_HEIGHT = window.innerHeight;
+
+				container = document.createElement( 'div' );
+				document.body.appendChild( container );
+
+				// camera
+
+				camera = new THREE.PerspectiveCamera( 40, window.innerWidth / window.innerHeight, 1, 15000 );
+				camera.position.z = 7250;
+
+				// controls = new THREE.FlyControls( camera );
+
+				// controls.movementSpeed = 2500;
+				// controls.domElement = container;
+				// controls.rollSpeed = Math.PI / 6;
+				// controls.autoForward = false;
+				// controls.dragToLook = false
+
+				// scene
+
+				scene = new THREE.Scene();
+				scene.add( camera );
+
+				scene.fog = new THREE.Fog( 0x000000, 3500, 15000 );
+				scene.fog.color.setHSV( 0.51, 0.6, 0.025 );
+
+				// world
+
+				var s = 100;
+
+				var cube = new THREE.PlaneGeometry( s, s * 200);
+				var material = new THREE.MeshPhongMaterial( { ambient: 0x333333, color: 0xffffff, specular: 0xffffff, shininess: 50, perPixel: true } );
+
+
+				for ( var i = 0; i < 2000; i ++ ) {
+
+					var mesh = new THREE.Mesh( cube, material );
+
+					mesh.position.x = 8000 * ( 2.0 * Math.random() - 1.0 );
+					mesh.position.y = 8000 * ( 2.0 * Math.random() - 1.0 );
+					mesh.position.z = 8000 * ( 2.0 * Math.random() - 1.0 );
+
+					mesh.rotation.x = Math.random() * Math.PI;
+					mesh.rotation.y = Math.random() * Math.PI;
+					mesh.rotation.z = Math.random() * Math.PI;
+
+					//mesh.matrixAutoUpdate = false;
+					mesh.updateMatrix();
+
+					scene.add( mesh );
+
+				}
+
+				// lights
+
+				var ambient = new THREE.AmbientLight( 0xffffff );
+				ambient.color.setHSV( 0.1, 0.5, 0.3 );
+				scene.add( ambient );
+
+
+				var dirLight = new THREE.DirectionalLight( 0xffffff, 0.125 );
+				dirLight.position.set( 0, -1, 0 ).normalize();
+				scene.add( dirLight );
+
+				dirLight.color.setHSV( 0.1, 0.725, 0.9 );
+
+				// lens flares
+
+				var textureFlare0 = THREE.ImageUtils.loadTexture( "textures/lensflare/lensflare0.png" );
+				var textureFlare2 = THREE.ImageUtils.loadTexture( "textures/lensflare/lensflare2.png" );
+				var textureFlare3 = THREE.ImageUtils.loadTexture( "textures/lensflare/lensflare3.png" );
+
+				addLight( 0.9, 0.9, 0.19, 300, 0, -12000 );
+				lensflare1 = addLight( 0.8, 0.7, 0.3,    0, 0, -1000 );
+				// addLight( 0.995, 0.025, 0.99, 5000, 5000, -1000 );
+
+				function addLight( r, g, b, x, y, z ) 
+				{
+					var light = new THREE.PointLight( 0xffffff, 1.5, 4500 );
+					light.position.set( x, y, z );
+					scene.add( light );
+
+					light.color.setRGB( r, g, b );
+
+					var flareColor = new THREE.Color( 0xffffff );
+					flareColor.copy( light.color );
+					THREE.ColorUtils.adjustHSV( flareColor, 0, -0.5, 0.5 );
+
+					var lensFlare = new THREE.LensFlare( textureFlare0, 700, 0.0, THREE.AdditiveBlending, flareColor );
+
+					lensFlare.add( textureFlare2, 512, 0.0, THREE.AdditiveBlending );
+					lensFlare.add( textureFlare2, 512, 0.0, THREE.AdditiveBlending );
+					lensFlare.add( textureFlare2, 512, 0.0, THREE.AdditiveBlending );
+
+					lensFlare.add( textureFlare3, 60, 0.6, THREE.AdditiveBlending );
+					lensFlare.add( textureFlare3, 70, 0.7, THREE.AdditiveBlending );
+					lensFlare.add( textureFlare3, 120, 0.9, THREE.AdditiveBlending );
+					lensFlare.add( textureFlare3, 70, 1.0, THREE.AdditiveBlending );
+
+					lensFlare.customUpdateCallback = lensFlareUpdateCallback;
+					lensFlare.position = light.position;
+
+					scene.add( lensFlare );
+					return lensFlare;
+
+				}
+
+				// renderer
+
+				renderer = new THREE.WebGLRenderer( { maxLights: 8, alpha: true } );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				renderer.setClearColor( scene.fog.color, 1 );
+
+				container.appendChild( renderer.domElement );
+
+				renderer.gammaInput = true;
+				renderer.gammaOutput = true;
+				renderer.physicallyBasedShading = true;
+
+				// COMPOSER
+
+				renderer.autoClear = false;
+
+				renderTargetParameters = { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, format: THREE.RGBFormat, stencilBuffer: false };
+				renderTarget = new THREE.WebGLRenderTarget( SCREEN_WIDTH, SCREEN_HEIGHT, renderTargetParameters );
+
+				effectBloom = new THREE.BloomPass( 0.6 );
+				var effectBleach = new THREE.ShaderPass( THREE.ShaderExtras[ "bleachbypass" ] );
+
+				hblur = new THREE.ShaderPass( THREE.ShaderExtras[ "horizontalTiltShift" ] );
+				vblur = new THREE.ShaderPass( THREE.ShaderExtras[ "verticalTiltShift" ] );
+
+				var bluriness = 4;
+
+				hblur.uniforms[ 'h' ].value = bluriness / SCREEN_WIDTH;
+				vblur.uniforms[ 'v' ].value = bluriness / SCREEN_HEIGHT;
+
+				hblur.uniforms[ 'r' ].value = vblur.uniforms[ 'r' ].value = 0.5;
+
+				effectBleach.uniforms[ 'opacity' ].value = 0.65;
+
+				composer = new THREE.EffectComposer( renderer, renderTarget );
+
+				var renderModel = new THREE.RenderPass( scene, camera );
+
+				vblur.renderToScreen = true;
+
+				composer = new THREE.EffectComposer( renderer, renderTarget );
+
+				composer.addPass( renderModel );
+
+				// composer.addPass( effectBloom );
+				// composer.addPass( effectBleach );
+
+				composer.addPass( hblur );
+				composer.addPass( vblur );
+
+				// events
+				projector = new THREE.Projector();
+
+				document.addEventListener( 'mousedown', onDocumentMouseDown, false );
+				document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+
+				window.addEventListener( 'resize', onWindowResize, false );
+
+			}
+
+			//
+
+			 function lensFlareUpdateCallback( object ) {
+
+				var f, fl = object.lensFlares.length;
+				var flare;
+				var vecX = -object.positionScreen.x * 2;
+				var vecY = -object.positionScreen.y * 2;
+
+				for( f = 0; f < fl; f++ ) {
+
+					   flare = object.lensFlares[ f ];
+
+					   flare.x = object.positionScreen.x + vecX * flare.distance;
+					   flare.y = object.positionScreen.y + vecY * flare.distance;
+
+					   flare.rotation = 0;
+				}
+
+				object.lensFlares[ 2 ].y += 0.025;
+				object.lensFlares[ 3 ].rotation = object.positionScreen.x * 0.5 + 45 * Math.PI / 180;
+
+			}
+
+			//
+
+			function onWindowResize( event ) {
+
+				renderer.setSize( window.innerWidth, window.innerHeight );
+
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+
+			}
+
+			function onDocumentMouseDown( event ) 
+			{
+				event.preventDefault();
+
+				var vector = new THREE.Vector3( ( event.clientX / window.innerWidth ) * 2 - 1, - ( event.clientY / window.innerHeight ) * 2 + 1, 0.5 );
+				projector.unprojectVector( vector, camera );
+
+				var ray = new THREE.Ray( camera.position, vector.subSelf( camera.position ).normalize() );
+
+				var intersects = ray.intersectObjects( scene.children );
+
+				if ( intersects.length > 0 ) {
+					var angleMove = 0.7;
+					new TWEEN.Tween( intersects[ 0 ].object.rotation ).to( {
+						x: intersects[ 0 ].object.rotation.x + (Math.random() - 0.5) * angleMove,
+						y: intersects[ 0 ].object.rotation.y + (Math.random() - 0.5) * angleMove,
+						z: intersects[ 0 ].object.rotation.z + (Math.random() - 0.5) * angleMove }, 5000 )
+					.easing( TWEEN.Easing.Elastic.EaseOut).start();
+
+					var posMove = 1000;
+					new TWEEN.Tween( intersects[ 0 ].object.position ).to( {
+						x: intersects[ 0 ].object.position.x + (Math.random() - 0.5) * posMove,
+						y: intersects[ 0 ].object.position.y + (Math.random() - 0.5) * posMove,
+						z: intersects[ 0 ].object.position.z + (Math.random() - 0.5) * posMove }, 5000 )
+					.easing( TWEEN.Easing.Elastic.EaseOut).start();
+				}
+			}
+
+			var mouseX = 0, mouseY = 0;
+			function onDocumentMouseMove( event ) 
+			{
+				event.preventDefault();
+
+				mouseX = ( event.clientX / window.innerWidth ) * 2 - 1;
+				mouseY = - ( event.clientY / window.innerHeight ) * 2 + 1;
+			}
+
+			//
+
+			function animate() {
+
+				requestAnimationFrame( animate );
+
+				render();
+
+			}
+
+			function render() {
+
+				var delta = clock.getDelta();
+				
+				TWEEN.update();
+
+				//controls.update( delta );
+				var distance = 7000;
+				cameraTimer += 0.01 * delta;
+
+				if(cameraTimer > 0.07)
+				{
+					document.getElementById("info").innerHTML = "";
+				}
+
+				if(isNaN(camera.position.x))
+				{
+					camera.position = new THREE.Vector3();
+					console.log("error, NAN");
+				}
+				 camera.position.z += ((lensflare1.position.z - distance * Math.cos(cameraTimer + mouseX * Math.PI * 0.3)) - camera.position.z) * delta;
+				camera.position.x += ((lensflare1.position.x - distance * Math.sin(cameraTimer + mouseX * Math.PI * 0.3)) - camera.position.x) * delta;
+
+				//camera.position.z = lensflare1.position.z + distance * Math.cos(cameraTimer + mouseX * Math.PI * 0.7);
+				//camera.position.x = lensflare1.position.x - distance * Math.sin(cameraTimer + mouseX * Math.PI * 0.7);
+
+				camera.position.y += (lensflare1.position.y + distance * Math.cos(mouseY * Math.PI * 0.5) - camera.position.y) * delta;
+
+				camera.lookAt( lensflare1.position );
+				renderer.render( scene, camera );
+
+				composer.render( 0.1 );
+
+			}
+
+		</script>
+
+	</body>
+</html>

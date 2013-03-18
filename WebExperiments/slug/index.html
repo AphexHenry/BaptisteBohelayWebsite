@@ -1,0 +1,457 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<title>Baptiste Home - draft</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<style>
+			body {
+				background-color: #000000;
+				margin: 0px;
+				overflow: hidden;
+				font-family:Monospace;
+				font-size:13px;
+				text-align:center;
+				font-weight: bold;
+				text-align:center;
+			}
+
+			a {
+				color:#0078ff;
+			}
+
+			#info {
+				color:#fff;
+				position: absolute;
+				top: 0px; width: 100%;
+				padding: 5px;
+				z-index:100;
+			}
+		</style>
+	</head>
+
+	<body>
+		<script src="../build/Three.js"></script>
+
+		<script src="js/Detector.js"></script>
+		<script src="js/ShaderExtras.js"></script>
+		<script src="js/Stats.js"></script>
+
+		<script src="js/postprocessing/EffectComposer.js"></script>
+		<script src="js/postprocessing/RenderPass.js"></script>
+		<script src="js/postprocessing/BloomPass.js"></script>
+		<script src="js/postprocessing/ShaderPass.js"></script>
+		<script src="js/postprocessing/MaskPass.js"></script>
+		<script src="js/postprocessing/SavePass.js"></script>
+
+		<script src='js/DAT.GUI.min.js'></script>
+		<script src='Tools/Settings.js'></script>
+		<script src='Tools/Tools.js'></script>
+		<script src='Tools/Pendulum.js'></script>
+		<script src='Tools/Camera.js'></script>
+		<script src='Tools/Light.js'></script>
+		<script src="States/StateIntro.js"></script>
+		<script src='Tools/Particle.js'></script>
+		<script src='Tools/ButtonFlying.js'></script>
+		<script src='Tools/Button.js'></script>
+		<script src='Tools/Loader.js'></script>
+		<script src='Tools/Template.js'></script>
+		<script src='Tools/Parser.js'></script>
+		<script src="fonts/helvetiker_bold.typeface.js"></script>
+		<script src='Tools/Environment.js'></script>
+		<script src='Tools/TransitionVideo.js'></script>
+
+		<script src='../GlobalTools/GlobalTools.js'></script>
+
+<!-- 		<div id="info">
+			shader by <a href="http://artmartinsh.blogspot.com/2010/02/glsl-lens-blur-filter-with-bokeh.html">Martins Upitis</a>
+		</div> -->
+
+		<div id="info">
+
+		</div>
+
+		<script>
+
+			if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
+
+			var set = new Settings();
+			var container, stats;
+			var statEnabled = false;
+			var cameraManager, lightManager, scene, renderer;
+			var cameraBack, sceneBack, sceneTreeBack, sceneTreeFront, environment;
+			var effectController;
+
+			var particles = new Array();
+			var NUM_PART = 0;
+
+			var enableShadow = true;
+			var SHADOW_MAP_WIDTH = 2048, SHADOW_MAP_HEIGHT = 1024;
+			var FLOOR = -1.;
+
+			var windowHalfX = window.innerWidth / 2;
+			var windowHalfY = window.innerHeight / 2;
+
+			var clock = new THREE.Clock();
+
+			var postprocessing = { enabled  : false };
+
+			var attractorPosition = new THREE.Vector3();
+			 var attractorStrength = 0.;
+			var surface = window.innerWidth * 4;
+			var DoorArray = new Array();
+
+			var colorClear = new THREE.Color();
+			colorClear.setRGB(.5, 0.6, .9);
+			var colorClearSecond = new THREE.Color();
+			colorClearSecond.setRGB(.9, 0.3, .1);
+
+			init();
+			animate();
+
+			function MinusMult(aVec1, aVec2, aCoeff)
+			{
+				return new THREE.Vector3().sub(aVec1, aVec2).multiplyScalar(aCoeff);
+			}
+
+			function init() {
+
+				var location = window.location.hash;
+				
+				container = document.createElement( 'div' );
+				document.body.appendChild( container );
+
+				scene = new THREE.Scene();
+				
+				sceneBack = new THREE.Scene();
+				// sceneTreeBack  = new THREE.Scene();
+				// sceneTreeFront  = new THREE.Scene();
+				cameraBack = new THREE.OrthographicCamera( window.innerWidth / - 2, window.innerWidth / 2, window.innerHeight / 2, window.innerHeight / - 2, -10000, 10000 );
+				sceneBack.add(cameraBack);
+
+				var lcamera = new THREE.PerspectiveCamera( 70, window.innerWidth / WINDOW_HEIGHT, 1, 13000 );
+				lcamera.position.z = 200;
+				cameraManager = new CameraManager(lcamera);
+				cameraManager.GoTo(new THREE.Vector3(0,0,-0.6), new THREE.Vector3(0,0,-1.5), 0.);
+
+				//controls = new THREE.TrackballControls( camera );
+				renderer = new THREE.WebGLRenderer( { antialias: true, clearAlpha: 1 } );
+				renderer.setSize( window.innerWidth, WINDOW_HEIGHT );
+				renderer.domElement.style.position = 'absolute';
+				var decay = (window.innerHeight - WINDOW_HEIGHT) * 0.5;
+				renderer.domElement.style.top = Math.floor(decay) + "px";
+				renderer.domElement.style.left = "0px";
+				container.appendChild( renderer.domElement );
+
+				SetComposer(10);
+
+				material_depth = new THREE.MeshDepthMaterial();
+
+				var start = Date.now();
+
+				scene.fog = new THREE.FogExp2( 0x000000, 0.0002 );
+
+				// LIGHTS
+				if(enableShadow)
+				{
+					renderer.shadowMapEnabled = true;
+					renderer.shadowMapSoft = true;
+					// renderer.setClearColor ( colorClear, 1.0 );
+					renderer.setClearColorHex ( 0xFA7800, 1.0 );
+					// renderer.setClearColorHex ( 0xFA7800, 1.0 );
+
+					  // var ambient = new THREE.AmbientLight( 0xff0000 );
+					  // scene.add( ambient );
+					var light = new THREE.SpotLight( 0xffffff, 1, 0, Math.PI, 1 );
+					light.position.set( 200, 300, -1000 );
+					light.target.position.set( 0, 0, 0 );
+
+					light.castShadow = true;
+
+					light.shadowCameraNear = 700;
+					light.shadowCameraFar = cameraManager.GetCamera().far * 2.;
+					light.shadowCameraFov = 90;
+
+					// light.shadowCameraVisible = true;
+
+					 light.shadowBias = 0.001;
+					 light.shadowDarkness = 0.6;
+
+					 light.shadowMapWidth = SHADOW_MAP_WIDTH;
+					 light.shadowMapHeight = SHADOW_MAP_HEIGHT;
+					 lightManager = new LightManager(light);
+
+				}
+
+				InitLoading();
+
+				//console.log("init time: ", Date.now() - start );
+
+				// scene.matrixAutoUpdate = false;
+
+				initPostprocessing();
+
+				 renderer.autoClear = false;
+
+				// renderer.shadowMapEnabled = true;
+				// renderer.shadowMapSoft = true;
+				// renderer.gammaInput = true;
+				// renderer.gammaOutput = true;
+				// renderer.physicallyBasedShading = true;
+
+				if(statEnabled)
+				{
+					stats = new Stats();
+					stats.domElement.style.position = 'absolute';
+					stats.domElement.style.top = '0px';
+					container.appendChild( stats.domElement );
+				}
+
+				effectController = {
+
+					focus: 		1.0,
+					aperture:	0.025,
+					maxblur:	1.0
+
+				};
+
+				var matChanger = function( ) {
+
+					postprocessing.bokeh_uniforms[ "focus" ].value = effectController.focus;
+					postprocessing.bokeh_uniforms[ "aperture" ].value = effectController.aperture;
+					postprocessing.bokeh_uniforms[ "maxblur" ].value = effectController.maxblur;
+				};
+
+				// var gui = new DAT.GUI();
+				// gui.add( effectController, "focus", 0.0, 3.0, 0.025 ).onChange( matChanger );
+				// gui.add( effectController, "aperture", 0.001, 0.2, 0.001 ).onChange( matChanger );
+				// gui.add( effectController, "maxblur", 0.0, 3.0, 0.025 ).onChange( matChanger );
+				// gui.close();
+
+			}
+
+			function SetComposer(aBluriness)
+			{
+				// COMPOSER
+
+				renderer.autoClear = false;
+				var SCREEN_WIDTH = window.innerWidth;
+				var SCREEN_HEIGHT = WINDOW_HEIGHT;
+				renderTargetParameters = { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, format: THREE.RGBFormat, stencilBuffer: false };
+				renderTarget = new THREE.WebGLRenderTarget( SCREEN_WIDTH, SCREEN_HEIGHT, renderTargetParameters );
+
+				effectBloom = new THREE.BloomPass( 0.6 );
+				var effectBleach = new THREE.ShaderPass( THREE.ShaderExtras[ "bleachbypass" ] );
+
+				hblur = new THREE.ShaderPass( THREE.ShaderExtras[ "horizontalTiltShift" ] );
+				vblur = new THREE.ShaderPass( THREE.ShaderExtras[ "verticalTiltShift" ] );
+
+				var bluriness = aBluriness;
+
+				hblur.uniforms[ 'h' ].value = bluriness / SCREEN_WIDTH;
+				vblur.uniforms[ 'v' ].value = bluriness / SCREEN_HEIGHT;
+
+				hblur.uniforms[ 'r' ].value = vblur.uniforms[ 'r' ].value = 0.5;
+
+				effectBleach.uniforms[ 'opacity' ].value = 0.65;
+
+				composer = new THREE.EffectComposer( renderer, renderTarget );
+
+				var renderModel = new THREE.RenderPass( scene, cameraManager.GetCamera() );
+
+				vblur.renderToScreen = true;
+
+				composer = new THREE.EffectComposer( renderer, renderTarget );
+
+				composer.addPass( renderModel );
+
+				composer.addPass( hblur );
+				composer.addPass( vblur );
+			}
+
+			function initTexture() 
+			{	
+				var canvas = GetCircle();
+				var newTexture = new THREE.Texture( canvas, THREE.UVMapping );
+				newTexture.needsUpdate = true;
+
+				for (var j = 0; j < particles.length; j ++ )
+				{
+					 particles[ j ].SetTexture(newTexture);
+				}
+			    
+			 	// var image = document.createElement( 'img' );
+				// image.src = "textures/sprite0.png";
+				
+				// image.onload= function() 
+				// {
+				// 	var newTexture = new THREE.Texture( image, THREE.UVMapping );
+				// 	newTexture.needsUpdate = true;
+
+				// 	for (var j = 0; j < particles.length; j ++ ) 
+				// 	{
+				// 		 particles[ j ].SetTexture(newTexture);
+				// 	}
+				// }
+			}
+
+			function onDocumentMouseUp( event ) 
+			{
+				event.preventDefault();
+				particles[0].MouseUp(PixelToRelative(new THREE.Vector3(event.clientX, event.clientY, 0)));
+			}
+
+			function SwitchState(index)
+			{
+				// var numDoor = 3;
+				// DoorArray.push(new Door(new THREE.Vector3(1.5, 1., -1.2), 0.6, 1., Math.floor(NUM_PART / numDoor)));
+				// DoorArray.push(new Door(new THREE.Vector3(-0.5, 1., -1.9), 0., 1., Math.floor(NUM_PART / numDoor)));
+				// DoorArray.push(new Door(new THREE.Vector3(0., 1., -2.9), 0.5, 1., Math.floor(NUM_PART / numDoor)));
+
+				for (var i = 0; i < particles.length; i ++ ) 
+				{
+					particles[ i ].SwitchState(index);
+				}
+				particles[0].PrepareTransition();
+			}
+
+			function onDocumentMouseDown( event ) 
+			{
+				event.preventDefault();
+
+				particles[0].MouseDown(PixelToRelative(new THREE.Vector3(event.clientX, event.clientY, 0)));				 
+			}
+
+			function onDocumentMouseMove( event ) 
+			{
+				event.preventDefault();
+				particles[0].MouseMove(PixelToRelative(new THREE.Vector3(event.clientX, event.clientY, 0)));
+			}
+
+			function onDocumentTouchStart( event ) {
+
+				if ( event.touches.length == 1 ) {
+
+					event.preventDefault();
+
+					mouseX = event.touches[ 0 ].pageX - windowHalfX;
+					mouseY = event.touches[ 0 ].pageY - windowHalfY;
+
+				}
+			}
+
+			function onDocumentTouchMove( event ) {
+
+				if ( event.touches.length == 1 ) {
+
+					event.preventDefault();
+
+					mouseX = event.touches[ 0 ].pageX - windowHalfX;
+					mouseY = event.touches[ 0 ].pageY - windowHalfY;
+
+				}
+			}
+
+			function createDoor()
+			{
+
+			}
+
+			function initPostprocessing() 
+			{
+
+				postprocessing.scene = new THREE.Scene();
+
+				postprocessing.camera = new THREE.OrthographicCamera( window.innerWidth / - 2, window.innerWidth / 2,  window.innerHeight / 2, window.innerHeight / - 2, -10000, 10000 );
+				postprocessing.camera.position.z = 100;
+
+				postprocessing.scene.add( postprocessing.camera );
+
+				var pars = { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, format: THREE.RGBFormat };
+				postprocessing.rtTextureDepth = new THREE.WebGLRenderTarget( window.innerWidth, WINDOW_HEIGHT, pars );
+				postprocessing.rtTextureColor = new THREE.WebGLRenderTarget( window.innerWidth, WINDOW_HEIGHT, pars );
+
+				var bokeh_shader = THREE.ShaderExtras[ "bokeh" ];
+
+				postprocessing.bokeh_uniforms = THREE.UniformsUtils.clone( bokeh_shader.uniforms );
+
+				postprocessing.bokeh_uniforms[ "tColor" ].texture = postprocessing.rtTextureColor;
+				postprocessing.bokeh_uniforms[ "tDepth" ].texture = postprocessing.rtTextureDepth;
+				postprocessing.bokeh_uniforms[ "focus" ].value = 1.1;
+				postprocessing.bokeh_uniforms[ "aspect" ].value = window.innerWidth / WINDOW_HEIGHT;
+
+				postprocessing.materialBokeh = new THREE.ShaderMaterial( {
+
+					uniforms: postprocessing.bokeh_uniforms,
+					vertexShader: bokeh_shader.vertexShader,
+					fragmentShader: bokeh_shader.fragmentShader
+
+				} );
+
+				postprocessing.quad = new THREE.Mesh( new THREE.PlaneGeometry( window.innerWidth, window.innerHeight ), postprocessing.materialBokeh );
+				postprocessing.quad.position.z = - 500;
+				postprocessing.quad.rotation.x = Math.PI / 2;
+				postprocessing.scene.add( postprocessing.quad );
+
+			}
+
+			function animate() {
+
+				requestAnimationFrame( animate, renderer.domElement );
+
+				if(!UpdateLoading())
+				{
+					render();
+				}
+			}
+
+			function render() {
+
+				var time = Date.now() * 0.00005;
+				var delta = Math.max(Math.min(clock.getDelta(), 0.06), 0.001);
+
+				cameraManager.Update(delta);
+				lightManager.Update(delta);
+
+				var lwidth = getWidth();
+				for ( i = 0; i < particles.length; i ++ ) 
+				{
+					particles[ i ].Update(delta, lwidth);
+				}
+
+				particles[0].GlobalUpdate(delta);
+
+				if ( postprocessing.enabled ) {
+
+					renderer.clear();
+
+					// Render scene into texture
+
+					scene.overrideMaterial = null;
+					renderer.render( scene, cameraManager.GetCamera(), postprocessing.rtTextureColor, true );
+
+					// Render depth into texture
+
+					scene.overrideMaterial = material_depth;
+					renderer.render( scene, cameraManager.GetCamera(), postprocessing.rtTextureDepth, true );
+
+					// Render bokeh ecomposite
+
+					renderer.render( postprocessing.scene, postprocessing.camera );
+
+
+				} else {
+
+					renderer.clear();
+					renderer.render( sceneBack, cameraBack);
+					renderer.render( scene, cameraManager.GetCamera() );
+
+				}
+				composer.render( 0.1 );
+
+			}
+
+
+		</script>
+	</body>
+</html>
