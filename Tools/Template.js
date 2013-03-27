@@ -74,10 +74,58 @@ var programStroke = function ( context ) {
     context.stroke();
 }
 
-var programFill = function ( context ) {
-
+var programFill = function ( context ) 
+{
     context.beginPath();
     context.arc( 0, 0, 0.99, 0, PI2, true );
+    context.closePath();
+    context.fill();
+}
+
+// var FillWaterCoeff = 0;
+// var sWaterHeight = 0.01;
+// var programFill = function ( context ) {
+
+//     // context.beginPath();
+//     // context.arc( 0, 0, 0.99, 0, PI2, true );
+//     // context.closePath();
+//     // context.fill();
+
+//      FillWaterCoeff += 0.1;
+//      sWaterHeight += 0.02;
+//      sWaterHeight = Math.min(sWaterHeight, 0.99);
+//     var angle = (-0.5 + sWaterHeight) * Math.PI;
+//     var height = Math.sin(angle);
+//     var y2 = clip(height +  0.5 * Math.sin(FillWaterCoeff * 1.6), -0.99, 0.99);
+//     var y1 = clip(height + -0.1 * Math.cos(FillWaterCoeff), -0.99, 0.99);
+
+//     if(sWaterHeight < 0.98)
+//     {
+//         context.beginPath();
+//         context.arc( 0, 0, 0.99, angle, Math.PI - angle, true );
+//         context.bezierCurveTo(-0.3 * Math. sin(FillWaterCoeff), y1, 0.2 + 0.4 * Math.cos(FillWaterCoeff * 1.6), y2, Math.cos(angle), height) 
+//         context.closePath();
+//         context.fill();
+//     }
+//     else
+//     {
+//         context.beginPath();
+//         context.arc( 0, 0, 0.99, 0, PI2, true );
+//         context.closePath();
+//         context.fill();
+//     }
+
+//     programStroke(context);
+
+//     // context.globalCompositeOperation = 'destination-in';
+//     // context.globalCompositeOperation = 'source-over';
+// }
+
+var programFillWater = function ( context ) {
+
+    context.beginPath();
+    context.arc( 0, 0, 0.99, PI, PI2, true );
+    context.quadraticCurveTo(-0.99, 0, 0., 0.5);
     context.closePath();
     context.fill();
 }

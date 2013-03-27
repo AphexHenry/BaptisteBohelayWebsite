@@ -6,60 +6,17 @@ var programMonster3 = function(context)
     var centerX = 0.;
     var centerY = 0.;
 
-    // drawOneArmThree(context, Math.PI * 0, sDistanceTwo );
-    // drawOneArmThree(context, Math.PI * 0.25, sDistanceTwo );
-    // drawOneArmThree(context, Math.PI * 0.5, sDistanceTwo );
-    // drawOneArmThree(context, Math.PI * 0.75, sDistanceTwo );
-    // drawOneArmThree(context, Math.PI * 1., sDistanceTwo );
-    // drawOneArmThree(context, Math.PI * 1.25, sDistanceTwo );
-    // drawOneArmThree(context, Math.PI * 1.5, sDistanceTwo );
-    // drawOneArmThree(context, Math.PI * 1.75, sDistanceTwo );
-
-	context.beginPath();
-	context.lineWidth = 0.02;
-	var radius = 0;
-	var lastradius = 1.;
-	var numPt = 200;
-	var lTotalAngle = 3 * 2 * Math.PI;
-	var angleDecay = lTotalAngle / (numPt);
-	var radiusStart = rotationThree * 2.5;
-	var lRadiusGlobal = 1.;
-	var radiusCircleEnd = 0.06;
-	var endRadius = 0.2;
-	context.moveTo(Math.cos(radiusStart) * lRadiusGlobal, Math.sin(radiusStart) * lRadiusGlobal);
-
-	var numPtActual = Math.floor(Math.sqrt(sDistanceTwo) * numPt);
-	for(var i = 0; i < numPtActual + 1; i++)
-	{
-		radius = endRadius + (1. - endRadius) * (1. - sDistanceTwo * (i / (numPtActual)));
-		radius = Math.max(radius, 0.);
-		radius = lRadiusGlobal * Math.sqrt(radius);
-		radius = Math.max(radius, endRadius);
-		context.lineTo( radius * Math.cos( angleDecay * i  + radiusStart), radius * Math.sin( angleDecay * i + radiusStart));
-	}
-
-	// radiusStart = rotationThree * 1.;
-	// context.moveTo(Math.cos(radiusStart) * lRadiusGlobal, Math.sin(radiusStart) * lRadiusGlobal);
-	// for(var i = 0; i < numPtActual + 1; i++)
-	// {
-	// 	radius = (1. - sDistanceTwo * (i / (numPtActual)));
-	// 	radius = Math.max(radius, 0.);
-	// 	radius = lRadiusGlobal * Math.sqrt(radius);
-	// 	context.lineTo( radius * Math.cos( angleDecay * i  + radiusStart), radius * Math.sin( angleDecay * i + radiusStart));
-	// }
-
-    context.stroke();
-    context.closePath();
+    drawOneArmThree(context, Math.PI * 0, sDistanceTwo );
+    drawOneArmThree(context, Math.PI * 0.25, sDistanceTwo );
+    drawOneArmThree(context, Math.PI * 0.5, sDistanceTwo );
+    drawOneArmThree(context, Math.PI * 0.75, sDistanceTwo );
+    drawOneArmThree(context, Math.PI * 1., sDistanceTwo );
+    drawOneArmThree(context, Math.PI * 1.25, sDistanceTwo );
+    drawOneArmThree(context, Math.PI * 1.5, sDistanceTwo );
+    drawOneArmThree(context, Math.PI * 1.75, sDistanceTwo );
 
     context.beginPath();
-    var radiusLittleCircle = endRadius + 2.5 * radiusCircleEnd * Math.cos(radiusStart);
-    context.arc( radiusLittleCircle * Math.cos(0.2 + radiusStart), radiusLittleCircle * Math.sin(0.2 + radiusStart), sDistanceTwo * sDistanceTwo * 2. * radiusCircleEnd, 0, PI2, true );
-    context.closePath();
-    context.fill();
-
-    // draw out circle.
-    context.beginPath();
-    context.arc( centerX, centerY, lRadiusGlobal, 0, PI2, true );
+    context.arc( centerX, centerY, 0.3, 0, PI2, true );
     context.closePath();
     context.stroke();
 
@@ -82,29 +39,29 @@ function drawOneArmThree(context, angle, evolution)
 	var noiseHand = Math.sin(-rotationThree + angle * 2);
 
 	size = evolution * 0.5;
-	// var evolution2NoPi = evolution * evolution * evolution * evolution;
-	// var evolution2 = evolution2NoPi * Math.PI;
-	// evolution = evolution * Math.PI;
-	// // context.setStrokeColor(0x0000f0);
-	// context.beginPath();
-	// var COS = Math.cos(angle + evolution + rotationThree);
-	// var SIN = Math.sin(angle + evolution + rotationThree);
-	// var posShoulderX =  COS * 0.3;
-	// var posShoulderY = SIN * 0.3;
-	// var posElbowX = posShoulderX + size * 0.5 * (COS * -Math.cos(evolution) + Math.sin(evolution + noiseElbow) * SIN);
-	// var posElbowY = posShoulderY + size * 0.5 * (SIN * -Math.cos(evolution) + Math.sin(evolution + noiseElbow) * COS);
-	// var posHandX = posShoulderX * (1. + 0.2 * evolution2) + size * (COS * -Math.cos(evolution2) + Math.sin(evolution2 + noiseHand) * SIN);
-	// var posHandY = posShoulderY * (1. + 0.2 * evolution2) + size * (SIN * -Math.cos(evolution2) + Math.sin(evolution2 + noiseHand) * COS);
+	var evolution2NoPi = evolution * evolution * evolution * evolution;
+	var evolution2 = evolution2NoPi * Math.PI;
+	evolution = evolution * Math.PI;
+	// context.setStrokeColor(0x0000f0);
+	context.beginPath();
+	var COS = Math.cos(angle + evolution + rotationThree);
+	var SIN = Math.sin(angle + evolution + rotationThree);
+	var posShoulderX =  COS * 0.3;
+	var posShoulderY = SIN * 0.3;
+	var posElbowX = posShoulderX + size * 0.5 * (COS * -Math.cos(evolution) + Math.sin(evolution + noiseElbow) * SIN);
+	var posElbowY = posShoulderY + size * 0.5 * (SIN * -Math.cos(evolution) + Math.sin(evolution + noiseElbow) * COS);
+	var posHandX = posShoulderX * (1. + 0.2 * evolution2) + size * (COS * -Math.cos(evolution2) + Math.sin(evolution2 + noiseHand) * SIN);
+	var posHandY = posShoulderY * (1. + 0.2 * evolution2) + size * (SIN * -Math.cos(evolution2) + Math.sin(evolution2 + noiseHand) * COS);
 
-	// context.moveTo(posHandX, posHandY);
- //    context.quadraticCurveTo(posElbowX, posElbowY, posShoulderX, posShoulderY);
- //    context.stroke();
+	context.moveTo(posHandX, posHandY);
+    context.quadraticCurveTo(posElbowX, posElbowY, posShoulderX, posShoulderY);
+    context.stroke();
 
-    // context.beginPath();
-    // var rayLittle = 0.03 * evolution2NoPi;
-    // context.arc( posHandX + COS * rayLittle, posHandY+ SIN * rayLittle, rayLittle, 0, PI2, true );
-    // context.closePath();
-    // context.stroke();
+    context.beginPath();
+    var rayLittle = 0.03 * evolution2NoPi;
+    context.arc( posHandX + COS * rayLittle, posHandY+ SIN * rayLittle, rayLittle, 0, PI2, true );
+    context.closePath();
+    context.stroke();
 }
 
 var sCurrentRandomString = "random project";
@@ -139,7 +96,7 @@ function MonsterRandom(aPosition, aSize)
 
 	this.particle.MyCameraDistance= function()
 	{
-		return window.innerWidth * 0.13;
+		return window.innerWidth * 0.14;
 	}
 
 	var programText = function ( context ) 
@@ -151,7 +108,7 @@ function MonsterRandom(aPosition, aSize)
 
 	this.info = new THREE.Particle( new THREE.ParticleCanvasMaterial( { color: PickColor(), program: programText, transparent:true, opacity:OPACITY_INFO } ) );
 	this.info.position = aPosition.clone();
-	this.info.scale.x = this.particle.scale.x * 0.1;
+	this.info.scale.x = this.particle.scale.x * 0.07;
 	this.info.scale.y = -this.info.scale.x;
 	scene.add( this.info );
 
@@ -213,6 +170,10 @@ MonsterRandom.prototype.RunRandomProject = function()
 		ImageFrontCtx.fillStyle = '#ffffff';
 		var newURL = window.location.href.substring(0, window.location.href.indexOf('#')) + lProject.targetURL;
 		open_in_new_tab(newURL);
+		if(isdefined(ParticleGroups[sGroupCurrent].BackFromHTML))
+		{
+			ParticleGroups[sGroupCurrent].BackFromHTML();
+		}
 	}
 	else if(typeof lProject.targetHTMLOpen != "undefined")
 	{
@@ -239,17 +200,19 @@ MonsterRandom.prototype.Update = function(delta)
     	pickCircleRadius = Math.max(0., pickCircleRadius);
     }
 
-	if(sIsMouseOnRandom && !sIsPicking)
+	if(sIsMouseOnRandom || sIsPicking)
 	{
-		sDistanceTwo += 0.02;
-		sDistanceTwo = Math.min(1., sDistanceTwo);
+		sCurrentRandomString = "click to pick"
+		sDistanceTwo -= 0.01;
+		sDistanceTwo = Math.max(.5, sDistanceTwo);
 		this.info.material.opacity += 0.01;
 		this.info.material.opacity = Math.min(1., this.info.material.opacity);
 	}
 	else
 	{
-		sDistanceTwo -= 0.02;
-		sDistanceTwo = Math.max(0., sDistanceTwo);
+		sCurrentRandomString = "random project";
+		sDistanceTwo += 0.01;
+		sDistanceTwo = Math.min(1., sDistanceTwo);
 		this.info.material.opacity -= 0.01;
 		this.info.material.opacity = Math.max(OPACITY_INFO, this.info.material.opacity);
 	}

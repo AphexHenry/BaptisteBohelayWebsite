@@ -46,6 +46,10 @@
 		$('#frontground').fadeOut(lSpeed);
 		canInteract = true;
 		SetBackButton(true);
+		if(isdefined(ParticleGroups[sGroupCurrent].BackFromHTML))
+		{
+			ParticleGroups[sGroupCurrent].BackFromHTML();
+		}
 	}
 
 	function CirclesToHtml(path)

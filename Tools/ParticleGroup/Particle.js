@@ -128,6 +128,7 @@ ParticleGroupWebExperiment.prototype.Update = function()
 			}
 			else
 			{
+				sWaterHeight = 0.01;
 				INTERSECTED.material.program = programFill;
 			}
 		}
@@ -267,6 +268,11 @@ ParticleGroupIntro.prototype.MouseUp = function()
 
 }
 
+ParticleGroupIntro.prototype.BackFromHTML = function()
+{
+	this.cameraDistance = this.cameraDistanceNormal;
+}
+
 ParticleGroupIntro.prototype.Init = function(){};
 
 ParticleGroupIntro.prototype.Terminate = function()
@@ -318,6 +324,7 @@ ParticleGroupIntro.prototype.Update = function()
 			}
 			else
 			{
+				sWaterHeight = 0.01;
 				INTERSECTED.material.program = programFill;
 			}
 		}
