@@ -11,6 +11,7 @@
 			window.location.hash = ParticleGroups[sGroupCurrent].name;
 			SELECTED = INTERSECTED = null;
 			sCoeffCameraMove = 0;
+			sButtonsBack.OnChange();
 				var prev = Organigram.GetFather(sGroupCurrent);
 			if(prev < 0)
 			{

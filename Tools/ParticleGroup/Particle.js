@@ -273,6 +273,17 @@ ParticleGroupIntro.prototype.BackFromHTML = function()
 	this.cameraDistance = this.cameraDistanceNormal;
 }
 
+ParticleGroupIntro.prototype.GetParticleThatLeadTo = function(aTarget)
+{
+	for(var i = 0; i< this.particles.length; i++)
+	{
+		if(this.particles[i].TargetObject.target == aTarget)
+		{
+			return this.particles[i];
+		}
+	}
+}
+
 ParticleGroupIntro.prototype.Init = function(){};
 
 ParticleGroupIntro.prototype.Terminate = function()
