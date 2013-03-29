@@ -1,5 +1,11 @@
 	function GoToIndex(index)
 	{
+		if(sIsInHTML)
+		{
+			HtmlToCircles();
+			return;
+		}
+
 		controlAuto = true;
 		if(index != sGroupCurrent)
 		{
@@ -47,6 +53,7 @@
 		$('#frontground').fadeOut(lSpeed);
 		canInteract = true;
 		SetBackButton(true);
+		sButtonsBack.OnChange();
 		if(isdefined(ParticleGroups[sGroupCurrent].BackFromHTML))
 		{
 			ParticleGroups[sGroupCurrent].BackFromHTML();
@@ -59,6 +66,7 @@
 		function(response, status, xhr)
 		{
 			sIsInHTML = true;
+			sButtonsBack.OnChange();
 			$("#info").fadeIn(1000);
 			$('#frontground').fadeTo('slow', 0.85);
 			canInteract = false;
