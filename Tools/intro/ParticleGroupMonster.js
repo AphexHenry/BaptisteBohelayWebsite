@@ -96,6 +96,7 @@ ParticleGroupMonster.prototype.MouseDown = function()
 		sEnd = true;
 		this.goAway = true;
 		infoDisplay.FadeOut();
+		$('#githubButton').slideUp();
 		setTimeout(function() {GoToIndex(ParticleGroup.PART_CREA_LULU);}, 1000);
 	}
 }
@@ -110,7 +111,6 @@ ParticleGroupMonster.prototype.UpdateCamera = function(delta)
 
 ParticleGroupMonster.prototype.UpdateFood = function(delta)
 {
-	$('#BackCircle').hide();
 	var lPart;
 	for(var i = 0; i < sFoodArray.length; i++)
 	{

@@ -11,6 +11,7 @@ AddLegSocial("8tracks","textures/icons/8tracks.png", "http://8tracks.com/aphexhe
 AddLegSocial("blogger","textures/icons/blogger.png", "http://aphexhenry.blogspot.com");
 AddLegSocial("youtube","textures/icons/youtube.png", "http://www.youtube.com/user/AphexHenry/videos?flow=grid&view=15");
 AddLegSocial("instructable","textures/icons/instructable.png", "http://www.instructables.com/member/AphexHenry/");
+AddLegSocial("github","textures/icons/github.png", "https://github.com/AphexHenry/BaptisteBohelayWebsite");
 
 programSocial = function ( context ) 
 {
@@ -198,7 +199,6 @@ ParticleSocial.prototype.SetTarget = function(aTarget, aNum)
 			sCoordSocialTouch = new THREE.Vector2(aNum - (Math.floor(aNum / 8) * 8), Math.floor(aNum / 8));
 			sCoordSocialTouch.x = -1 + sCoordSocialTouch.x / 4;
 			sCoordSocialTouch.y = 1 - sCoordSocialTouch.y / 4;
-			console.log(aNum);
 
 			var distanceMin = 2.;
 			var distance = 0;

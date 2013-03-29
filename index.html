@@ -22,6 +22,7 @@ if( /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent) )
 	    <meta name="description" content="An experimental website introducing my projects and my work.">
     	<meta name="author" content="Baptiste Bohelay">
 		<link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+		<link href="css/main.css" rel="stylesheet">
 
 		<!-- the core stuff -->
 		<script type="text/javascript" src="script/soundmanager2.js"></script>
@@ -44,150 +45,6 @@ if( /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent) )
 
 		</script>
 
-		<style>
-
-			#info {
-				position: absolute;
-				top: 10%; width: 80%;
-				height:80%; left: 10%;
-				color: #010101;
-				padding: 5px;
-				font-family: Monospace;
-				font-size: 13px;
-				/*text-align: center;*/
-				vertical-align:text-middle;
-				z-index:200;
-				margin: 0%;
-				/*display:none;*/
-				overflow:auto;
-			}
-
-			#infoSmall 
-			{
-				position: absolute;
-				left:15%;
-				top: 30%; width: 70%;
-				height:40%;
-				color: #010101;
-				padding: 5px;
-				font-family: Monospace;
-				font-size: 13px;
-				text-align: center;
-				z-index:200;
-				display:none;
-				overflow:auto;
-			}
-
-			#circle 
-			{
-				position:absolute;
-				left:5px;
-				bottom:5px;
-				width:70px;
-				height:70px;
-				border-radius:35px;
-				font-size:20px;
-				color:#000;
-				line-height:100px;
-				text-align:center;
-				background:#f9dfcb;
-				display:none;
-			}
-
-			#roundCorner
-			{
-				position: absolute;
-				left: 30%; width: 40%;
-				top: 20%; height:60%;
-				color: #010101;
-				background-color: rgba(250, 250, 250, 0.8);
-				font-family: Monospace;
-				border: solid 1px #000000;
-				text-align: center;
-				vertical-align: middle;
-				padding: 5px;
-				z-index:200;
-				display:none;
-				overflow:auto;
-				border-radius: 20px;
-			}
-
-			#backButtonsContainer
-			{
-				position:absolute;
-				bottom:5px;
-				height:110px;
-				width:50%;
-				z-index:500;
-			}
-
-			.BackCircle
-			{
-				bottom:0px;
-				position:absolute;
-				width:70px;
-				height:70px;
-				border-radius:35px;
-				font-size:16px;
-				border: solid 1px #000000;
-				color:#000;
-				line-height:70px;
-				text-align:center;
-				/*display:none;*/
-			}
-
-			.BackCircleLeft
-			{
-				bottom:-10px;
-				position:absolute;
-				width:80px;
-				height:80px;
-				border-radius:40px;
-				border: solid 1px #000000;
-				font-size:100px;
-				color:#000;
-				line-height:70px;
-				text-align:center;
-				background:#f0f0f0;
-			}
-
-			.BackCircle:hover 
-			{
-			 cursor:pointer;
-			}
-
-			.BackCircleLeft:hover 
-			{
-			 cursor:pointer;
-			}
-
-			i:hover {
-			 cursor:pointer;
-			}
-
-			.soundCanvas
-			{
-				position:absolute;
-				z-index:-100;
-				display:none;
-			}
-
-			#circle:hover{
-			cursor:pointer;	
-			}
-
-			#sm2-container{
-				position:absolute;
-				top:-500;
-				left:-500;
-			}
-
-			a:link {color:#303000;text-decoration: none}      /* unvisited link */
-			a:visited {color:#303000;text-decoration: none}  /* visited link */
-			a:hover {color:#606060; text-decoration:none;}  /* mouse over link */
-			a:active {color:#606060; text-decoration:none;}  /* selected link */ 
-
-		</style>
 	</head>
 	<body>
 
@@ -197,6 +54,8 @@ if( /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent) )
 		</div>
 		<div id="roundCorner"> </div>
 		<div id="backButtonsContainer"> </div>
+
+		<a href="https://github.com/AphexHenry/BaptisteBohelayWebsite"><img title="Look at the GitHub project" id="githubButton" src="textures/icons/githubCircle.png" ></a> 
 
 		<div id="sm2-container" style="z-index:-300;">
 		 <!-- flash movie is added here -->
@@ -427,6 +286,103 @@ if( /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent) )
 
 				mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
 				mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+			}
+
+			function onDocumentMouseDown( event ) 
+			{
+				event.preventDefault();
+				if(canInteract)
+				{
+					ParticleGroups[sGroupCurrent].MouseDown(event);
+				}
+			}
+
+			function onDocumentTouchStart(event)
+			{
+				startX = event.touches[0].pageX;
+    			startY = event.touches[0].pageY;
+    			mouse.x = ( startX / window.innerWidth ) * 2 - 1;
+				mouse.y = -( startY / window.innerHeight ) * 2 + 1;
+				event.preventDefault();
+			}
+
+			function onDocumentTouchEnd(event)
+			{
+				startX = event.touches[0].pageX;
+    			startY = event.touches[0].pageY;
+    			mouse.x = ( startX / window.innerWidth ) * 2 - 1;
+				mouse.y = -( startY / window.innerHeight ) * 2 + 1;
+
+				event.preventDefault();
+				if(canInteract)
+				{
+					ParticleGroups[sGroupCurrent].MouseDown(event);
+				}
+			}
+
+			function animate() {
+
+				requestAnimationFrame( animate );
+
+				render();
+			}
+
+			function render() {
+
+				if(!sPageLoaded || sMinLoading > -1)
+				{
+					sMinLoading -= 0.02;
+					if(sMinLoading <= 0)
+					{
+						sMinLoading = -2;
+						HtmlToCircles(200);
+					}
+					return;
+				}
+
+				var radius = ParticleGroups[sGroupCurrent].cameraDistance;
+				var delta = Math.max(Math.min(clock.getDelta(), 0.06), 0.001);
+				infoDisplay.Update(delta);
+				theta += 0.2;
+
+				cameraManager.Update(delta);
+				sEnvironment.Update(delta);
+				sButtonsBack.Update(delta);
+
+				if(!SELECTED && controlAuto)
+				{
+					cameraTarget = ParticleGroups[sGroupCurrent].positionCenter;
+					cameraPosition.x = ParticleGroups[sGroupCurrent].positionCenter.x + radius * Math.sin( theta * Math.PI / 360 );
+					cameraPosition.y = ParticleGroups[sGroupCurrent].positionCenter.y + radius * Math.sin( theta * Math.PI / 360 );
+					cameraPosition.z = ParticleGroups[sGroupCurrent].positionCenter.z + radius * Math.cos( theta * Math.PI / 360 );
+				}
+
+				if(isNaN(camera.position.x))
+				{
+					camera.position = new THREE.Vector3();
+					console.log("error, NAN");
+				}
+
+				cameraManager.UpdateGoTo(cameraPosition, cameraTarget);
+
+				camera.updateMatrixWorld();
+				if(canInteract)
+				{
+					ParticleGroups[sGroupCurrent].Update(delta);
+				}
+
+				// rotate camera
+				renderer.clear(true, true, true);
+
+				renderer.render( sceneInfo, camera );
+				renderer.render( scene, camera );
+
+			}
+
+		</script>
+	</body>
+</html>
+.innerHeight ) * 2 + 1;
 			}
 
 			function onDocumentMouseDown( event ) 
