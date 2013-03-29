@@ -18,7 +18,7 @@ function CameraManager(a_camera)
 	this.mPositionInit = this.camera.position.clone();
 
     this.mCameraMovementTimer = 0.;
-	this.mCameraDuration = 0.2;
+	this.mCameraDuration = 1.2;
 	this.mBlock = false;
 	this.mLightMove = 0.;
 	this.noise = 0;
@@ -35,14 +35,13 @@ CameraManager.prototype.Update = function(aTimeInterval)
 	this.mLightMove += aTimeInterval;
 	this.mCameraMovementTimer += aTimeInterval / this.mCameraDuration;
 	var lCoeffMov = 1. - (1. + Math.cos(Math.min(1., this.mCameraMovementTimer) * Math.PI)) * 0.5;
-	lCoeffMovPos = 1. - (1. + Math.cos(Math.min(1., lCoeffMov * 0.9) * Math.PI)) * 0.5;
+	lCoeffMovPos = 1. - (1. + Math.cos(Math.min(1., lCoeffMov * 0.95) * Math.PI)) * 0.5;
 	// lCoeffMovPos *= lCoeffMovPos;
 
-	lCoeffMovLook = lCoeffMovPos;//1. - (1. + Math.cos(Math.min(1., lCoeffMov) * Math.PI)) * 0.5;
+	lCoeffMovLook = 1. - (1. + Math.cos(Math.min(1., lCoeffMov) * Math.PI)) * 0.5;
 	// lCoeffMovLook *= lCoeffMovLook;
-	 lCoeffMovPosJump =  Math.sin( 2. * Math.PI * lCoeffMovPos);
 
-	this.camera.position = this.mPositionInit.clone().addSelf(new THREE.Vector3(this.mTarget.x + window.innerWidth * lCoeffMovPosJump, this.mTarget.y, this.mTarget.z).subSelf(this.mPositionInit).multiplyScalar(lCoeffMovPos));
+	this.camera.position = this.mPositionInit.clone().addSelf(this.mTarget.clone().subSelf(this.mPositionInit).multiplyScalar(lCoeffMovPos));
 	var width = getWidth() * 0.1;
 	this.camera.position.x += this.noise * myRandom() * width;
 	this.camera.position.y += this.noise * myRandom() * width;
@@ -63,7 +62,7 @@ CameraManager.prototype.GoTo = function(aPosition, aLookAt, aDuration)
 	this.mCameraLookAtInit = this.mCameraLookAt.clone();
 
 	this.mCameraMovementTimer = 0.;
-	this.mCameraDuration = Math.max(aDuration, 0.01) * 2.;
+	this.mCameraDuration = Math.max(aDuration, 0.01);
 }
 
 CameraManager.prototype.UpdateGoTo = function(aPosition, aLookAt)
