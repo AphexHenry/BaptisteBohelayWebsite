@@ -79,6 +79,9 @@
 		position:absolute;
 		width:70px;
 		height:70px;
+		/*background-color: #123456;*/
+		-moz-border-radius: 35px;
+		-webkit-border-radius: 35px;
 		border-radius:35px;
 		font-size:16px;
 		border: solid 1px #000000;

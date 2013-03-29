@@ -56,7 +56,7 @@ function ButtonsBack(aCanvas)
 	    // opacity: '0.9'
 	  }, 100);
 
-		$(this).css( "background-color",  $(this).css("border-color"));
+		$(this).css( "background-color",  this.myColor);
   	});
 	
 	$(".BackCircle").mouseleave(function() 
@@ -114,6 +114,7 @@ ButtonsBack.prototype.OnChange = function()
 			var rgbString = 'rgb(' + Math.floor(listElement.color.r * 275) + ',' + Math.floor(listElement.color.g * 275) + ',' + Math.floor(listElement.color.b * 275) + ')';
 			$(this.ButtonsStack[i]).text(listElement.name);
 			$(this.ButtonsStack[i]).css( "border-color",  rgbString);
+			this.ButtonsStack[i].myColor = rgbString;
 			this.ButtonsStack[i].indexGroup = listElement.index;
 			// this.ButtonsStack[i].style.display = '';
 			$(this.ButtonsStack[i]).slideDown(400);

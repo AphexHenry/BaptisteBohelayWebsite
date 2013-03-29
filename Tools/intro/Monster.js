@@ -168,7 +168,8 @@ drawOneArmTwo = function (context, size, i, amp)
 				gotObject.particle.position.y = gotObject.particle.TargetObject.positionTarget.y;
 				sLegArray[i].gotObject = null;
 				sPutALetter++;
-				if(sPutALetter > 20)
+				// we display the github button at the 20th letter.
+				if(sPutALetter == 20)
 				{
 					$('#githubButton').slideDown();
 				}
