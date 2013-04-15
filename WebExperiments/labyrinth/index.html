@@ -1,0 +1,265 @@
+
+
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<title>Three.js -- Template</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<style>
+		body 
+		{
+			font-family: Monospace;
+			font-weight: bold;
+			font-size: 18px;
+			background-color: #ccccff;
+			margin: 2px;
+			overflow: hidden;
+		}
+	</style>
+<style type="text/css"></style><style type="text/css"></style></head>
+<body>
+
+<div id="message">...</div>
+
+<script src="./js/Three.js"></script>
+<script src="./js/Detector.js"></script>
+<script src="./js/Stats.js"></script>
+<script src="./js/TrackballControls.js"></script>
+<script src="./js/THREEx.KeyboardState.js"></script>
+<script src="./js/THREEx.FullScreen.js"></script>
+<script src="./js/THREEx.WindowResize.js"></script>
+<script src="./Tools/Template.js"></script>
+
+<div id="message"></div>
+
+<script>
+
+// standard global variables
+var container, scene, camera, renderer, controls, stats;
+var keyboard = new THREEx.KeyboardState();
+var clock = new THREE.Clock();
+// custom global variables
+
+var MovingCube, MovingSphere;
+var sSpeedBall = new THREE.Vector3();
+var collidableMeshList = [];
+
+var arrowList = [];
+var directionList = [];
+
+init();
+animate();
+
+// FUNCTIONS 		
+function init() 
+{
+	// SCENE
+	scene = new THREE.Scene();
+	// CAMERA
+	var SCREEN_WIDTH = window.innerWidth, SCREEN_HEIGHT = window.innerHeight;
+	var VIEW_ANGLE = 45, ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT, NEAR = 0.1, FAR = 20000;
+	camera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR);
+	scene.add(camera);
+	camera.position.set(0,400,10);
+	camera.lookAt(scene.position);	
+	// RENDERER
+	if ( Detector.webgl )
+	{
+		document.getElementById("message").innerHTML = "use arrows or tilt your device to move";
+		renderer = new THREE.WebGLRenderer( {antialias:true} );
+	}
+	else
+	{
+		document.getElementById("message").innerHTML = "webGL not activated"
+		renderer = new THREE.CanvasRenderer();
+	}
+	renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+	container = document.createElement( 'div' );
+	document.body.appendChild( container );
+	container.appendChild( renderer.domElement );
+	// EVENTS
+	THREEx.WindowResize(renderer, camera);
+	THREEx.FullScreen.bindKey({ charCode : 'm'.charCodeAt(0) });
+	// CONTROLS
+	// controls = new THREE.TrackballControls( camera );
+	// STATS
+	stats = new Stats();
+	stats.domElement.style.position = 'absolute';
+	stats.domElement.style.bottom = '0px';
+	stats.domElement.style.zIndex = 100;
+	container.appendChild( stats.domElement );
+	// LIGHT
+	var light = new THREE.PointLight(0xffffff);
+	light.position.set(0,250,0);
+	scene.add(light);
+	// FLOOR
+	var floorMaterial = new THREE.MeshBasicMaterial( {color:0x444444, side:THREE.DoubleSide} );
+	var floorGeometry = new THREE.PlaneGeometry(10000, 10000, 10, 10);
+	var floor = new THREE.Mesh(floorGeometry, floorMaterial);
+	floor.position.y = -0.5;
+	floor.rotation.x = Math.PI / 2;
+	scene.add(floor);
+	// SKYBOX/FOG
+	var skyBoxGeometry = new THREE.CubeGeometry( 10000, 10000, 10000 );
+	var skyBoxMaterial = new THREE.MeshBasicMaterial( { color: 0x9999ff, side: THREE.BackSide } );
+	var skyBox = new THREE.Mesh( skyBoxGeometry, skyBoxMaterial );
+	scene.add(skyBox);
+	
+	////////////
+	// CUSTOM //
+	////////////
+
+	var cubeGeometry = new THREE.CubeGeometry(50 * 0.707,50 * 0.707,50 * 0.707,1,1,1);
+	var wireMaterial = new THREE.MeshBasicMaterial( { color: 0xff0000, wireframe:true } );
+	MovingCube = new THREE.Mesh( cubeGeometry, wireMaterial );
+	MovingCube.position.set(0, 25.1, 0);
+	MovingCube.rotation.y = Math.PI * 0.25;
+	scene.add( MovingCube );	
+	
+
+    var canvas = GetCircle();//document.createElement('img');
+    // canvas.src = "textures/BackBlack.png";
+    // canvas.onload = function()
+    // {	
+    	var newTexture = new THREE.Texture( canvas, THREE.UVMapping );
+		newTexture.needsUpdate = true;
+		newTexture.wrapS = newTexture.wrapT = THREE.RepeatWrapping;
+
+		var sphereGeometry = new THREE.SphereGeometry( 25, 32, 16 );
+		var wireMaterial = new THREE.MeshBasicMaterial( { color: 0xffffff, wireframe:false, map:newTexture } );
+		MovingSphere = new THREE.Mesh( sphereGeometry, wireMaterial );
+		MovingSphere.position = MovingCube.position;
+		MovingSphere.rotation.x = Math.PI * 0.5;
+		scene.add( MovingSphere );	
+	// }
+
+	addWall(new THREE.Vector3(-450, 50, 0), 600, false);
+	addWall(new THREE.Vector3(-350, 50, 200), 900, true);
+	addWall(new THREE.Vector3(350, 50, 0), 600, true);
+	addWall(new THREE.Vector3(350, 50, 400), 700, false);
+	addWall(new THREE.Vector3(-450, 50, -600), 700, false);
+
+	 window.ondevicemotion = function(event) 
+	 {
+    	sSpeedBall.x = event.accelerationIncludingGravity.x * 10;
+    	sSpeedBall.z = -event.accelerationIncludingGravity.y * 10;
+    }
+}
+
+function addWall(position, size, rotation)
+{
+	var wallGeometry = new THREE.CubeGeometry( size, 100, 20, 1, 1, 1 );
+	var wallMaterial = new THREE.MeshBasicMaterial( {color: 0x8888ff} );
+	var wireMaterial = new THREE.MeshBasicMaterial( { color: 0x000000, wireframe:true } );
+
+	var wall = new THREE.Mesh(wallGeometry, wallMaterial);
+	wall.position = position.clone();
+	if(rotation)
+		wall.rotation.y = 3.14159 / 2;
+	scene.add(wall);
+	collidableMeshList.push(wall);
+	var wall = new THREE.Mesh(wallGeometry, wireMaterial);
+	wall.position = position.clone();
+	if(rotation)
+		wall.rotation.y = 3.14159 / 2;
+	scene.add(wall);
+}
+
+function clearText()
+{   
+	// document.getElementById('message').innerHTML = '...';   
+}
+
+function appendText(txt)
+{   
+//document.getElementById('message').innerHTML += txt;   
+}
+
+function animate() 
+{
+    requestAnimationFrame( animate );
+	render();		
+	update();
+}
+
+function update()
+{
+	var delta = clock.getDelta(); // seconds.
+	var moveDistance = 280 * delta; // 200 pixels per second
+	var rotateAngle = Math.PI / 2 * delta;   // pi/2 radians (90 degrees) per second
+		
+	if ( keyboard.pressed("left") )
+		sSpeedBall.x -= moveDistance;
+	if ( keyboard.pressed("right") )
+		sSpeedBall.x += moveDistance;
+	if ( keyboard.pressed("up") )
+		sSpeedBall.z -= moveDistance;
+	if ( keyboard.pressed("down") )
+		sSpeedBall.z += moveDistance;
+	
+	MovingCube.position.x += sSpeedBall.x * delta;
+	MovingCube.position.z += sSpeedBall.z * delta;
+	MovingSphere.material.map.offset.x = MovingSphere.position.x * 0.02; // 0.0 - 1.0
+	MovingSphere.material.map.offset.y = -MovingSphere.position.z * 0.02;
+	// MovingSphere.rotation.x = MovingSphere.position.z * 0.1;
+	// // MovingSphere.rotation.y = MovingSphere.position.x;
+	// MovingSphere.rotation.z = -MovingSphere.position.x * 0.1;
+
+	// collision detection:
+	//   determines if any of the rays from the cube's origin to each vertex
+	//		intersects any face of a mesh in the array of target meshes
+	//   for increased collision accuracy, add more vertices to the cube;
+	//		for example, new THREE.CubeGeometry( 64, 64, 64, 8, 8, 8, wireMaterial )
+	//   HOWEVER: when the origin of the ray is within the target mesh, collisions do not occur
+	var originPoint = MovingCube.position.clone();
+
+	clearText();
+	var sumx = 0;
+	var sumz = 0;
+	var collisionResults;
+	
+	for (var vertexIndex = 0; vertexIndex < MovingCube.geometry.vertices.length; vertexIndex++)
+	{		
+		var localVertex = MovingCube.geometry.vertices[vertexIndex].clone();
+		var globalVertex = localVertex.applyMatrix4( MovingCube.matrix );
+		var directionVector = globalVertex.sub( MovingCube.position );
+		
+		var ray = new THREE.Raycaster( originPoint, directionVector.clone().normalize() );
+		var collisionResults = ray.intersectObjects( collidableMeshList );
+		if ( collisionResults.length > 0 && collisionResults[0].distance < directionVector.length() ) 
+		{
+			appendText(" Hit ");
+			appendText(" face index : " + collisionResults[0].face.a + " " + collisionResults[0].face.b + " " + collisionResults[0].face.c );
+			sumx += localVertex.x;
+			sumz += localVertex.z;
+		}
+	}
+
+	if(Math.abs(sumx) > 30)
+	{
+		MovingCube.position.x -= sSpeedBall.x * delta * 2.;
+		sSpeedBall.x *= -1;
+	}
+	if(Math.abs(sumz) > 30)
+	{
+		MovingCube.position.z -= sSpeedBall.z * delta * 2.;
+		sSpeedBall.z *= -1;
+	}
+
+	sSpeedBall.multiplyScalar(0.985);
+
+	// controls.update();
+	stats.update();
+}
+
+function render() 
+{
+	camera.position.set(MovingCube.position.x,700,MovingCube.position.z + 200);
+	camera.lookAt(MovingCube.position);
+	renderer.render( scene, camera );
+}
+
+</script>
+
+
+
+</body></html>

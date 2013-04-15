@@ -91,10 +91,6 @@
 	{
 		container.style.cursor = 'auto';
 		canInteract = true;
-		if(!isRoot)
-			$("#BackCircle").fadeTo(400, 0.4);
-		// document.getElementById("BackCircle").style.background = "#f9dfcb";
-		// document.getElementById("BackCircle").style.color = "#96a";
 	}
 
 	function inAppCirlceBackIn()
@@ -102,10 +98,6 @@
 		container.style.cursor = 'pointer';
 		// container.style.cursor = 'move';
 		canInteract = false;
-		if(!isRoot)
-			$("#BackCircle").fadeTo(200, 1.);
-		// document.getElementById("BackCircle").style.background = "#d9cfbb";
-		// document.getElementById("BackCircle").style.color = "#345";
 	}
 
 	function changeButtonBackOut()
@@ -151,14 +143,7 @@
 
 	function SetBackButton(visible)
 	{
-		if(visible && (!isRoot || sIsInHTML))
-		{
-			$("#BackCircle").slideDown(400);
-		}
-		else
-		{
-			$("#BackCircle").slideUp(400);	
-		}
+
 	}
 
 	function removeRoundCorner()

@@ -17,7 +17,7 @@ var sRayCircle = 0.3;
 var sMovementMonster = 0.;
 var sAttractionMonster = 0.;
 var sRayCircleTarget = sRayCircle;
-var sMonster = null;
+var sMonsterIntro = null;
 var sFoodArray = [];
 var sLegArray = [];
 var sChallenge;

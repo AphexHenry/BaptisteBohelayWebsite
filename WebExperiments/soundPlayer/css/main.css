@@ -73,10 +73,18 @@
 	#backButtonsContainer
 	{
 		position:absolute;
-		bottom:5px;
-		height:110px;
-		width:50%;
+		top:2%;
+		left:2%;
+		height:10%;
 		z-index:500;
+		display:none;
+	}
+
+	#backButtonsContainer:hover
+	{
+		top:1%;
+		left:1%;
+		height:12%;
 	}
 
 	.BackCircle

@@ -23,7 +23,8 @@ function ParticleGroupWebExperiment(positionCenter, name)
 	this.references.push(GetReference("Slug Journey", "", "WebExperiments/slug", true, "high"));
 	this.references.push(GetReference("Moving Mirror", "", "WebExperiments/mirror", true, "high"));
 	this.references.push(GetReference("3D Videos", "", "WebExperiments/videos", true, "high"));
-	this.references.push(GetReference("Plane forest", "", "WebExperiments/LightForest", true, "high"));
+	this.references.push(GetReference("Plane Forest", "", "WebExperiments/LightForest", true, "high"));
+	this.references.push(GetReference("Sound Eater", "", "WebExperiments/soundPlayer", true, "high"));
 	var width = window.innerWidth * .7;
 	this.cameraDistance = width * 0.6;
 	this.positionCenter = positionCenter;

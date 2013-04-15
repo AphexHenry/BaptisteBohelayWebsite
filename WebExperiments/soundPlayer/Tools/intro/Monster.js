@@ -28,11 +28,11 @@ function getCloseFood()
 		{
 			continue;
 		}
-		var distance = sFoodArray[i].position.distanceTo(sMonster.position);
-		if(distance < sMonster.scale.x * (sRayCircle + 1.2 * sSizeLegsMax))
+		var distance = sFoodArray[i].position.distanceTo(sMonsterIntro.position);
+		if(distance < sMonsterIntro.scale.x * (sRayCircle + 1.2 * sSizeLegsMax))
 		{
-			var angleClose = Math.atan((sMonster.position.y - sFoodArray[i].position.y) / (sMonster.position.x - sFoodArray[i].position.x));
-			if((sMonster.position.x - sFoodArray[i].position.x) > 0)
+			var angleClose = Math.atan((sMonsterIntro.position.y - sFoodArray[i].position.y) / (sMonsterIntro.position.x - sFoodArray[i].position.x));
+			if((sMonsterIntro.position.x - sFoodArray[i].position.x) > 0)
 			{
 				angleClose += Math.PI;
 			}
@@ -134,12 +134,12 @@ drawOneArmTwo = function (context, size, i, amp)
 			sLegArray[i].posHandTarget.y = (posShoulderY + size * (SIN * size + 1.5 * amp * Math.sin(sTime1 + decay * 2.) * COS));
 			break;
 		case 1: // go catch
-		 	sLegArray[i].posHandTarget.x = (gotObject.particle.position.x - sMonster.position.x) / sMonster.scale.x;
-	  		sLegArray[i].posHandTarget.y = (gotObject.particle.position.y - sMonster.position.y) / sMonster.scale.y;
+		 	sLegArray[i].posHandTarget.x = (gotObject.particle.position.x - sMonsterIntro.position.x) / sMonsterIntro.scale.x;
+	  		sLegArray[i].posHandTarget.y = (gotObject.particle.position.y - sMonsterIntro.position.y) / sMonsterIntro.scale.y;
 		break;
 		case 2: // go put
-		 	sLegArray[i].posHandTarget.x = (gotObject.particle.TargetObject.positionTarget.x - sMonster.position.x) / sMonster.scale.x;
-	  		sLegArray[i].posHandTarget.y = (gotObject.particle.TargetObject.positionTarget.y - sMonster.position.y) / sMonster.scale.x;
+		 	sLegArray[i].posHandTarget.x = (gotObject.particle.TargetObject.positionTarget.x - sMonsterIntro.position.x) / sMonsterIntro.scale.x;
+	  		sLegArray[i].posHandTarget.y = (gotObject.particle.TargetObject.positionTarget.y - sMonsterIntro.position.y) / sMonsterIntro.scale.x;
 		break;
 	}
 
@@ -160,8 +160,8 @@ drawOneArmTwo = function (context, size, i, amp)
 			}
 		break;
 		case 2: // go put
-			gotObject.particle.position.x = sMonster.position.x + posHandX * sMonster.scale.x;
-			gotObject.particle.position.y = sMonster.position.y + posHandY * sMonster.scale.y;
+			gotObject.particle.position.x = sMonsterIntro.position.x + posHandX * sMonsterIntro.scale.x;
+			gotObject.particle.position.y = sMonsterIntro.position.y + posHandY * sMonsterIntro.scale.y;
 			if(sLegArray[i].coeffMove >= .5)
 			{
 				gotObject.particle.position.x = gotObject.particle.TargetObject.positionTarget.x;
@@ -213,7 +213,7 @@ function Monster(positionCenter, width)
 
 	sTime1 = 0;
 	sTime2 = 0;
-	sMonster = this.particle;
+	sMonsterIntro = this.particle;
 }
 
 Monster.prototype.WakeUp = function(duration)
@@ -247,15 +247,6 @@ Monster.prototype.Update = function(delta)
 	sSizeLegs += (sSizeLegsTarget - sSizeLegs) * delta * 0.5;
 
 	sRayCircle += (sRayCircleTarget - sRayCircle) * delta * 0.5;
-
-	if(sSizeLegs < 0.52 && (sPutALetter > 0) && !sEnd)
-	{
-		infoDisplay.SetSize(1.3);
-		infoDisplay.SetText([{string:"enter", size: 2}]);
-		infoDisplay.FadeIn();	
-		sEnd = true;
-	}
-	infoDisplay.SetPosition(sMonster.position, true);
 }
 
 Monster.prototype.SetFood = function(foodArray)

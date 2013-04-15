@@ -23,7 +23,7 @@ function InitAudio(aData) {
 }
 
 function createAudio() {
-    processor = AudioContext.createJavaScriptNode(512 /*bufferSize*/, 1 /*num inputs*/, 1 /*num outputs*/); 
+    processor = AudioContext.createJavaScriptNode(1024 /*bufferSize*/, 1 /*num inputs*/, 1 /*num outputs*/); 
     processor.onaudioprocess = processAudio;
 
     analyser = AudioContext.createAnalyser();
@@ -78,16 +78,18 @@ function processAudio(e)
         var leftValue = 0.;
         var rightValue = 0.;
         sWaveFormData = [];
+        var valueCurrent;
         for(var i = 0; i < 512; i += 2)
         {
-            sWaveFormData.push((ByteData[i] - 127) / 127);
+            valueCurrent = (ByteData[i] - 127) / 127;
+            sWaveFormData.push(valueCurrent);
             if(left)
             {
-                leftValue += Math.abs(sWaveFormData[i]);
+                leftValue += Math.abs(valueCurrent);
             }
             else
             {
-                rightValue += Math.abs(sWaveFormData[i]);
+                rightValue += Math.abs(valueCurrent);
             }
             left = !left;
         }

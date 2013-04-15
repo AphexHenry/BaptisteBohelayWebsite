@@ -17,6 +17,7 @@ function ParticleGroupMonsterSound(positionCenter, name)
 	this.positionCenter = positionCenter;
 	this.name = name;
 	this.timer = 0;
+	this.isExplaining = true;
 
 	this.monster = new MonsterSound(positionCenter, this.width);
 	this.InitFood(this.width);
@@ -62,6 +63,10 @@ ParticleGroupMonsterSound.prototype.InitFood = function(aName, position, size, u
 
 ParticleGroupMonsterSound.prototype.AddFood = function(aName, size, url, volume)
 {
+	infoDisplay.FadeOut();
+	$("#backButtonsContainer").slideDown();
+	this.isExplaining = false;
+
 	var lPosition = new THREE.Vector3(this.positionCenter.x - mousePosition.x - window.innerWidth * 0.5,this.positionCenter.y + mousePosition.y - window.innerHeight * 0.5, this.positionCenter.z)
 	var targetObject = {name:aName, url:url};
 
@@ -78,10 +83,15 @@ ParticleGroupMonsterSound.prototype.AddFood = function(aName, size, url, volume)
 
 ParticleGroupMonsterSound.prototype.Init = function()
 {
+	infoDisplay.SetText([{string:"Feed me", size: 2}, {string:"with noise", size: 2}, {string:"drag your mp3 here", size: 1}]);
+	 // infoDisplay.SetText([{string:"Drag your mp3", size: 2}, {string:"in the window", size: 2}]);
+
 	for(var i = 0; i < sFoodArraySoundWait.length; i++)
 	{
 		sFoodArraySoundWait[i].SetTextEnabled(true);
 	}
+
+	setTimeout(function() {infoDisplay.FadeIn();},3250);
 };
 
 ParticleGroupMonsterSound.prototype.AddSound = function(aName, aURL, aPosition)
@@ -123,17 +133,26 @@ ParticleGroupMonsterSound.prototype.MouseDown = function()
 
 ParticleGroupMonsterSound.prototype.UpdateCamera = function(delta)
 {
+	var decayx = 0;
+	var decayy = 0;
 	if(sPlayingSound)
 	{
 		this.timer += delta * 0.2;
 		this.cameraDistance = window.innerWidth * 0.4;
 	}
+	else if(this.isExplaining)
+	{
+		decayx = getWidth() * 0.17;
+		decayy = getWidth() * 0.17;
+		this.timer += delta * 0.;
+		this.cameraDistance = window.innerWidth * 0.99;
+	}
 	else
 	{
 		this.timer = 0.;
-		this.cameraDistance = window.innerWidth * 0.99;	
+		this.cameraDistance = window.innerWidth * 0.99;			
 	}
-	cameraTarget = this.positionCenter;
+	cameraTarget = new THREE.Vector3(this.positionCenter.x + decayx, this.positionCenter.y + decayy, this.positionCenter.z);
 	cameraPosition.x = this.positionCenter.x + Math.sin(this.timer) *  this.cameraDistance;
 	cameraPosition.y = this.positionCenter.y + Math.sin(this.timer) *  this.cameraDistance;
 	cameraPosition.z = this.positionCenter.z + this.cameraDistance * Math.cos(this.timer);
@@ -200,6 +219,9 @@ ParticleGroupMonsterSound.prototype.Update = function(delta)
 			INTERSECTED = null;
 		}
 	}
+
+	infoDisplay.SetPosition(new THREE.Vector3(this.positionCenter.x + getWidth() * 0.28, this.positionCenter.y + getWidth() * 0.4, this.positionCenter.z));
+	infoDisplay.SetSize(25.);
 }
 
 ParticleGroupMonsterSound.prototype.Terminate = function()

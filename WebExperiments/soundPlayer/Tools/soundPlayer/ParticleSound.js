@@ -186,8 +186,8 @@ ParticleSound.prototype.Update = function(delta)
 	this.mSpeedTimer += delta * 0.5;
 	this.mParticle.position.x += this.mSpeed.x * delta;
 	this.mParticle.position.y += this.mSpeed.y * delta;
-	this.mSpeed.x += myRandom() * delta + Math.cos(this.mSpeedTimer + this.mAngleDecay) * 0.2 + 3.5 * (this.mPositionCenter.x - this.mParticle.position.x) / window.innerWidth;
-	this.mSpeed.y += myRandom() * delta + Math.sin(this.mSpeedTimer + this.mAngleDecay) * 0.2 + 3.5 * (this.mPositionCenter.y - this.mParticle.position.y) / window.innerWidth;
+	this.mSpeed.x += myRandom() * delta + Math.cos(this.mSpeedTimer + this.mAngleDecay) * 0.2 + 27.5 * (this.mPositionCenter.x - this.mParticle.position.x) / window.innerWidth;
+	this.mSpeed.y += myRandom() * delta + Math.sin(this.mSpeedTimer + this.mAngleDecay) * 0.2 + 27.5 * (this.mPositionCenter.y - this.mParticle.position.y) / window.innerWidth;
 	this.mSpeed.multiplyScalar(0.98);
 
 	this.mParticle.SetPosition(this.mPosition);

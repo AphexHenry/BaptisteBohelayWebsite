@@ -69,6 +69,7 @@ var sIsMouseOnRandom = false;
 var sIsPicking = false;
 function MonsterRandom(aPosition, aSize)
 {
+	this.timer = 0.;
 	this.particle = new THREE.Particle( new THREE.ParticleCanvasMaterial( { color: PickColor(), program: programMonster3, transparent:true } ) );
 
 	this.particle.position = aPosition.clone();
@@ -76,41 +77,6 @@ function MonsterRandom(aPosition, aSize)
 
 	this.particle.scale.x = this.particle.scale.y = aSize;
 	scene.add( this.particle );
-
-	this.particle.MyMouseOn = function(intersect)
-	{
-		sIsMouseOnRandom = true;
-	}
-
-	this.particle.MyMouseOff = function(intersect)
-	{
-		sIsMouseOnRandom = false;
-	}
-
-	this.particle.MyMouseDown = function()
-	{
-		// sCurrentRandomString = "click to pick";
-		sIsPicking = true;
-		// SELECTED = this;
-	}
-
-	this.particle.MyCameraDistance= function()
-	{
-		return window.innerWidth * 0.14;
-	}
-
-	var programText = function ( context ) 
-	{
-		var infoText = [];
-		infoText.push({string:sCurrentRandomString, size: 2});
-		SetTextInCanvas(infoText, context.canvas)
-	}
-
-	this.info = new THREE.Particle( new THREE.ParticleCanvasMaterial( { color: PickColor(), program: programText, transparent:true, opacity:OPACITY_INFO } ) );
-	this.info.position = aPosition.clone();
-	this.info.scale.x = this.particle.scale.x * 0.07;
-	this.info.scale.y = -this.info.scale.x;
-	scene.add( this.info );
 
 	// create the mesh's material
 	this.plane = new THREE.Mesh( new THREE.PlaneGeometry( this.particle.scale.x * 1.5, this.particle.scale.x * 1.5, 8, 8 ), new THREE.MeshBasicMaterial( { color: 0x000000, opacity: 0.25, transparent: true, wireframe: true } ) );
@@ -128,94 +94,11 @@ function MonsterRandom(aPosition, aSize)
 	this.touched = false;
 }
 
-MonsterRandom.prototype.RunRandomProject = function()
-{
-	var	index = Math.floor(Math.random() * sProjectsToRandom.length);
-	var lAlreadyIn = true;
-	var iterCount = 0;
-	while(lAlreadyIn)
-	{
-		iterCount++;
-		index++;
-		index = index % sProjectsToRandom.length;
-		lAlreadyIn = false;
-		for(var i = 0; i < sRandomLastIndex.length; i++)
-		{
-			if(index == sRandomLastIndex[i])
-			{
-				lAlreadyIn = true;
-			}
-		}
-		if(iterCount > sProjectsToRandom.length)
-		{
-			sRandomLastIndex = [];
-		}
-	}
-
-	var lProject = sProjectsToRandom[index];
-
-	if(sRandomLastIndex >= sProjectsToRandom.length - 1)
-	{
-		sRandomLastIndex = [];	
-	}
-	sRandomLastIndex.push(index);
-	console.log(lProject);
-	
-	if(typeof lProject.targetHTML != "undefined")
-	{
-		CirclesToHtml(lProject.targetHTML);
-	}
-	else if(typeof lProject.targetURL != "undefined")
-	{
-		ImageFrontCtx.fillStyle = '#ffffff';
-		var newURL = window.location.href.substring(0, window.location.href.indexOf('#')) + lProject.targetURL;
-		open_in_new_tab(newURL);
-		if(isdefined(ParticleGroups[sGroupCurrent].BackFromHTML))
-		{
-			ParticleGroups[sGroupCurrent].BackFromHTML();
-		}
-	}
-	else if(typeof lProject.targetHTMLOpen != "undefined")
-	{
-		open_in_new_tab(lProject.targetHTMLOpen);
-	}
-}
-
 MonsterRandom.prototype.Update = function(delta)
 {
-	if(sIsPicking)
-    {
-    	pickCircleRadius += 0.01;
-    	if(pickCircleRadius > 0.75)
-    	{
-    		pickCircleRadius = 1.;
-    		sDistanceTwo = pickCircleRadius;
-    		sIsPicking = false;
-    		this.RunRandomProject();
-    	}
-    }
-    else
-    {
-    	pickCircleRadius -= 0.05;
-    	pickCircleRadius = Math.max(0., pickCircleRadius);
-    }
-
-	if(sIsMouseOnRandom || sIsPicking)
-	{
-		sCurrentRandomString = "click to pick"
-		sDistanceTwo -= 0.01;
-		sDistanceTwo = Math.max(.5, sDistanceTwo);
-		this.info.material.opacity += 0.01;
-		this.info.material.opacity = Math.min(1., this.info.material.opacity);
-	}
-	else
-	{
-		sCurrentRandomString = "random project";
-		sDistanceTwo += 0.01;
-		sDistanceTwo = Math.min(1., sDistanceTwo);
-		this.info.material.opacity -= 0.01;
-		this.info.material.opacity = Math.max(OPACITY_INFO, this.info.material.opacity);
-	}
+	this.timer += delta;
+	sDistanceTwo = 0.5 + 0.5 * Math.cos(this.timer * 0.1);
+	// sDistanceTwo = pickCircleRadius;
 }
 
 MonsterRandom.prototype.SetFood = function(foodArray)

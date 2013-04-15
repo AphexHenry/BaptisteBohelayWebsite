@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+	<head>
+
+<!--[if IE]>
+<script type="text/javascript">
+    document.location.href = "./sorryIE.html";
+ </script>
+<![endif]-->
+<script type="text/javascript">
+var IS_PHONE = false;
+if( /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent) ) 
+{
+	IS_PHONE = true;
+ 	// document.location.href = "./sorry.html";
+}
+</script>
+
+		<title>Baptiste Bohelay - developer & designer</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	    <meta name="description" content="An experimental website introducing my projects and my work.">
+    	<meta name="author" content="Baptiste Bohelay">
+		<link href="css/main.css" rel="stylesheet">
+
+		<!-- the core stuff -->
+		<script type="text/javascript" src="script/soundmanager2.js"></script>
+
+		<script type="text/javascript">
+
+		soundManager.setup({
+		  flashVersion: 9,
+		  preferFlash: true, // for visualization effects
+		  useHighPerformance: true, // keep flash on screen, boost performance
+		  wmode: 'transparent', // transparent SWF, if possible
+		  url: 'soundmanager/swf/'
+		});
+
+		soundManager.useFlashBlock = true;
+		sSoundManagerReady = false;
+
+  		// even if HTML5 supports MP3, prefer flash so the visualization features can be used.
+	  	soundManager.preferFlash = true;
+
+		</script>
+
+	</head>
+	<body>
+
+		<div id="dropArea">
+		</div>
+		<canvas id="canvas">
+		    
+		</canvas>
+
+		<script src='js/jquery.js'></script>
+		
+		<script>
+
+var canvas = document.getElementById('canvas');
+var ctx = canvas.getContext('2d');
+const CANVAS_HEIGHT = canvas.height;
+const CANVAS_WIDTH = canvas.width;
+const SPACER_WIDTH = 1;
+const COL_WIDTH = 3;
+
+var context = new (window.AudioContext || window.webkitAudioContext)();
+var source;
+var processor;
+var analyser;
+var xhr;
+
+function initAudio(data) {
+    source = context.createBufferSource();
+    
+    if(context.decodeAudioData) {
+        context.decodeAudioData(data, function(buffer) {
+            source.buffer = buffer;
+            createAudio();
+        }, function(e) {
+            console.log(e);
+        });
+    } else {
+        source.buffer = context.createBuffer(data, false /*mixToMono*/);
+        createAudio();
+       }
+    
+    
+}
+
+function createAudio() {
+    processor = context.createJavaScriptNode(2048 /*bufferSize*/, 1 /*num inputs*/, 1 /*num outputs*/); 
+    processor.onaudioprocess = processAudio;
+
+    analyser = context.createAnalyser();
+        
+    source.connect(context.destination);
+    source.connect(analyser);
+
+    analyser.connect(processor);
+    processor.connect(context.destination);
+
+    source.noteOn(0);
+    setTimeout(disconnect, source.buffer.duration * 1000 +1000);
+}
+
+function disconnect() {
+    source.noteOff(0);
+    source.disconnect(0);
+    processor.disconnect(0);
+    analyser.disconnect(0);
+}
+
+function processAudio(e) {
+    var freqByteData = new Uint8Array(analyser.frequencyBinCount);
+    
+    analyser.getByteFrequencyData(freqByteData);
+    
+    ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+    
+    var colors = [
+        '#3369E8', // blue
+        '#D53225', // red
+        '#EEB211', // yellow
+        '#009939' // green
+      ];
+    
+    for (var i = 0; i < freqByteData.length; ++i) {
+        
+        var magnitude = freqByteData[i];
+        var lingrad = ctx.createLinearGradient(0, CANVAS_HEIGHT, 0, CANVAS_HEIGHT - magnitude);
+        
+        lingrad.addColorStop(0, colors[i % colors.length]);
+        lingrad.addColorStop(1, colors[i % colors.length]);
+        ctx.fillStyle = lingrad;
+
+        ctx.fillRect(i * SPACER_WIDTH, CANVAS_HEIGHT, COL_WIDTH, -magnitude);
+      }
+}
+
+function dropEvent(evt) {
+    evt.stopPropagation();
+    evt.preventDefault();
+    
+    var droppedFiles = evt.dataTransfer.files;
+    
+    /*
+    var formData = new FormData();
+    
+    for(var i = 0; i < droppedFiles.length; ++i) {
+        var file = droppedFiles[i];
+        
+        files.append(file.name, file);
+    }
+    
+    xhr = new XMLHttpRequest();
+    xhr.open("POST", settings.url);  
+    xhr.onreadystatechange = handleResult;
+    xhr.send(formData);
+    */
+    
+    var reader = new FileReader();
+    
+    reader.onload = function(fileEvent) {
+        var data = fileEvent.target.result;
+        initAudio(data);
+    }
+    
+    reader.readAsArrayBuffer(droppedFiles[0]);
+}
+
+function handleResult() {
+    if (xhr.readyState == 4 /* complete */) {
+        switch(xhr.status) {
+            case 200: /* Success */
+                initAudio(request.response);
+                break;
+            default:
+                break;
+        }
+        xhr = null;
+    }      
+}
+
+function dragOver(evt) {
+    evt.stopPropagation();
+    evt.preventDefault();
+    return false;
+}
+
+var dropArea = document.getElementById('dropArea');
+dropArea.addEventListener('drop', dropEvent, false);
+dropArea.addEventListener('dragover', dragOver, false);
+
+		</script>
+	</body>
+</html>

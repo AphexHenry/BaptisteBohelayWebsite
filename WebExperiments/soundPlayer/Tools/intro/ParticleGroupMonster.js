@@ -11,7 +11,7 @@ function ParticleGroupMonster(positionCenter, name)
 {
 	this.width = window.innerWidth * 0.3;
 	this.cameraDistance = this.width * 3.;
-	this.positionCenter = positionCenter;
+	this.positionCenter = positionCenter.clone();
 	this.name = name;
 	this.goAway = false;
 
@@ -54,7 +54,7 @@ ParticleGroupMonster.prototype.AddFood = function(aName, position, speed, size, 
 
 ParticleGroupMonster.prototype.AddString = function(aText, aPosition)
 {
-	var size = window.innerWidth * 0.03;
+	var size = window.innerWidth * 0.05;
 	var spaceInit = size * 1.9;
 	var position = aPosition.clone();
 	position.addSelf(this.positionCenter);
@@ -77,8 +77,8 @@ ParticleGroupMonster.prototype.AddString = function(aText, aPosition)
 
 ParticleGroupMonster.prototype.InitFood = function(width)
 {
-	this.AddString("Baptiste Bohelay", new THREE.Vector3(-window.innerWidth * .7, window.innerHeight * 0.4, 0));
-	this.AddString("Developer & Designer", new THREE.Vector3(-window.innerWidth * 0.5, window.innerHeight * -0.3, 0));
+	this.AddString("Tentacle", new THREE.Vector3(-window.innerWidth * .7, window.innerHeight * 0.4, 0));
+	this.AddString("Audio Player", new THREE.Vector3(-window.innerWidth * 0.5, window.innerHeight * -0.3, 0));
 }
 
 ParticleGroupMonster.prototype.MouseUp = function()
@@ -88,17 +88,17 @@ ParticleGroupMonster.prototype.MouseUp = function()
 
 ParticleGroupMonster.prototype.MouseDown = function()
 {
-	if(IS_PHONE)
-		this.UpdatePointer();
+	// if(IS_PHONE)
+	// 	this.UpdatePointer();
 
-	if(INTERSECTED || !sEnd)
-	{
-		sEnd = true;
-		this.goAway = true;
-		infoDisplay.FadeOut();
-		// $('#githubButton').slideUp();
-		setTimeout(function() {GoToIndex(ParticleGroup.PART_CREA_LULU);}, 1000);
-	}
+	// if(INTERSECTED || !sEnd)
+	// {
+	// 	sEnd = true;
+	// 	this.goAway = true;
+	// 	infoDisplay.FadeOut();
+	// 	// $('#githubButton').slideUp();
+	// 	setTimeout(function() {GoToIndex(ParticleGroup.PART_SOUND_MONSTER);}, 1000);
+	// }
 }
 
 ParticleGroupMonster.prototype.UpdateCamera = function(delta)
@@ -126,7 +126,7 @@ ParticleGroupMonster.prototype.UpdateFood = function(delta)
 			lPart.SetPosition(lPart.position);
 			lPart.mSpeed.multiplyScalar(0.95);
 		}
-		if(this.goAway)
+		if(this.goAway || sEnd)
 		{
 			lPart.mSpeed.x += myRandom() * window.innerHeight * 0.02;
 			lPart.mSpeed.x += (this.positionCenter.x - lPart.position.x) * -0.3;
@@ -139,8 +139,9 @@ ParticleGroupMonster.prototype.UpdateFood = function(delta)
 		}
 	}
 
-	sMonster.position.x += (this.positionCenter.x + window.innerWidth * 0.5 - sMonster.position.x) * delta * 0.25;
-	sMonster.position.y += (this.positionCenter.y + window.innerHeight * 0.5 - sMonster.position.y) * delta * 0.25;
+	sMonsterIntro.position.x += (this.positionCenter.x + window.innerWidth * 0.5 - sMonsterIntro.position.x) * delta * 0.35;
+	sMonsterIntro.position.y += (this.positionCenter.y + window.innerHeight * 0.5 - sMonsterIntro.position.y) * delta * 0.35;
+	sMonsterIntro.position.z += (this.positionCenter.z  - sMonsterIntro.position.z) * delta * 0.25;
 }
 
 ParticleGroupMonster.prototype.SwitchNextState = function()
@@ -179,6 +180,21 @@ ParticleGroupMonster.prototype.Update = function(delta)
 	this.monster.Update(delta);
 
 	this.UpdateIntersectPlane();
+
+	if(sPutALetter > sFoodArray.length - 1)
+	{
+		if(!sEnd)
+		{
+			setTimeout(function() {
+				sPutALetter = 0;
+				sEnd = true;
+				this.goAway = true;
+				infoDisplay.FadeOut();
+				// $('#githubButton').slideUp();
+				setTimeout(function() {GoToIndex(ParticleGroup.PART_SOUND_MONSTER);}, 500);
+			}, 1000);
+		}
+	}
 }
 
 ParticleGroupMonster.prototype.Init = function(){};
@@ -209,17 +225,17 @@ ParticleGroupMonster.prototype.UpdatePointer = function()
 
 	var ray = new THREE.Ray( camera.position, vector.subSelf( camera.position ).normalize() );
 
-	var intersects = ray.intersectObject( sMonster );
+	var intersects = ray.intersectObject( sMonsterIntro );
 
 	if ( intersects.length > 0 ) 
 	{
 			INTERSECTED = intersects[ 0 ].object;
 			if(intersects[0].distance < INTERSECTED.boundRadiusScale * sRayCircle)
 			{
-				sMonster.material.program = monsterTouched;
+				sMonsterIntro.material.program = monsterTouched;
 				return;
 			}
 	} 
-	sMonster.material.program = programMonster;
+	sMonsterIntro.material.program = programMonster;
 }
 

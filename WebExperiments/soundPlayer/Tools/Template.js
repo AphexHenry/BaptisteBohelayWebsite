@@ -245,7 +245,7 @@ function SetTextInCanvas(text, canvas)
         }
         thissize = text[lineIndex].size;
         jump += thissize;
-        context.font = thissize + "pt Helvetica"
+        context.font = thissize + "pt Helvetica";
         context.fillText(text[lineIndex].string, 5, 1.6 * jump);
     }
 }
@@ -301,7 +301,7 @@ function GetTextInBox(text, width, height, border, size, status)
         var up = (height - splitTextLine.length * size) * 0.25;
         for(var lineIndex = 0; lineIndex < splitTextLine.length; lineIndex++)
         {
-            context.fillText(splitTextLine[lineIndex], 5, size + canvasText.height * 0.);
+            context.fillText(splitTextLine[lineIndex], -metricLine, size + canvasText.height * 0.);
         }
 
         return canvasText;

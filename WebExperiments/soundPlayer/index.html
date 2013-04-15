@@ -16,22 +16,18 @@ if( /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent) )
 }
 </script>
 
-		<title>Baptiste Bohelay - developer & designer</title>
+		<title>Tentacle Sound Player</title>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-	    <meta name="description" content="An experimental website introducing my projects and my work.">
+	    <meta name="description" content="An experimental audio player for your local files. Just drag them and feed the monster.">
     	<meta name="author" content="Baptiste Bohelay">
 		<link href="css/main.css" rel="stylesheet">
 
 	</head>
 	<body>
 
-		<div id="info"> 	
-		<CENTER>
-		<H2> <strong><br><br><br>loading...</strong><P>
-		</div>
 		<div id="roundCorner"> </div>
-		<div id="backButtonsContainer"> </div>
+		<!-- <img id="backButtonsContainer" src="PlayAll.png" title="play all" onmousedown="playAll()"> </div> -->
 
 		<canvas id="canvas"></canvas>
 
@@ -57,7 +53,7 @@ if( /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent) )
 		<script src='Tools/soundPlayer/MonsterSound.js'></script>
 		<script src='Tools/soundPlayer/ParticleGroupMonsterSound.js'></script>
 		<script src='Tools/soundPlayer/ParticleSound.js'></script>
-		
+
 		<script>
 
 			var container;
@@ -76,13 +72,13 @@ if( /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent) )
 			var sPageLoaded = false;
 			var sMinLoading = 1.;
 
-			var sProjectsToRandom = [];
+			var sMonsterRandom = [];
 			var sRandomLastIndex = [];
 
 			var infoDisplay;
 
 			var clock = new THREE.Clock();
-
+			var sPlayAll = false;
 			var PI2 = Math.PI * 2;
 
 			var theta = 0;
@@ -109,27 +105,16 @@ if( /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent) )
 				scene.add( camera );
 				sceneInfo.add( camera );
 
+				infoDisplay = new InfoDisplay(1., 8.);
+
 				 // Monster
 				 ParticleGroups[ParticleGroup.PART_INTRO] = new ParticleGroupMonster(new THREE.Vector3(-500, -1000, -1000), "");
 
-				// Main choice
-				var flyer = [];
-				flyer.push({name: "contact", targetHTML:"html/contact.html", size:0.5, addRandom:false});
-				flyer.push({name: "funky creations", target:ParticleGroup.PART_FUNKY_CREATION});
-				flyer.push({name: "Lulu - Iphone Game", target:ParticleGroup.
-					PART_LULU});
-				flyer.push({name: "about me", target:ParticleGroup.PART_ABOUT_ME});
-
-				// var flyer = [];
-				// flyer.push({name: "Lulu soundtrack", targetHTML:"html/LuluSounds.html"});
-				// flyer.push({name: "sound monsters", target:ParticleGroup.PART_SOUND_MONSTER});
-				// flyer.push({name: "dancing robot", targetHTML:"html/dancingRobot.html"});
-				// var lSound = new ParticleGroupIntro(new THREE.Vector3(-2000, -2000, 3000), flyer, "soundExperiment", ParticleGroup.PART_SOUND_EXPERIMENTS);
 
 				var positionSound = new THREE.Vector3(2500, 2500, 3500);
 				ParticleGroups[ParticleGroup.PART_SOUND_MONSTER] = new ParticleGroupMonsterSound(positionSound, "SoundMonsters");
 
-				for(var i = 0; i < 8; i++)
+				for(var i = 0; i < 2; i++)
 				{
 					var distance = (1. + myRandom() * 0.5) * window.innerWidth * 3.;
 					var angle1 = myRandom() * Math.PI * 2.;
@@ -138,11 +123,8 @@ if( /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent) )
 					lposition.x = positionSound.x + distance * Math.cos(angle1) * Math.sin(angle2);
 					lposition.y = positionSound.y + distance * Math.sin(angle1) * Math.sin(angle2);
 					lposition.z = positionSound.z + distance * Math.cos(angle2);
-					new Monster(lposition, window.innerWidth * 0.3 + Math.random() * 0.1);
+					sMonsterRandom.push(new MonsterRandom(lposition, window.innerWidth * 0.3 + Math.random() * 0.1));
 				}
-
-				 // add the sounds as they are not in html in the website.
-				sProjectsToRandom.push({name: "sound monsters", targetHTML:"html/SoundMonsters.html", size:1.});
 
 				 var lGroupToGo = ParticleGroup.PART_SOUND_MONSTER;
 				 for(var i in ParticleGroups)
@@ -200,8 +182,6 @@ if( /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent) )
             	{
             		document.addEventListener("touchstart", onDocumentTouchStart, false);
             	}
-
-				infoDisplay = new InfoDisplay(1., 1.5);
 			}
 
 			window.onload = function ()
@@ -233,6 +213,9 @@ if( /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent) )
 		 	 {
 	 	 	    evt.stopPropagation();
 			    evt.preventDefault();
+			    mouse.x = ( evt.clientX / window.innerWidth ) * 2 - 1;
+				mouse.y = - ( evt.clientY / window.innerHeight ) * 2 + 1;
+			    console.log(evt);
 			    
 			    var droppedFiles = evt.dataTransfer.files;
 			    
@@ -309,6 +292,12 @@ if( /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent) )
 				}
 			}
 
+
+			function playAll()
+			{
+				sPlayAll = true;	
+			}
+
 			function animate() {
 
 				requestAnimationFrame( animate );
@@ -333,6 +322,11 @@ if( /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent) )
 				var delta = Math.max(Math.min(clock.getDelta(), 0.06), 0.001);
 				infoDisplay.Update(delta);
 				theta += 0.2;
+
+				for(var i = 0; i < sMonsterRandom.length; i++)
+				{
+					sMonsterRandom[i].Update(delta)
+				}
 
 				cameraManager.Update(delta);
 
