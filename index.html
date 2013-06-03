@@ -55,8 +55,8 @@ if( /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent) )
 		<div id="roundCorner"> </div>
 		<div id="backButtonsContainer"> </div>
 
-<!-- 		<a href="https://github.com/AphexHenry/BaptisteBohelayWebsite"><img title="Look at the GitHub project" id="githubButton" src="textures/icons/githubCircle.png" ></a> 
- -->
+		<a href="https://github.com/AphexHenry/BaptisteBohelayWebsite"><img title="Look at the GitHub project" id="githubButton" src="textures/icons/githubCircle.png" ></a> 
+ 
 		<div id="sm2-container" style="z-index:-300;">
 		 <!-- flash movie is added here -->
 		</div>
@@ -94,13 +94,13 @@ if( /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent) )
 		
 		<script>
 
-			var container;
-			var camera, scene, projector, renderer;
-			var sceneInfo;
-			var cameraManager;
-			var controlAuto = true;
+			var container; 							// WebGL canvas container.
+			var camera, scene, projector, renderer; // three.js components.
+			var sceneInfo; 							// scene to display static informations.
+			var cameraManager;						// camera manager.
+			var controlAuto = true; 				//define if the camera has an automatic control (rotation around a point) or a specific one. 
 
-			var mousePosition = new THREE.Vector3();
+			var mousePosition = new THREE.Vector3(); // position of the mouse.
 			var cameraTarget = new THREE.Vector3();
 			var cameraTargetCurrent = new THREE.Vector3();
 			var cameraPosition = new THREE.Vector3();
@@ -170,12 +170,6 @@ if( /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent) )
 				flyer.push({name: "videos", target:ParticleGroup.PART_VIDEOS});
 				flyer.push({name: "sound monsters", target:ParticleGroup.PART_SOUND_MONSTER});
 				new ParticleGroupIntro(new THREE.Vector3(-2000, 2000, 3000), flyer, "funkyCreation", ParticleGroup.PART_FUNKY_CREATION);
-
-				// var flyer = [];
-				// flyer.push({name: "Lulu soundtrack", targetHTML:"html/LuluSounds.html"});
-				// flyer.push({name: "sound monsters", target:ParticleGroup.PART_SOUND_MONSTER});
-				// flyer.push({name: "dancing robot", targetHTML:"html/dancingRobot.html"});
-				// var lSound = new ParticleGroupIntro(new THREE.Vector3(-2000, -2000, 3000), flyer, "soundExperiment", ParticleGroup.PART_SOUND_EXPERIMENTS);
 
 				ParticleGroups[ParticleGroup.PART_SOUND_MONSTER] = new ParticleGroupMonsterSound(new THREE.Vector3(2500, 2500, 3500), "SoundMonsters");
 
@@ -380,5 +374,22 @@ if( /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent) )
 			}
 
 		</script>
+		
+		<!-- Piwik -->
+		<script type="text/javascript">
+		  var _paq = _paq || [];
+		  _paq.push(["trackPageView"]);
+		  _paq.push(["enableLinkTracking"]);
+
+		  (function() {
+		    var u=(("https:" == document.location.protocol) ? "https" : "http") + "://piwik.moumne.com/";
+		    _paq.push(["setTrackerUrl", u+"piwik.php"]);
+		    _paq.push(["setSiteId", "9"]);
+		    var d=document, g=d.createElement("script"), s=d.getElementsByTagName("script")[0]; g.type="text/javascript";
+		    g.defer=true; g.async=true; g.src=u+"piwik.js"; s.parentNode.insertBefore(g,s);
+		  })();
+		</script>
+		<!-- End Piwik Code -->
+
 	</body>
 </html>
