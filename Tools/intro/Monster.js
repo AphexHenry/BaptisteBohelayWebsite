@@ -171,7 +171,8 @@ drawOneArmTwo = function (context, size, i, amp)
 				// we display the github button at the 20th letter.
 				if(sPutALetter == 20)
 				{
-					$('#githubButton').slideDown();
+					$('#githubButton').slideDown(300);
+					$('#contactButton').slideDown(200);
 				}
 				SetStateLeg(i, 0);
 			}

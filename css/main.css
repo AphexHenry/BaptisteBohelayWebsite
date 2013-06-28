@@ -131,6 +131,17 @@
 	cursor:pointer;	
 	}
 
+	#contactButton
+	{
+		position:absolute;
+		right:6%;
+		bottom:1%;
+		width:5%;
+		display:none;
+		border-radius:50%;
+		opacity: 0.7;
+	}
+
 	#githubButton
 	{
 		position:absolute;
@@ -142,6 +153,7 @@
 		opacity: 0.7;
 	}
 
+	#contactButton:hover,
 	#githubButton:hover
 	{
 		-moz-box-shadow: 0px 4px 4px #000;

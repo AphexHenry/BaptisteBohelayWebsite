@@ -95,6 +95,10 @@ ParticleGroupMonster.prototype.MouseDown = function()
 	{
 		sEnd = true;
 		this.goAway = true;
+		
+		$('#githubButton').slideUp(300);
+		$('#contactButton').slideUp(200);
+		
 		infoDisplay.FadeOut();
 		// $('#githubButton').slideUp();
 		setTimeout(function() {GoToIndex(ParticleGroup.PART_CREA_LULU);}, 1000);
