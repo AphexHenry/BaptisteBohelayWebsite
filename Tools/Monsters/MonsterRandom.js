@@ -203,16 +203,16 @@ MonsterRandom.prototype.Update = function(delta)
 	if(sIsMouseOnRandom || sIsPicking)
 	{
 		sCurrentRandomString = "click to pick"
-		sDistanceTwo -= 0.01;
-		sDistanceTwo = Math.max(.5, sDistanceTwo);
+		sDistanceTwo += 0.03;
+		sDistanceTwo = Math.min(1., sDistanceTwo);
 		this.info.material.opacity += 0.01;
 		this.info.material.opacity = Math.min(1., this.info.material.opacity);
 	}
 	else
 	{
 		sCurrentRandomString = "random project";
-		sDistanceTwo += 0.01;
-		sDistanceTwo = Math.min(1., sDistanceTwo);
+		sDistanceTwo -= 0.005;
+		sDistanceTwo = Math.max(0., sDistanceTwo);
 		this.info.material.opacity -= 0.01;
 		this.info.material.opacity = Math.max(OPACITY_INFO, this.info.material.opacity);
 	}

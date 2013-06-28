@@ -71,7 +71,7 @@ CameraManager.prototype.UpdateGoTo = function(aPosition, aLookAt)
 	aLookAt = aLookAt.clone();
 	var relTarget = this.mTarget;
 	// relTarget = RelativeToPixel(relTarget);
-	if(relTarget.distanceTo(aPosition) > 100)
+	if(relTarget.distanceTo(aPosition) > 40)
 	{
 		this.GoTo(aPosition, aLookAt, DefaultDuration);
 	}

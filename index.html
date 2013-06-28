@@ -78,7 +78,7 @@ if( /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent) )
 		<script src='Tools/Camera.js'></script>
 		<script src='Tools/ParticleCircleNavigate.js'></script>
 		<script src='Tools/Monsters/MonsterRandom.js'></script>
-		<script src='Tools/Monsters/MonsterLastProject.js'></script>
+		<script src='Tools/Monsters/MonsterTournicoti.js'></script>
 		<script src='Tools/ParticleGroup/Particle.js'></script>
 		<script src='Tools/ParticleGroup/ParticleAboutMe.js'></script>
 		<script src='Tools/ParticleGroup/ParticleLulu.js'></script>
@@ -154,18 +154,6 @@ if( /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent) )
 				 // Monster
 				 ParticleGroups[ParticleGroup.PART_INTRO] = new ParticleGroupMonster(new THREE.Vector3(-500, -1000, -1000), "");
 
-				// Main choice
-				var flyer = [];
-				flyer.push({name: "contact", targetHTML:"html/contact.html", size:0.5, addRandom:false});
-				flyer.push({name: "funky creations", target:ParticleGroup.PART_FUNKY_CREATION});
-				flyer.push({name: "about me", target:ParticleGroup.PART_ABOUT_ME});
-
-				var lMenu = new ParticleGroupIntro(new THREE.Vector3(1000, 2000, 2000), flyer, "home", ParticleGroup.PART_CREA_LULU);
-				var randomMonster = new MonsterRandom(new THREE.Vector3(1150, 2000, 2000), window.innerWidth * 0.06);
-				var randomLastProject = new MonsterLastProject(new THREE.Vector3(850, 1850, 2000), window.innerWidth * 0.06);
-				lMenu.AddParticle(randomMonster);
-				lMenu.AddParticle(randomLastProject);
-
 				// creations type
 				var flyer = [];
 				flyer.push({name: "web exploration", target:ParticleGroup.PART_WEB});
@@ -180,8 +168,24 @@ if( /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent) )
 					PART_LULU});
 				flyer.push({name: "musical box", targetHTML:"html/other/MusicalBox.html"});
 				sProjectsLast = flyer[flyer.length - 1];
+				sProjectsLast.name = "last project";
 				new ParticleGroupIntro(new THREE.Vector3(0, 2000, 2000), flyer, "otherCreation", ParticleGroup.PART_OTHER);
 
+				// Main choice
+				var flyer = [];
+				flyer.push({name: "contact", targetHTML:"html/contact.html", size:0.5, addRandom:false});
+				flyer.push();
+				flyer.push({name: "about me", target:ParticleGroup.PART_ABOUT_ME});
+
+				var lMenu = new ParticleGroupIntro(new THREE.Vector3(1000, 2000, 2000), flyer, "home", ParticleGroup.PART_CREA_LULU);
+				var randomMonster = new MonsterRandom(new THREE.Vector3(1150, 2000, 2000), window.innerWidth * 0.06);
+				var randomLastProject = new MonsterTournicoti(new THREE.Vector3(850, 1850, 2000), window.innerWidth * 0.06, sProjectsLast, 1);
+				var funkyCreation = new MonsterTournicoti(new THREE.Vector3(850, 1850, 1800), window.innerWidth * 0.06, {name: "funky creations", target:ParticleGroup.PART_FUNKY_CREATION}, -1);
+				lMenu.AddParticle(funkyCreation);
+				lMenu.AddParticle(randomMonster);
+				lMenu.AddParticle(randomLastProject);
+
+				// sound monsters
 				ParticleGroups[ParticleGroup.PART_SOUND_MONSTER] = new ParticleGroupMonsterSound(new THREE.Vector3(2500, 2500, 3500), "SoundMonsters");
 
 				ParticleGroups[ParticleGroup.PART_ABOUT_ME] = new ParticleGroupAboutMe(new THREE.Vector3(2500, -1000, -1500), "AboutMe");

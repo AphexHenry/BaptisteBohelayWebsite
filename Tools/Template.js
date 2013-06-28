@@ -67,7 +67,7 @@ var programStrokeThick = function ( context ) {
 
 var programStroke = function ( context ) {
 
-    context.lineWidth = 0.05;
+    context.lineWidth = 0.07;
     context.beginPath();
     context.arc( 0, 0, 1. - 0.05, 0, PI2, true );
     context.closePath();

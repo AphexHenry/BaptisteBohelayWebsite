@@ -289,7 +289,7 @@ ParticleGroupIntro.prototype.Init = function(){};
 
 ParticleGroupIntro.prototype.Terminate = function()
 {
-	if(INTERSECTED)
+	if(INTERSECTED && !isdefined(INTERSECTED.TargetObject.isAutonomous))
 	{
 		INTERSECTED.material.program = programStroke;
 	}
@@ -319,6 +319,7 @@ ParticleGroupIntro.prototype.Update = function()
 				if(isdefined(INTERSECTED.TargetObject.isAutonomous))
 				{
 					INTERSECTED.MyMouseOff(intersects[ 0 ]);
+					INTERSECTED = null;
 					return;
 				}
 				else
