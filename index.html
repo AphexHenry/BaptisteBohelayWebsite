@@ -43,6 +43,7 @@ if( /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent) )
   		// even if HTML5 supports MP3, prefer flash so the visualization features can be used.
 	  	soundManager.preferFlash = true;
 
+	  	var sAutomatedFadeIn = false;
 		</script>
 
 	</head>
@@ -79,6 +80,7 @@ if( /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent) )
 		<script src='Tools/ParticleCircleNavigate.js'></script>
 		<script src='Tools/Monsters/MonsterRandom.js'></script>
 		<script src='Tools/Monsters/MonsterTournicoti.js'></script>
+		<script src='Tools/Monsters/MonsterNoise.js'></script>
 		<script src='Tools/ParticleGroup/Particle.js'></script>
 		<script src='Tools/ParticleGroup/ParticleAboutMe.js'></script>
 		<script src='Tools/ParticleGroup/ParticleLulu.js'></script>
@@ -118,13 +120,11 @@ if( /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent) )
 			var sRandomLastIndex = [];				// list of projects picked randomly to avoid to get one 2 times.
 			var sProjectsLast;						// last project added.
 
-			var infoDisplay;
+			var infoDisplay;						// common text display in 3d.
 
-			var clock = new THREE.Clock();
+			var clock = new THREE.Clock();			// clock
 
-			var PI2 = Math.PI * 2;
-
-			var theta = 0;
+			var PI2 = -Math.PI * 1.99;					// PI2
 
 			var mouse = { x: 0, y: 0 }, INTERSECTED;
 			var sCoeffCameraMove = 0;
@@ -157,30 +157,30 @@ if( /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent) )
 				// creations type
 				var flyer = [];
 				flyer.push({name: "web exploration", target:ParticleGroup.PART_WEB});
-				flyer.push({name: "other", target:ParticleGroup.PART_OTHER});
+				flyer.push({name: "projects", target:ParticleGroup.PART_OTHER});
 				flyer.push({name: "videos", target:ParticleGroup.PART_VIDEOS});
-				flyer.push({name: "sound monsters", target:ParticleGroup.PART_SOUND_MONSTER});
-				new ParticleGroupIntro(new THREE.Vector3(-2000, 2000, 3000), flyer, "funkyCreation", ParticleGroup.PART_FUNKY_CREATION);
+				
+				var lFunky = new ParticleGroupIntro(new THREE.Vector3(-2000, 2000, 3000), flyer, "funkyCreation", ParticleGroup.PART_FUNKY_CREATION);
+				var monsterNoise = new MonsterNoise(new THREE.Vector3(-1900, 2100, 3100), window.innerWidth * 0.06, {name: "sound monsters", target:ParticleGroup.PART_SOUND_MONSTER});
+				lFunky.AddParticle(monsterNoise);
 
 				var flyer = [];
 				flyer.push({name: "musical baguette", targetURL:"musicalBaguetteHowTo.html", size:0.8});
 				flyer.push({name: "Lulu - Iphone Game", target:ParticleGroup.
 					PART_LULU});
 				flyer.push({name: "musical box", targetHTML:"html/other/MusicalBox.html"});
-				sProjectsLast = flyer[flyer.length - 1];
-				sProjectsLast.name = "last project";
-				new ParticleGroupIntro(new THREE.Vector3(0, 2000, 2000), flyer, "otherCreation", ParticleGroup.PART_OTHER);
+				sProjectsLast = {name: "last project", targetHTML:"html/other/MusicalBox.html"};
+				new ParticleGroupIntro(new THREE.Vector3(0, 2000, 2000), flyer, "projects", ParticleGroup.PART_OTHER);
 
 				// Main choice
 				var flyer = [];
 				flyer.push({name: "contact", targetHTML:"html/contact.html", size:0.5, addRandom:false});
-				flyer.push();
 				flyer.push({name: "about me", target:ParticleGroup.PART_ABOUT_ME});
 
 				var lMenu = new ParticleGroupIntro(new THREE.Vector3(1000, 2000, 2000), flyer, "home", ParticleGroup.PART_CREA_LULU);
 				var randomMonster = new MonsterRandom(new THREE.Vector3(1150, 2000, 2000), window.innerWidth * 0.06);
 				var randomLastProject = new MonsterTournicoti(new THREE.Vector3(850, 1850, 2000), window.innerWidth * 0.06, sProjectsLast, 1);
-				var funkyCreation = new MonsterTournicoti(new THREE.Vector3(850, 1850, 1800), window.innerWidth * 0.06, {name: "funky creations", target:ParticleGroup.PART_FUNKY_CREATION}, -1);
+				var funkyCreation = new MonsterTournicoti(lMenu.positionCenter, window.innerWidth * 0.1, {name: "creations", target:ParticleGroup.PART_FUNKY_CREATION, size:1.5}, -1);
 				lMenu.AddParticle(funkyCreation);
 				lMenu.AddParticle(randomMonster);
 				lMenu.AddParticle(randomLastProject);
@@ -203,13 +203,22 @@ if( /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent) )
 				sProjectsToRandom.push({name: "sound monsters", targetHTML:"html/SoundMonsters.html", size:1.});
 
 				 var lGroupToGo = ParticleGroup.PART_INTRO;
+				 var lHTMLToGo = window.location.hash.split('+');
 				 for(var i in ParticleGroups)
 				 {
-				 	if(window.location.hash == "#" + ParticleGroups[i].name)
+				 	if(lHTMLToGo[0] == "#" + ParticleGroups[i].name)
 				 	{
 				 		lGroupToGo = i;
+				 		if(lHTMLToGo.length > 1)
+				 		{
+				 			CirclesToHtmlEncoded(lHTMLToGo[1]);
+				 		}
 				 		break;
 				 	}
+				 }
+				 if(!sIsInHTML)
+				 {
+					FadeIn();
 				 }
 				 if(sGroupCurrent != ParticleGroup.PART_INTRO)
 				 {
@@ -263,7 +272,7 @@ if( /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent) )
 				{
         		 for(var i in ParticleGroups)
 				 {
-				 	if(window.location.hash == "#" + ParticleGroups[i].name)
+				 	if(GetHashGroup() == ParticleGroups[i].name)
 				 	{
 				 		GoToIndex(i);
 				 		return;
@@ -272,7 +281,7 @@ if( /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent) )
 				}
 				else
 				{
-					window.location.hash = "#" + ParticleGroups[sGroupCurrent].name;
+					SetHashGroup(ParticleGroups[sGroupCurrent].name);
 					HtmlToCircles();
 				}
             }
@@ -342,7 +351,8 @@ if( /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent) )
 					if(sMinLoading <= 0)
 					{
 						sMinLoading = -2;
-						HtmlToCircles(200);
+						if(!sIsInHTML)
+							HtmlToCircles(200);
 					}
 					return;
 				}
@@ -351,7 +361,6 @@ if( /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent) )
 				var delta = Math.max(Math.min(clock.getDelta(), 0.06), 0.001);
 				sGeneralTimer+=delta;
 				infoDisplay.Update(delta);
-				theta += 0.2;
 
 				cameraManager.Update(delta);
 				sButtonsBack.Update(delta);
@@ -359,11 +368,10 @@ if( /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent) )
 				if(!SELECTED && controlAuto)
 				{
 					cameraTarget = ParticleGroups[sGroupCurrent].positionCenter;
-					cameraPosition.x = ParticleGroups[sGroupCurrent].positionCenter.x + radius * Math.sin( theta * Math.PI / 360 );
-					cameraPosition.y = ParticleGroups[sGroupCurrent].positionCenter.y + radius * Math.sin( theta * Math.PI / 360 );
-					cameraPosition.z = ParticleGroups[sGroupCurrent].positionCenter.z + radius * Math.cos( theta * Math.PI / 360 );
+					cameraPosition.x = ParticleGroups[sGroupCurrent].positionCenter.x + radius * Math.sin( sGeneralTimer * Math.PI / 40 );
+					cameraPosition.y = ParticleGroups[sGroupCurrent].positionCenter.y + radius * Math.sin( sGeneralTimer * Math.PI / 40 );
+					cameraPosition.z = ParticleGroups[sGroupCurrent].positionCenter.z + radius * Math.cos( sGeneralTimer * Math.PI / 40 );
 				}
-
 				if(isNaN(camera.position.x))
 				{
 					camera.position = new THREE.Vector3();

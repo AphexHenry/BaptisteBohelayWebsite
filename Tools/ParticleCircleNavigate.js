@@ -18,6 +18,7 @@ function ParticleCircleNavigate(position, aTargetObject)
 
 	var infoText = [];
 	infoText.push({string:this.name, size: 2});
+
 	var programText = function ( context ) 
 	{
 		SetTextInCanvas(infoText, context.canvas)
@@ -46,6 +47,17 @@ function ParticleCircleNavigate(position, aTargetObject)
 		particle.TargetObject.info.position = aPosition;
 	};
 
+	particle.SetName = function(aName)
+	{
+		infoText = [];
+		infoText.push({string:aName, size: 2});
+	}
+
+	particle.SetAutonomous = function(aValue)
+	{
+		particle.TargetObject.isAutonomous = aValue;
+	}
+
 	particle.Delete = function()
 	{
 		scene.remove(particle);
@@ -54,7 +66,19 @@ function ParticleCircleNavigate(position, aTargetObject)
 		delete this;
 	};
 
+	particle.GetInfo = function()
+	{
+		return particle.TargetObject.info;
+	}
+
+	particle.SetTextVisible = function(aVisible)
+	{
+		this.TargetObject.info.visible = aVisible;
+		this.TargetObject.info.particleClear = aVisible;
+	}
+
 	scene.add( particle );
 	scene.add(info);
+	particle.SetTextVisible(false);
 	return particle;
 }

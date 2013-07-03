@@ -83,8 +83,6 @@ programMonsterSound = function ( context )
 	}
 
 	DrawBodySound(context);
-
-
 }
 
 DrawBodySound = function(context)

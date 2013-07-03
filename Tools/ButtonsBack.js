@@ -40,6 +40,7 @@ function ButtonsBack(aCanvas)
   	$(this.backLeft).click(function() 
 	{
     	sButtonsBack.SetLeave();
+    	GoBack();
   	});
 
   	$(parent).mouseleave(function() 

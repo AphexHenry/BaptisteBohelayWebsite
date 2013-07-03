@@ -177,7 +177,7 @@ if( /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent) )
 				 var lGroupToGo = ParticleGroup.PART_SOUND_MONSTER;
 				 for(var i in ParticleGroups)
 				 {
-				 	if(window.location.hash == "#" + ParticleGroups[i].name)
+				 	if(GetHashGroup() == ParticleGroups[i].name)
 				 	{
 				 		lGroupToGo = i;
 				 		break;
@@ -245,7 +245,7 @@ if( /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent) )
 				{
         		 for(var i in ParticleGroups)
 				 {
-				 	if(window.location.hash == "#" + ParticleGroups[i].name)
+				 	if(GetHashGroup() == ParticleGroups[i].name)
 				 	{
 				 		GoToIndex(i);
 				 		return;
@@ -254,7 +254,7 @@ if( /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent) )
 				}
 				else
 				{
-					window.location.hash = "#" + ParticleGroups[sGroupCurrent].name;
+					GetHashGroup() == ParticleGroups[sGroupCurrent].name;
 					HtmlToCircles();
 				}
             }

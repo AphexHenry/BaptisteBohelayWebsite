@@ -64,18 +64,17 @@ function drawOneArmThree(context, angle, evolution)
     context.stroke();
 }
 
-var sCurrentRandomString = "random project";
 var sIsMouseOnRandom = false;
 var sIsPicking = false;
 function MonsterRandom(aPosition, aSize)
 {
-	this.particle = new THREE.Particle( new THREE.ParticleCanvasMaterial( { color: PickColor(), program: programMonster3, transparent:true } ) );
+	var aTarget = {name:"random"};
+	this.particle = new ParticleCircleNavigate(aPosition, aTarget);
+	this.particle.material.program = programMonster3;
+	this.particle.scale.x *= 3.;
+	this.particle.scale.y *= 3.;
 
-	this.particle.position = aPosition.clone();
-	this.particle.TargetObject = {isAutonomous:true};
-
-	this.particle.scale.x = this.particle.scale.y = aSize;
-	scene.add( this.particle );
+	this.particle.TargetObject.isAutonomous = true;
 
 	this.particle.MyMouseOn = function(intersect)
 	{
@@ -99,32 +98,7 @@ function MonsterRandom(aPosition, aSize)
 		 return window.innerWidth * 0.2;
 	}
 
-	var programText = function ( context ) 
-	{
-		var infoText = [];
-		infoText.push({string:sCurrentRandomString, size: 2});
-		SetTextInCanvas(infoText, context.canvas)
-	}
-
-	this.info = new THREE.Particle( new THREE.ParticleCanvasMaterial( { color: PickColor(), program: programText, transparent:true, opacity:OPACITY_INFO } ) );
-	this.info.position = aPosition.clone();
-	this.info.scale.x = this.particle.scale.x * 0.07;
-	this.info.scale.y = -this.info.scale.x;
-	scene.add( this.info );
-
-	// create the mesh's material
-	this.plane = new THREE.Mesh( new THREE.PlaneGeometry( this.particle.scale.x * 1.5, this.particle.scale.x * 1.5, 8, 8 ), new THREE.MeshBasicMaterial( { color: 0x000000, opacity: 0.25, transparent: true, wireframe: true } ) );
-	this.plane.geometry.applyMatrix( new THREE.Matrix4().makeRotationX( Math.PI / 2 ) );
-	this.plane.visible = false;
-	this.plane.position = aPosition.clone();
-	scene.add( this.plane );
-
-	this.particleClear = new THREE.Particle( new THREE.ParticleCanvasMaterial( { color: Math.random() * 0x808080 + 0x808080, program: programDoNothing, opacity:0 } ) );
-	var width = window.innerWidth * 1.5;
-	this.particleClear.scale.x = this.particleClear.scale.y = this.particle.scale.x * 2.;
-	scene.add( this.particleClear );
-	this.particleClear.position = this.particle.position;
-
+	this.info = this.particle.TargetObject.info;
 	this.touched = false;
 }
 
@@ -202,7 +176,7 @@ MonsterRandom.prototype.Update = function(delta)
 
 	if(sIsMouseOnRandom || sIsPicking)
 	{
-		sCurrentRandomString = "click to pick"
+		this.particle.SetName("click to pick");
 		sDistanceTwo += 0.03;
 		sDistanceTwo = Math.min(1., sDistanceTwo);
 		this.info.material.opacity += 0.01;
@@ -210,7 +184,7 @@ MonsterRandom.prototype.Update = function(delta)
 	}
 	else
 	{
-		sCurrentRandomString = "random project";
+		this.particle.SetName("roulette");
 		sDistanceTwo -= 0.005;
 		sDistanceTwo = Math.max(0., sDistanceTwo);
 		this.info.material.opacity -= 0.01;

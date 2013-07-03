@@ -10,11 +10,13 @@
 		if(index != sGroupCurrent)
 		{
 			if(sGroupCurrent >= 0)
-				ParticleGroups[sGroupCurrent].Terminate();
+			{
+				GlobalGroupTeminate();				
+			}
 			sGroupCurrent = index;
-			if(typeof isdefined(ParticleGroups[sGroupCurrent].Init == 'function'))
-				ParticleGroups[sGroupCurrent].Init();
-			window.location.hash = ParticleGroups[sGroupCurrent].name;
+			GlobalGroupInit();
+
+			SetHashGroup(ParticleGroups[sGroupCurrent].name);
 			SELECTED = INTERSECTED = null;
 			sCoeffCameraMove = 0;
 			sButtonsBack.OnChange();
@@ -30,6 +32,47 @@
 				SetBackButton(true);
 			}
 		}   				
+	}
+
+	function GoBack()
+	{
+		GoToIndex(Organigram.GetFather(sGroupCurrent));
+	}
+
+	function GlobalGroupInit()
+	{
+		lCurrentGroup = ParticleGroups[sGroupCurrent];
+		lCurrentGroup.Init();
+
+		// stop display text for particles of this group.
+		if(isdefined(lCurrentGroup.particles))
+		{
+			for(var i in lCurrentGroup.particles)
+			{
+				if(isdefined(lCurrentGroup.particles[i].SetTextVisible))
+				{
+					lCurrentGroup.particles[i].SetTextVisible(true);
+				}
+			}
+		}
+	}
+
+	function GlobalGroupTeminate()
+	{
+		lCurrentGroup = ParticleGroups[sGroupCurrent];
+		lCurrentGroup.Terminate();
+
+		// stop display text for particles of this group.
+		if(isdefined(lCurrentGroup.particles))
+		{
+			for(var i in lCurrentGroup.particles)
+			{
+				if(isdefined(lCurrentGroup.particles[i].SetTextVisible))
+				{
+					lCurrentGroup.particles[i].SetTextVisible(false);
+				}
+			}
+		}
 	}
 
 	var sIsInHTML = false;
@@ -54,17 +97,58 @@
 		canInteract = true;
 		SetBackButton(true);
 		sButtonsBack.OnChange();
+		SetHashHTML('');
 		if(isdefined(ParticleGroups[sGroupCurrent].BackFromHTML))
 		{
 			ParticleGroups[sGroupCurrent].BackFromHTML();
 		}
 	}
 
-	function CirclesToHtml(path)
+	function SetHashHTML(aPath)
 	{
+		var hashSplit = window.location.hash.split('+');
+		var newHash = hashSplit[0] + ((aPath.length > 0) ? '+' + aPath.replace(/\//g, '&') : '');
+		window.location.hash = newHash;
+	}
+
+	function SetHashGroup(aPath)
+	{
+		var hashSplit = window.location.hash.split('+');
+		var newHash = aPath;
+		newHash += (hashSplit.length > 1) ? '+' + hashSplit[1] : '';
+		window.location.hash = newHash;
+	}
+
+	function GetHashGroup(aPath)
+	{
+		var hashSplit = window.location.hash.split('+');
+		return hashSplit[0].replace('#','');
+	}
+
+	function CirclesToHtmlEncoded(path)
+	{
+		path = path.replace(/&/g, '/');
+		CirclesToHtml(path, false);
+	}
+
+	function CirclesToHtml(path, aUpdateHash)
+	{
+		if(!isdefined(aUpdateHash))
+		{
+			SetHashHTML(path);
+		}
+		else if(aUpdateHash)
+		{
+			SetHashHTML(path);
+		}
+
 		$("#info").load(path, 
 		function(response, status, xhr)
 		{
+			if(status == 'error')
+			{
+				SetHashHTML('');
+			}
 			sIsInHTML = true;
 			sButtonsBack.OnChange();
 			$("#info").fadeIn(1000);

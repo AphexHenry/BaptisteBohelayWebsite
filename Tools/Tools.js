@@ -29,7 +29,14 @@ var sDurationFade = 1;
 var isBlack = false;
 var sWIDTH;
 
-FadeIn();
+if(!isdefined(sAutomatedFadeIn))
+{
+    FadeIn();
+}
+else if(sAutomatedFadeIn)
+{
+    FadeIn();
+}
 
 var ParticleGroups = [];
 var ParticleGroupID = 0;
@@ -60,7 +67,7 @@ function FadeIn()
 {
     ImageFrontCtx.fillStyle = '#f0f0f0';
     ImageFrontCtx.fillRect( 0, 0, ImageFront.width, ImageFront.height );
-    $('#frontground').fadeOut('slow', 0.);
+    // $('#frontground').fadeOut('slow', 0.);
 }
 
 function onMouseDownIntro()

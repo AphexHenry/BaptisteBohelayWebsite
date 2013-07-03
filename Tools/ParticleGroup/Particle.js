@@ -213,7 +213,7 @@ function ParticleGroupIntro(positionCenter, flyer, name, id)
 			lPosition.z = positionCenter.z + 1.2 * sWIDTH * Math.cos( i * angleDecay + Math.PI+ Math.random() * 2. / flyer.length);
 		}
 
-		var particle = new ParticleCircleNavigate(lPosition, flyer[i])
+		var particle = new ParticleCircleNavigate(lPosition, flyer[i]);
 		this.particles.push(particle);
 	}
 }
@@ -262,6 +262,13 @@ ParticleGroupIntro.prototype.AddParticle = function(aParticleObject)
 {
 	this.particles.push(aParticleObject.particle);
 	this.particlesToUpdate.push(aParticleObject);
+	if(isdefined(aParticleObject.target))
+	{
+		if(isdefined(aParticleObject.target.target))
+		{
+			Organigram.Map(this.id, aParticleObject.target.target);
+		}
+	}
 }
 
 ParticleGroupIntro.prototype.MouseUp = function()
@@ -285,7 +292,16 @@ ParticleGroupIntro.prototype.GetParticleThatLeadTo = function(aTarget)
 	}
 }
 
-ParticleGroupIntro.prototype.Init = function(){};
+ParticleGroupIntro.prototype.Init = function()
+{
+	for(var i in this.particles)
+	{
+		if(isdefined(this.particles[i].SetTextVisible))
+		{
+			this.particles[i].SetTextVisible(true);
+		}
+	}
+};
 
 ParticleGroupIntro.prototype.Terminate = function()
 {
@@ -311,7 +327,6 @@ ParticleGroupIntro.prototype.Update = function()
 
 	if ( intersects.length > 0 ) 
 	{
-
 		if ( INTERSECTED != intersects[ 0 ].object ) {
 
 			if ( INTERSECTED ) 
@@ -319,13 +334,13 @@ ParticleGroupIntro.prototype.Update = function()
 				if(isdefined(INTERSECTED.TargetObject.isAutonomous))
 				{
 					INTERSECTED.MyMouseOff(intersects[ 0 ]);
-					INTERSECTED = null;
-					return;
 				}
 				else
 				{
 					INTERSECTED.material.program = programStroke;
 				}
+
+				INTERSECTED.TargetObject.info.material.opacity = OPACITY_INFO;
 			}
 
 			INTERSECTED = intersects[ 0 ].object;
@@ -357,8 +372,8 @@ ParticleGroupIntro.prototype.Update = function()
 			else
 			{
 				INTERSECTED.material.program = programStroke;
-				INTERSECTED.TargetObject.info.material.opacity = OPACITY_INFO;
 			}
+			INTERSECTED.TargetObject.info.material.opacity = OPACITY_INFO;
 		}
 		INTERSECTED = null;
 	}

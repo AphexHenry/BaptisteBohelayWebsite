@@ -1,8 +1,12 @@
 
-function MonsterTournicoti(aPosition, aSize, aTarget, aDrawParam)
+function MonsterTournicoti(aPosition, aSize, aTarget, aDrawParam, aStayAwake)
 {
+	var that = this;
 	this.target = aTarget;
 	this.drawParam = aDrawParam;
+
+	this.stayAwake = isdefined(aStayAwake) ? aStayAwake : false;
+
 	var programLastProject = function(context)
 	{
 	    var centerX = 0.;
@@ -46,14 +50,11 @@ function MonsterTournicoti(aPosition, aSize, aTarget, aDrawParam)
 	  context.stroke();
 	}
 
-	this.particle = new THREE.Particle( new THREE.ParticleCanvasMaterial( { color: PickColor(), program: programLastProject, transparent:true } ) );
-
-	this.particle.position = aPosition.clone();
-	this.particle.TargetObject = {isAutonomous:true};
-
-	this.particle.scale.x = this.particle.scale.y = aSize;
-	scene.add( this.particle );
-	var that = this;
+	this.particle = new ParticleCircleNavigate(aPosition, aTarget);
+	this.particle.material.program = programLastProject;
+	this.particle.scale.x *= 3.;
+	this.particle.scale.y *= 3.;
+	this.particle.SetAutonomous(true);
 
 	this.particle.MyMouseOn = function(intersect)
 	{
@@ -78,33 +79,8 @@ function MonsterTournicoti(aPosition, aSize, aTarget, aDrawParam)
 	this.distanceLastProject = 1.;
 	this.mouseOn = false;
 	this.currentLastProjectString = this.target.name;
-	that = this;
 
-	var programText = function ( context ) 
-	{
-		var infoText = [];
-		infoText.push({string:that.currentLastProjectString, size: 2});
-		SetTextInCanvas(infoText, context.canvas)
-	}
-
-	this.info = new THREE.Particle( new THREE.ParticleCanvasMaterial( { color: PickColor(), program: programText, transparent:true, opacity:OPACITY_INFO } ) );
-	this.info.position = aPosition.clone();
-	this.info.scale.x = this.particle.scale.x * 0.07;
-	this.info.scale.y = -this.info.scale.x;
-	scene.add( this.info );
-
-	// create the mesh's material
-	this.plane = new THREE.Mesh( new THREE.PlaneGeometry( this.particle.scale.x * 1.5, this.particle.scale.x * 1.5, 8, 8 ), new THREE.MeshBasicMaterial( { color: 0x000000, opacity: 0.25, transparent: true, wireframe: true } ) );
-	this.plane.geometry.applyMatrix( new THREE.Matrix4().makeRotationX( Math.PI / 2 ) );
-	this.plane.visible = false;
-	this.plane.position = aPosition.clone();
-	scene.add( this.plane );
-
-	this.particleClear = new THREE.Particle( new THREE.ParticleCanvasMaterial( { color: Math.random() * 0x808080 + 0x808080, program: programDoNothing, opacity:0 } ) );
-	var width = window.innerWidth * 1.5;
-	this.particleClear.scale.x = this.particleClear.scale.y = this.particle.scale.x * 2.;
-	scene.add( this.particleClear );
-	this.particleClear.position = this.particle.position;
+	this.info = this.particle.TargetObject.info;
 
 	this.touched = false;
 }
@@ -141,19 +117,17 @@ MonsterTournicoti.prototype.Update = function(delta)
 {
 	if(this.mouseOn)
 	{
-		this.currentLastProjectString = "click me"
 		this.distanceLastProject += 0.03;
 		this.distanceLastProject = Math.min(1., this.distanceLastProject);
-		this.info.material.opacity += 0.01;
-		this.info.material.opacity = Math.min(1., this.info.material.opacity);
 	}
 	else
 	{
 		this.currentLastProjectString = this.target.name;
-		this.distanceLastProject -= 0.005;
-		this.distanceLastProject = Math.max(0, this.distanceLastProject);
-		this.info.material.opacity -= 0.01;
-		this.info.material.opacity = Math.max(OPACITY_INFO, this.info.material.opacity);
+		if(!this.stayAwake)
+		{
+			this.distanceLastProject -= 0.005;
+			this.distanceLastProject = Math.max(0, this.distanceLastProject);
+		}
 	}
 }
 
