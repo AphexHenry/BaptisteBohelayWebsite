@@ -81,6 +81,7 @@ if( /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent) )
 		<script src='Tools/Monsters/MonsterRandom.js'></script>
 		<script src='Tools/Monsters/MonsterTournicoti.js'></script>
 		<script src='Tools/Monsters/MonsterNoise.js'></script>
+		<script src='Tools/Monsters/MonsterVideo.js'></script>
 		<script src='Tools/ParticleGroup/Particle.js'></script>
 		<script src='Tools/ParticleGroup/ParticleAboutMe.js'></script>
 		<script src='Tools/ParticleGroup/ParticleLulu.js'></script>
@@ -95,6 +96,7 @@ if( /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent) )
 		<script src='Tools/soundPlayer/MonsterSound.js'></script>
 		<script src='Tools/soundPlayer/ParticleGroupMonsterSound.js'></script>
 		<script src='Tools/soundPlayer/ParticleSound.js'></script>
+		<script src='Tools/THREEx.WindowResize.js'></script>
 		
 		<script>
 
@@ -158,11 +160,13 @@ if( /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent) )
 				var flyer = [];
 				flyer.push({name: "web exploration", target:ParticleGroup.PART_WEB});
 				flyer.push({name: "projects", target:ParticleGroup.PART_OTHER});
-				flyer.push({name: "videos", target:ParticleGroup.PART_VIDEOS});
+				// flyer.push({name: "videos", target:ParticleGroup.PART_VIDEOS});
 				
 				var lFunky = new ParticleGroupIntro(new THREE.Vector3(-2000, 2000, 3000), flyer, "funkyCreation", ParticleGroup.PART_FUNKY_CREATION);
 				var monsterNoise = new MonsterNoise(new THREE.Vector3(-1900, 2100, 3100), window.innerWidth * 0.06, {name: "sound monsters", target:ParticleGroup.PART_SOUND_MONSTER});
+				var monsterVideo = new MonsterVideo(new THREE.Vector3(-2100, 1900, 3100), window.innerWidth * 0.06, {name: "videos", target:ParticleGroup.PART_VIDEOS});
 				lFunky.AddParticle(monsterNoise);
+				lFunky.AddParticle(monsterVideo);
 
 				var flyer = [];
 				flyer.push({name: "musical baguette", targetURL:"musicalBaguetteHowTo.html", size:0.8});
@@ -250,15 +254,22 @@ if( /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent) )
 				ImageFront.style.left="0px";
 				ImageFront.style.top="0px";
 
-		        document.addEventListener( 'mousemove', onDocumentMouseMove, false );
-            	document.addEventListener( 'mousedown', onDocumentMouseDown, false );
-            	document.addEventListener( 'mouseup', onDocumentMouseUp, false );
             	if(IS_PHONE)
             	{
             		document.addEventListener("touchstart", onDocumentTouchStart, false);
+            		document.addEventListener("touchend", onDocumentTouchEnd, false);
+            		document.addEventListener("touchmove", onDocumentTouchMove, false);
+            	}
+            	else
+            	{
+       		        document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+            		document.addEventListener( 'mousedown', onDocumentMouseDown, false );
+            		document.addEventListener( 'mouseup', onDocumentMouseUp, false );
             	}
 
 				infoDisplay = new InfoDisplay(1., 1.5);
+
+				THREEx.WindowResize(renderer, cameraManager.GetCamera());
 			}
 
 			window.onload = function ()
@@ -313,26 +324,37 @@ if( /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent) )
 				}
 			}
 
+			function onDocumentTouchMove(event)
+			{
+				event.preventDefault();
+
+				mousePosition = new THREE.Vector2(event.touches[0].clientX, event.touches[0].clientY, 1000);
+
+				mouse.x = ( event.touches[0].clientX / window.innerWidth ) * 2 - 1;
+				mouse.y = - ( event.touches[0].clientY / window.innerHeight ) * 2 + 1;
+			}
+
 			function onDocumentTouchStart(event)
 			{
-				startX = event.touches[0].pageX;
-    			startY = event.touches[0].pageY;
-    			mouse.x = ( startX / window.innerWidth ) * 2 - 1;
-				mouse.y = -( startY / window.innerHeight ) * 2 + 1;
 				event.preventDefault();
+				mousePosition = new THREE.Vector2(event.touches[0].clientX, event.touches[0].clientY, 1000);
+
+				mouse.x = ( event.touches[0].clientX / window.innerWidth ) * 2 - 1;
+				mouse.y = - ( event.touches[0].clientY / window.innerHeight ) * 2 + 1;
+				
+				ParticleGroups[sGroupCurrent].Update(0);
+
+				if(canInteract)
+				{
+					ParticleGroups[sGroupCurrent].MouseDown(event);
+				}
 			}
 
 			function onDocumentTouchEnd(event)
 			{
-				startX = event.touches[0].pageX;
-    			startY = event.touches[0].pageY;
-    			mouse.x = ( startX / window.innerWidth ) * 2 - 1;
-				mouse.y = -( startY / window.innerHeight ) * 2 + 1;
-
-				event.preventDefault();
 				if(canInteract)
 				{
-					ParticleGroups[sGroupCurrent].MouseDown(event);
+					ParticleGroups[sGroupCurrent].MouseUp(event);
 				}
 			}
 

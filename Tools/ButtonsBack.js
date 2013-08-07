@@ -37,7 +37,7 @@ function ButtonsBack(aCanvas)
     	sButtonsBack.SetEnter();
   	});
 
-  	$(this.backLeft).click(function() 
+  	$(this.backLeft).bind('touchend mousedown',function() 
 	{
     	sButtonsBack.SetLeave();
     	GoBack();
@@ -159,6 +159,10 @@ ButtonsBack.prototype.Update = function(aTimeInterval)
 	this.backLeft.style.left = (leftLeftInit + (leftLeftEnd - leftLeftInit) * this.deployCoeff) + 'px';
 	// this.backLeft.style.opacity = 1. - this.deployCoeff;
 	var deg = Math.floor(this.deployCoeff * 180);
+	if(IS_PHONE)
+	{
+		deg += 180;
+	}
 	this.backLeft.style.mozTransform    = 'rotate(' + deg + 'deg)';
 	this.backLeft.style.webkitTransform = 'rotate(' + deg + 'deg)';
 	this.backLeft.style.oTransform      = 'rotate(' + deg + 'deg)';

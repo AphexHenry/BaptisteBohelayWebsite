@@ -1,3 +1,4 @@
+// basic particle object.
 function ParticleCircleNavigate(position, aTargetObject) 
 {
 	this.name = aTargetObject.name;

@@ -41,7 +41,7 @@ ParticleGroupAboutMe.prototype.Init = function()
 	$("#roundCorner").load("html/aboutMe.html");
 	
 	setTimeout(function() {$("#roundCorner").slideDown(500);}, 1500);
-	$('body').click(function(e){
+	$('body').bind('touchend mousedown',function(e){
    	if( e.target.id == 'roundCorner' )
    	{
     	return true; 

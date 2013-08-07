@@ -367,7 +367,14 @@ ParticleGroupIntro.prototype.Update = function()
 		{
 			if(isdefined(INTERSECTED.TargetObject.isAutonomous))
 			{
-				INTERSECTED.MyMouseOff(intersects[ 0 ]);
+				if(!IS_PHONE)
+				{
+					INTERSECTED.MyMouseOff(intersects[ 0 ]);
+				}
+				else
+				{
+					INTERSECTED.MyMouseOn(intersects[ 0 ]);
+				}
 			}
 			else
 			{

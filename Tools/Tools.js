@@ -1,7 +1,7 @@
 
 var MAX_Z = (window.innerWidth + window.innerHeight) * 0.5;
 var MIN_Z = -window.innerWidth
-var WINDOW_HEIGHT = window.innerHeight * 0.9;
+var WINDOW_HEIGHT = window.innerHeight * 1.;
 
 var ImageFront = document.createElement('canvas');
 document.body.appendChild(ImageFront);
