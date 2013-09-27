@@ -1,3 +1,12 @@
+	@font-face {
+	 font-family:"TitleText";
+	 /*src:url(../fonts/Sequi/Sequi_regular.otf);*/
+	}
+
+	H2{
+		font-family:"Times New Roman",Georgia,Serif;
+	}
+
 	#info {
 		position: absolute;
 		top: 10%; width: 80%;
@@ -108,7 +117,8 @@
 		text-align:center;
 		/*display:none;*/
 	}
-
+@media screen and (min-width: 768px)
+{
 	.BackCircleLeft
 	{
 		bottom:-10px;
@@ -123,6 +133,25 @@
 		text-align:center;
 		background:#f0f0f0;
 	}
+}
+
+@media screen and (max-width: 768px)
+{
+	.BackCircleLeft
+	{
+		bottom:-5px;
+		position:absolute;
+		width:40px;
+		height:40px;
+		border-radius:20px;
+		border: solid 1px #000000;
+		font-size:100px;
+		color:#000;
+		line-height:35px;
+		text-align:center;
+		background:#f0f0f0;
+	}
+}
 
 	.BackCircle:hover 
 	{

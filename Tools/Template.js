@@ -206,7 +206,7 @@ function SetTextInCanvas(text, canvas)
         }
         thissize = text[lineIndex].size;
         jump += thissize;
-        context.font = thissize + "pt Helvetica"
+        context.font = thissize + "pt TitleText"
         context.fillText(text[lineIndex].string, 5, 1.6 * jump);
     }
 }

@@ -1,6 +1,8 @@
 
 var sButtonsBack;
-
+/*
+ * Manage the buttons bottom left used to navigate into the project.
+ */
 function ButtonsBack(aCanvas) 
 {
 	sButtonsBack = this;

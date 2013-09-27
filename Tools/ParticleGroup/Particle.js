@@ -24,7 +24,8 @@ function ParticleGroupWebExperiment(positionCenter, name)
 	this.references.push(GetReference("Moving Mirror", "", "WebExperiments/mirror", true, "high"));
 	this.references.push(GetReference("3D Videos", "", "WebExperiments/videos", true, "high"));
 	this.references.push(GetReference("Plane Forest", "", "WebExperiments/LightForest", true, "high"));
-	this.references.push(GetReference("Sound Eater", "", "WebExperiments/soundPlayer", true, "high"));
+	this.references.push(GetReference("Plane Forest", "", "WebExperiments/LightForest", true, "high"));
+	this.references.push(GetReference("Sound Visu", "", "WebExperiments/SoundVisu", true, "high"));
 	var width = window.innerWidth * .7;
 	this.cameraDistance = width * 0.6;
 	this.positionCenter = positionCenter;
@@ -51,7 +52,7 @@ ParticleGroupWebExperiment.prototype.Init = function()
 	$("#roundCorner").load("html/aboutWebExperiments.html");
 	
 	setTimeout(function() {$("#roundCorner").slideDown(500);}, 1500);
-	$('body').click(function(e){
+	$('body').bind('touchend mousedown',function(e){
    	if( e.target.id == 'roundCorner' )
    	{
     	return true; 

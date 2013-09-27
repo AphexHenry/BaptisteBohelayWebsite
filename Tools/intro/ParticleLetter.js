@@ -5,7 +5,7 @@ function ParticleLetter(position, aLetter, aPositionTarget, aSize)
 	var programText = function ( context ) 
 	{
 	    context.textAlign = "center"; 
-		context.font = 2 + "pt Helvetica"
+		context.font = 2 + "pt TitleText"
 	    context.fillText(letter, -1, 1);
 	}
 
@@ -37,6 +37,6 @@ function ParticleLetter(position, aLetter, aPositionTarget, aSize)
 		delete this;
 	};
 
-	scene.add( particle );
+	//scene.add( particle );
 	return particle;
 }
