@@ -9,7 +9,7 @@ sCurrentResumeSate = ResumeStates.INIT;
 
 function ParticleGroupMonster(positionCenter, name) 
 {
-	this.width = window.innerWidth * 0.3;
+	this.width = (window.innerWidth + window.innerHeight) * 0.5 * 0.3;
 	this.cameraDistance = this.width * 3.;
 	this.positionCenter = positionCenter;
 	this.name = name;

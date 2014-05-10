@@ -209,9 +209,9 @@ function ParticleGroupIntro(positionCenter, flyer, name, id)
 		}
 		else
 		{
-			lPosition.x = positionCenter.x + 1.2 * sWIDTH * Math.sin( i * angleDecay + Math.PI + Math.random() * 1. / flyer.length);
-			lPosition.y = positionCenter.y + 1.2 * sWIDTH * Math.sin( i * angleDecay + Math.random() * 2. / flyer.length);
-			lPosition.z = positionCenter.z + 1.2 * sWIDTH * Math.cos( i * angleDecay + Math.PI+ Math.random() * 2. / flyer.length);
+			lPosition.x = positionCenter.x + 1.6 * sWIDTH * Math.sin( i * angleDecay + Math.PI + Math.random() * 1. / flyer.length);
+			lPosition.y = positionCenter.y + (1.6 * sWIDTH * Math.sin( i * angleDecay + Math.random() * 2. / flyer.length) / getRatio());
+			lPosition.z = positionCenter.z + 1.6 * sWIDTH * Math.cos( i * angleDecay + Math.PI+ Math.random() * 2. / flyer.length);
 		}
 
 		var particle = new ParticleCircleNavigate(lPosition, flyer[i]);

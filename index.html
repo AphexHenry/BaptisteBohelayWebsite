@@ -18,11 +18,14 @@
 	</head>
 	<body>
 
-		<div id="info"> </div>	
+		<div id="info"></div>
+		<canvas id="loadingBoard"> </canvas> 
 
 		<script type="text/javascript">
 		var IS_PHONE = false;
-		if( /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent) ) 
+		var sPageLoaded = false;				// if false, we are waiting for more assets to be loaded.
+		var sGeneralTimer = 0;					// timer of the whole app.
+		if( /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent))
 		{
 			IS_PHONE = true;
 			document.getElementById("info").innerHTML = "<CENTER><H2> <strong>loading...</strong><P><H4>for a better experience use your device horizontaly<br><br><img src='textures/GUI/smartphone-icon.png' style='width:50%;'>";
@@ -30,7 +33,41 @@
 		}
 		else
 		{
-			document.getElementById("info").innerHTML = "<CENTER><H2> <br><br><br><strong>loading...</strong><P>";
+			document.getElementById("info").innerHTML = "<CENTER><H2> <br><br><br><strong>loading</strong><P>";
+			(function(){
+			var thisTimer = [0,0,0,0,0,0];
+			var lThisInterval = window.setInterval(function(){
+				sGeneralTimer += 0.1;
+				var lLoadBoard = document.getElementById("loadingBoard");
+				lLoadBoard.width = 200;
+				lLoadBoard.height = 200;
+				var lLoadContext = lLoadBoard.getContext("2d");
+				var circleRadius = lLoadBoard.width * 0.2;
+				lLoadContext.strokeStyle='#0f0310';
+				lLoadContext.lineWidth = 2;
+				lLoadContext.beginPath();
+    			lLoadContext.arc(lLoadBoard.width * 0.5 , lLoadBoard.height * 0.5, circleRadius, 0, 2*Math.PI );
+    			lLoadContext.stroke();
+
+    			for(var i = 0; i < 6; i++)
+    			{
+    				var coeff = 1 / (i + 3);
+    				thisTimer[i] += (1. + Math.cos(coeff * sGeneralTimer)) * 0.02; 
+    				var coeff2 =  thisTimer[i];
+	    		    lLoadContext.beginPath();
+	      			lLoadContext.moveTo(lLoadBoard.width * 0.5 + circleRadius * Math.cos(sGeneralTimer * coeff), lLoadBoard.height * 0.5 + circleRadius * Math.sin(sGeneralTimer * coeff));
+	      			lLoadContext.lineTo(lLoadBoard.width * 0.5 + circleRadius * Math.cos(coeff2 + Math.PI), lLoadBoard.height * 0.5 + circleRadius * Math.sin(coeff2 + Math.PI));
+	      			lLoadContext.stroke();
+      			}
+
+    			if(sPageLoaded)
+    			{
+    				$(lLoadBoard).addClass('fadeout');
+    				clearInterval(lThisInterval);
+    			}
+    			// console.log("draw!" + lLoadBoard.width + " "  + lLoadBoard.height);
+			},30);
+			})();
 		}
 		</script>
 
@@ -118,9 +155,7 @@
 			var SELECTED = null;					// current bubble selected.
 			var Organigram = new Organigram();		// tree of relations between "pages" or actually group of bubbles.
 			var isRoot = false;						// if true, we actually are at the home "page".
-			var sPageLoaded = false;				// if false, we are waiting for more assets to be loaded.
 			var sMinLoading = 1.;					
-			var sGeneralTimer = 0;					// timer of the whole app.
 
 			var sProjectsToRandom = [];				// container for projects, used to get a random one.
 			var sRandomLastIndex = [];				// list of projects picked randomly to avoid to get one 2 times.
@@ -157,15 +192,13 @@
 				// init the back button.
 				new ButtonsBack();
 
+				// Let's get all the particles group initialized each group at a time.
 				 // Monster
 				 ParticleGroups[ParticleGroup.PART_INTRO] = new ParticleGroupMonster(new THREE.Vector3(-500, -1000, -1000), "");
 
 				// creations type
 				var flyer = [];
 				flyer.push({name: "web exploration", target:ParticleGroup.PART_WEB});
-				// flyer.push({name: "projects", target:ParticleGroup.PART_OTHER});
-				// flyer.push({name: "videos", target:ParticleGroup.PART_VIDEOS});
-				
 				var lFunky = new ParticleGroupIntro(new THREE.Vector3(-2000, 2000, 3000), flyer, "funkyCreation", ParticleGroup.PART_FUNKY_CREATION);
 				var monsterNoise = new MonsterNoise(new THREE.Vector3(-1900, 2100, 3100), window.innerWidth * 0.06, {name: "sound monsters", target:ParticleGroup.PART_SOUND_MONSTER});
 				var monsterVideo = new MonsterVideo(new THREE.Vector3(-2100, 1900, 3100), window.innerWidth * 0.06, {name: "videos", target:ParticleGroup.PART_VIDEOS});
@@ -175,21 +208,24 @@
 				lFunky.AddParticle(monsterProjects);
 
 				var flyer = [];
-				flyer.push({name: "musical baguette", targetURL:"musicalBaguetteHowTo.html", size:0.8});
+				flyer.push({name: "musical baguette", targetHTML:"html/other/MusicalBaguette.html", size:0.8});
 				flyer.push({name: "Lulu - Iphone Game", target:ParticleGroup.
 					PART_LULU});
 				flyer.push({name: "musical box", targetHTML:"html/other/MusicalBox.html"});
-				sProjectsLast = {name: "last project", targetHTML:"html/other/MusicalBox.html"};
+				flyer.push({name: "interactive dance", targetHTML:"html/other/InteractiveDance.html"});
+				flyer.push({name: "PIP - interactive installation", targetHTML:"html/other/pip.html"});
+				sProjectsLast = {name: "last project", targetHTML:"html/other/pip.html"};
 				new ParticleGroupIntro(new THREE.Vector3(0, 2000, 2000), flyer, "projects", ParticleGroup.PART_OTHER);
 
 				// Main choice
 				var flyer = [];
-				flyer.push({name: "contact", targetHTML:"html/contact.html", size:0.5, addRandom:false});
-				flyer.push({name: "about me", target:ParticleGroup.PART_ABOUT_ME});
+				flyer.push({name: "contact", targetHTML:"html/contact.html", size:0.5, addRandom:false, position:new THREE.Vector3(50, 140, 0)});
+				flyer.push({name: "about me", target:ParticleGroup.PART_ABOUT_ME, position:new THREE.Vector3(-50, 190, 10)});
 
 				var lMenu = new ParticleGroupIntro(new THREE.Vector3(1000, 2000, 2000), flyer, "home", ParticleGroup.PART_CREA_LULU);
-				var randomMonster = new MonsterRandom(new THREE.Vector3(1150, 2000, 2000), window.innerWidth * 0.06);
-				var randomLastProject = new MonsterTournicoti(new THREE.Vector3(850, 1850, 2000), window.innerWidth * 0.06, sProjectsLast, 1);
+
+				var randomMonster = new MonsterRandom( new THREE.Vector3(lMenu.positionCenter.x + -sWIDTH * 1.5, lMenu.positionCenter.y + sWIDTH / getRatio(), lMenu.positionCenter.z), window.innerWidth * 0.06);
+				var randomLastProject = new MonsterTournicoti(new THREE.Vector3(lMenu.positionCenter.x + sWIDTH * 1.5, lMenu.positionCenter.y - sWIDTH / getRatio(), lMenu.positionCenter.z), window.innerWidth * 0.06, sProjectsLast, 1);
 				var funkyCreation = new MonsterTournicoti(lMenu.positionCenter, window.innerWidth * 0.1, {name: "creations", target:ParticleGroup.PART_FUNKY_CREATION, size:1.5}, -1);
 				lMenu.AddParticle(funkyCreation);
 				lMenu.AddParticle(randomMonster);
@@ -397,7 +433,7 @@
 				{
 					cameraTarget = ParticleGroups[sGroupCurrent].positionCenter;
 					cameraPosition.x = ParticleGroups[sGroupCurrent].positionCenter.x + radius * Math.sin( sGeneralTimer * Math.PI / 40 );
-					cameraPosition.y = ParticleGroups[sGroupCurrent].positionCenter.y + radius * Math.sin( sGeneralTimer * Math.PI / 40 );
+					cameraPosition.y = ParticleGroups[sGroupCurrent].positionCenter.y + radius * 0.;//Math.sin( sGeneralTimer * Math.PI / 40 );
 					cameraPosition.z = ParticleGroups[sGroupCurrent].positionCenter.z + radius * Math.cos( sGeneralTimer * Math.PI / 40 );
 				}
 				if(isNaN(camera.position.x))
