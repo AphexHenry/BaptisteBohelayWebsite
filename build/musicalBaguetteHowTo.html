@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<!-- saved from url=(0059)http://twitter.github.com/bootstrap/examples/carousel.html# -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <title>Musical Baguette - How To</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="How to make a musical baguette.">
+    <meta name="author" content="Baptiste Bohelay">
+
+    <!-- Le styles -->
+    <link href="http://twitter.github.com/bootstrap/assets/css/bootstrap.css" rel="stylesheet">
+    <link href="http://twitter.github.com/bootstrap/assets/css/bootstrap-responsive.css" rel="stylesheet">
+    <style>
+
+    /* GLOBAL STYLES
+    -------------------------------------------------- */
+    /* Padding below the footer and lighter body text */
+
+    body {
+      padding-bottom: 40px;
+      color: #5a5a5a;
+    }
+
+
+
+    /* CUSTOMIZE THE NAVBAR
+    -------------------------------------------------- */
+
+    /* Special class on .container surrounding .navbar, used for positioning it into place. */
+    .navbar-wrapper {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 10;
+      margin-top: 20px;
+      margin-bottom: -90px; /* Negative margin to pull up carousel. 90px is roughly margins and height of navbar. */
+    }
+    .navbar-wrapper .navbar {
+
+    }
+
+    /* Remove border and change up box shadow for more contrast */
+    .navbar .navbar-inner {
+      border: 0;
+      -webkit-box-shadow: 0 2px 10px rgba(0,0,0,.25);
+         -moz-box-shadow: 0 2px 10px rgba(0,0,0,.25);
+              box-shadow: 0 2px 10px rgba(0,0,0,.25);
+    }
+
+    /* Downsize the brand/project name a bit */
+    .navbar .brand {
+      padding: 14px 20px 16px; /* Increase vertical padding to match navbar links */
+      font-size: 16px;
+      font-weight: bold;
+      text-shadow: 0 -1px 0 rgba(0,0,0,.5);
+    }
+
+    /* Navbar links: increase padding for taller navbar */
+    .navbar .nav > li > a {
+      padding: 15px 20px;
+    }
+
+    /* Offset the responsive button for proper vertical alignment */
+    .navbar .btn-navbar {
+      margin-top: 10px;
+    }
+
+
+
+    /* CUSTOMIZE THE CAROUSEL
+    -------------------------------------------------- */
+
+    /* Carousel base class */
+    .carousel {
+      margin-bottom: 60px;
+    }
+
+    .carousel .container {
+      position: relative;
+      z-index: 9;
+    }
+
+    .carousel-control {
+      height: 80px;
+      margin-top: 0;
+      font-size: 120px;
+      text-shadow: 0 1px 1px rgba(0,0,0,.4);
+      background-color: transparent;
+      border: 0;
+      z-index: 10;
+    }
+
+    .carousel .item {
+      height: 500px;
+    }
+    .carousel img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      min-width: 100%;
+      height: 500px;
+    }
+
+    .carousel-caption {
+      background-color: transparent;
+      position: static;
+      max-width: 550px;
+      padding: 0 20px;
+      margin-top: 200px;
+    }
+    .carousel-caption h1,
+    .carousel-caption .lead {
+      margin: 0;
+      line-height: 1.25;
+      color: #fff;
+      text-shadow: 0 1px 1px rgba(0,0,0,.4);
+    }
+    .carousel-caption .btn {
+      margin-top: 10px;
+    }
+
+
+
+    /* MARKETING CONTENT
+    -------------------------------------------------- */
+
+    /* Center align the text within the three columns below the carousel */
+    .marketing .span4 {
+      text-align: center;
+    }
+    .marketing h2 {
+      font-weight: normal;
+    }
+    .marketing .span4 p {
+      margin-left: 10px;
+      margin-right: 10px;
+    }
+
+
+    /* Featurettes
+    ------------------------- */
+
+    .featurette-divider {
+      margin: 80px 0; /* Space out the Bootstrap <hr> more */
+    }
+    .featurette {
+      padding-top: 12px; /* Vertically center images part 1: add padding above and below text. */
+      overflow: hidden; /* Vertically center images part 2: clear their floats. */
+    }
+    .featurette-image {
+      margin-top: -120px; /* Vertically center images part 3: negative margin up the image the same amount of the padding to center it. */
+    }
+
+    /* Give some space on the sides of the floated elements so text doesn't run right into it. */
+    .featurette-image.pull-left {
+      margin-right: 40px;
+    }
+    .featurette-image.pull-right {
+      margin-left: 40px;
+    }
+
+    /* Thin out the marketing headings */
+    .featurette-heading {
+      font-size: 50px;
+      font-weight: 300;
+      line-height: 1;
+      letter-spacing: -1px;
+    }
+
+
+
+    /* RESPONSIVE CSS
+    -------------------------------------------------- */
+
+    @media (max-width: 979px) {
+
+      .container.navbar-wrapper {
+        margin-bottom: 0;
+        width: auto;
+      }
+      .navbar-inner {
+        border-radius: 0;
+        margin: -20px 0;
+      }
+
+      .carousel .item {
+        height: 500px;
+      }
+      .carousel img {
+        width: auto;
+        height: 500px;
+      }
+
+      .featurette {
+        height: auto;
+        padding: 0;
+      }
+      .featurette-image.pull-left,
+      .featurette-image.pull-right {
+        display: block;
+        float: none;
+        max-width: 40%;
+        margin: 0 auto 20px;
+      }
+    }
+
+
+    @media (max-width: 767px) {
+
+      .navbar-inner {
+        margin: -20px;
+      }
+
+      .carousel {
+        margin-left: -20px;
+        margin-right: -20px;
+      }
+      .carousel .container {
+
+      }
+      .carousel .item {
+        height: 300px;
+      }
+      .carousel img {
+        height: 300px;
+      }
+      .carousel-caption {
+        width: 65%;
+        padding: 0 70px;
+        margin-top: 100px;
+      }
+      .carousel-caption h1 {
+        font-size: 30px;
+      }
+      .carousel-caption .lead,
+      .carousel-caption .btn {
+        font-size: 18px;
+      }
+
+      .marketing .span4 + .span4 {
+        margin-top: 40px;
+      }
+
+      .featurette-heading {
+        font-size: 30px;
+      }
+      .featurette .lead {
+        font-size: 18px;
+        line-height: 1.5;
+      }
+
+    }
+    </style>
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="../assets/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="http://twitter.github.com/bootstrap/assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="http://twitter.github.com/bootstrap/assets/ico/apple-touch-icon-114-precomposed.png">
+      <link rel="apple-touch-icon-precomposed" sizes="72x72" href="http://twitter.github.com/bootstrap/assets/ico/apple-touch-icon-72-precomposed.png">
+                    <link rel="apple-touch-icon-precomposed" href="http://twitter.github.com/bootstrap/assets/ico/apple-touch-icon-57-precomposed.png">
+                                   <link rel="shortcut icon" href="http://twitter.github.com/bootstrap/assets/ico/favicon.png">
+  <style type="text/css"></style><style id="holderjs-style" type="text/css">.holderjs-fluid {font-size:16px;font-weight:bold;text-align:center;font-family:sans-serif;margin:0}</style></head>
+
+  <body>
+
+
+
+
+
+    <!-- Carousel
+    ================================================== -->
+    <div id="myCarousel" class="carousel slide">
+      <div class="carousel-inner">
+        <div class="item active", id="intro">
+          <img src="/textures/baguette/intro.jpg" alt="">
+          <div class="container">
+            <div class="carousel-caption">
+              <h1>The musical Baguette - How To - In contruction</h1>
+              <p class="lead">Introducing the musical Baguette! Who never wanted to play music with a baguette? 
+                Your dream just came true and this baguette can be played like a Theremin or/and a percussion instrument.
+                You can do yours yourself and you'll find all the informations you need here.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="item", id="BuildTheremin">
+          <img src="/textures/baguette/ThereminArduino.jpg" alt="">
+          <div class="container">
+            <div class="carousel-caption">
+              <h1>Step 1 - Build the Theremin.</h1>
+              <p class="lead">All the secret of the fabrication of a Theremin with an Arduino and some cheap electronic components.</p>
+            </div>
+          </div>
+        </div>
+        <div class="item", id="BuildPerc">
+          <img src="/textures/baguette/piezzo.jpg" alt="">
+          <div class="container">
+            <div class="carousel-caption">
+              <h1>Step 2 - Build the percussion intrument.</h1>
+              <p class="lead">How to build a percussion sensor and make crazy rythmes with your baguette.</p>
+            </div>
+          </div>
+        </div>
+        <div class="item", id="GetBaguette">
+          <img src="/textures/baguette/stuffedBaguette.jpg" alt="">
+          <div class="container">
+            <div class="carousel-caption">
+              <h1>Step 3 - Get a baguette.</h1>
+              <p class="lead">And stuff it with electronics.</p>
+            </div>
+          </div>
+        </div>
+        <div class="item", id="MaxPat">
+          <img src="/textures/baguette/MaxPat.jpg" alt="">
+          <div class="container">
+            <div class="carousel-caption">
+              <h1>Step 4 - Process the informations.</h1>
+              <p class="lead">Build the brain of the intrument.</p>
+            </div>
+          </div>
+        </div>
+         <div class="item", id="HaveFun">
+          <img src="/textures/baguette/Live.png" alt="">
+          <div class="container">
+            <div class="carousel-caption">
+              <h1>Step 5 - Receive the Midi messages and have fun.</h1>
+              <p class="lead">And you finally have to play the sound.</p>
+              <p class="lead">I use Ableton Live to receive the Midi informations and play with virtual instruments. Of course, almost any musical software would make it (Reaper, Fruityloops, etc.).</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <a class="left carousel-control" href="http://twitter.github.com/bootstrap/examples/carousel.html#myCarousel" data-slide="prev">‹</a>
+      <a class="right carousel-control" href="http://twitter.github.com/bootstrap/examples/carousel.html#myCarousel" data-slide="next">›</a>
+    </div><!-- /.carousel -->
+
+
+    <!-- Marketing messaging and featurettes
+    ================================================== -->
+    <!-- Wrap the rest of the page in another container to center all the content. -->
+
+    <div class="container marketing">
+
+      <!-- START THE FEATURETTES -->
+      <myLead></myLead>
+      <div class="featurette">
+
+      </div>
+
+      <div id="introDiv", style='display:none;'>
+        <CENTER>
+        <iframe width="640" height="360" src="http://www.youtube.com/embed/u-UH1h7Y6p8?rel=0" frameborder="0"></iframe>
+      </CENTER>
+
+        <h2 class="featurette-heading">How does it work?</h2>
+
+        <p class="lead">The Theremin is an antenna which behave differently when there are conductive stuffs around, including you.  The antenna produce a frequency and the closeness your body will change this frequency so you can use this difference as an information to control something: here it will be sound.</p>
+
+        <p class="lead">The percussive part done with a piezzo. It is like a little microphone which will detect vibrations.</p>
+
+        <p class="lead">What we will need is an Arduino to build the antenna, Max/MSP to process the vibrations of the Piezzo, and a 
+          virtual intrument to play the sound.</p>
+
+       <p class="lead"> Let's do it!</p>
+
+        <img class="featurette-image pull-right" src="/textures/baguette/schema.jpg">
+      </div>
+
+      <div id="buildThereminDiv", style='display:none;'>
+        <h2 class="featurette-heading"></h2>
+
+        <p class="lead">For this part, I have used <a href="http://interface.khm.de/index.php/lab/experiments/theremin-as-a-capacitive-sensing-device/">this tutorial</a> and haven't changed anything. The weak part in my system was the antenna: thinner than the one adviced and not in a ring shape, because I then put it inside the baguette. Note: I recently used a coke can as an antenna and it worked even better than with a cable.</p>
+
+        <p class="lead">If you followed the tutorial. You should have connected the Arduino to your computer and run the Adruino code they give. Instead of this code you can use mine, <a href="http://www.instructables.com/files/orig/FYK/6W6M/H2WEXDSS/FYK6W6MH2WEXDSS.ino">here</a>. It is the same except that I have commented all the serial communication we don't need, it will just send the distance information.</p>
+
+        <p class="lead">Run it and on the Arduino application and watch the datas you receive. To do that click on the button up right. Be sure they match the distance of you hand from the antenna. At some point the values are inverted, this is normal and this is also something to improve..</p>
+
+      </div>
+
+      <div id="buildPercDiv", style='display:none;'>
+        <h2 class="featurette-heading"></h2>
+
+        <p class="lead"> The particularity of this intrument on top of being a baguette it to be controlled by percussion. I also use a piezo-electric sensor to detect if the baguette is hit to add this feature.</p>
+
+        <p class="lead">The piezzo is put inside the baguette and will give you the vibrations datas.</p>
+
+        <p class="lead">To build it, just connect a mini jack plug to the piezzo as showed in the picture. By pluging the mini jack to your computer you can get the vibrations informations exactly like a microphone.</p>
+
+        <p class="lead">Connect the mini jack, get something to watch the level recorded from a microphone (Systeme Preference -> Sound -> Input -> Line In on a Mac) and be sure you have a response when you hit the sensor.</p>
+
+      </div>
+
+      <div id="getBaguetteDiv", style='display:none;'>
+        <h2 class="featurette-heading"></h2>
+
+        <p class="lead"> Now you need to buy a baguette. If you live in another country than France you can get the same thing I use in my tutorial to imitate the baguette. It looks a little like it and is also called a "Baguette" You can buy it in any shop I guess.</p>
+
+        <p class="lead">Make a sandwich with the piezzo and the antenna. Tape the piezzo inside before you close the baguette, you don't want it to move inside.</p>
+
+        <p class="lead">Connect the piezzo and the Arduino to your computer.</p>
+
+      </div>
+
+      <div id="MaxPatDiv", style='display:none;'>
+        <h2 class="featurette-heading"></h2>
+
+        <p class="lead"> Now you get everything connected. You can use Max/MSP to process all these informations in order to send midi to any instrument.
+        You can download my patch <a href="http://www.instructables.com/files/orig/FYK/6W6M/H2WEXDSS/FYK6W6MH2WEXDSS.ino">here</a>.
+        I explain the code inside the patch.</p>
+
+        <p class="lead">For those who are not familiar with Max MSP, I am sorry I don't go very deeply into the instructions. But you can download a demo version on the Cycling74 website and everything will be fine.</p>
+
+        <p class="lead">Basically, you just have to run the Arduino code, then click on the start button in Max MSP and select the midi port in the list ("from Max 1" for instance). If you receive something you should see the graph and the slider moving.</p>
+
+      </div>
+
+      <div id="HaveFunDiv", style='display:none;'>
+        <h2 class="featurette-heading"></h2>
+
+        <p class="lead">This is what you have to do for a lot of software:
+        <ul class="lead">
+        <li>Create one or two midi tracks.</li>
+        <li>Set there input to from Max 1, channel 1 for the first track and channel 2 for the second.</li>
+        <li>Choose and set an instrument (VST) for both tracks.</li>
+        </ul></p>
+
+        <p class="lead">And here we go you have a baguette instrument!!</p>
+
+        <p class="lead">You can use the channel 2 to receive the piezo percussion, and control some parameters of your instrument with the channel 1 midi controller.</p>
+
+        <p class="lead">Or you can receive the Theremin midi notes to your antenna on MIDI channel 1.</p>
+
+        <p class="lead">This is not accurate, this is not really convenient to control an instrument, but this is fun an I believe that if I improve it, it could be an innovative way of playing music.</p>
+
+      </div>
+
+      <hr class="featurette-divider">
+
+      <!-- /END THE FEATURETTES -->
+
+    </div><!-- /.container -->
+
+
+
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="./Carousel Template · Bootstrap_files/jquery.js"></script>
+    <script src="./Carousel Template · Bootstrap_files/bootstrap-transition.js"></script>
+    <script src="./Carousel Template · Bootstrap_files/bootstrap-alert.js"></script>
+    <script src="./Carousel Template · Bootstrap_files/bootstrap-modal.js"></script>
+    <script src="./Carousel Template · Bootstrap_files/bootstrap-dropdown.js"></script>
+    <script src="./Carousel Template · Bootstrap_files/bootstrap-scrollspy.js"></script>
+    <script src="./Carousel Template · Bootstrap_files/bootstrap-tab.js"></script>
+    <script src="./Carousel Template · Bootstrap_files/bootstrap-tooltip.js"></script>
+    <script src="./Carousel Template · Bootstrap_files/bootstrap-popover.js"></script>
+    <script src="./Carousel Template · Bootstrap_files/bootstrap-button.js"></script>
+    <script src="./Carousel Template · Bootstrap_files/bootstrap-collapse.js"></script>
+    <script src="./Carousel Template · Bootstrap_files/bootstrap-carousel.js"></script>
+    <script src="./Carousel Template · Bootstrap_files/bootstrap-typeahead.js"></script>
+    <script>
+      !function ($) {
+        $(function(){
+          // carousel demo
+          $('.carousel').carousel(
+          {
+          pause: true,
+          interval: false
+          });
+
+          var mapper = [];
+          mapper['intro'] = '#introDiv';
+          mapper['BuildTheremin'] = '#buildThereminDiv';
+          mapper['BuildPerc'] = '#buildPercDiv';
+          mapper['GetBaguette'] = '#getBaguetteDiv';
+          mapper['MaxPat'] = '#MaxPatDiv';
+          mapper['HaveFun'] = '#HaveFunDiv';
+          $('div myLead').html($('#introDiv').html());
+
+          $('body').on('slid', function (e) {
+            var idActive = $(".item.active").attr('id');
+
+            var itemtoReplaceContentOf = $('div myLead');
+            itemtoReplaceContentOf.html("");
+            var mapElement = mapper[idActive];
+            itemtoReplaceContentOf.html($(mapElement).html());
+          });
+        })
+      }(window.jQuery)
+    </script>
+    <script src="./Carousel Template · Bootstrap_files/holder.js"></script>
+  
+
+</body><style type="text/css"></style></html>

@@ -23,8 +23,6 @@ function CameraManager(a_camera)
 	this.mLightMove = 0.;
 	this.noise = 0;
 
-	this.movementTypeCoeff = 0.;
-
 	this.mSecurityDistance = CAMERA_DISTANCE_SECURITY;
 	this.rotationAdd = new THREE.Vector3();
 
@@ -34,7 +32,6 @@ function CameraManager(a_camera)
 		PHYSICS : 1
 	};
 	this.movementType = this.movementTypeGroup.INTERPOLATION;
-	this.movementTypeCoeff = 0.;
 }
 
 /*
@@ -51,31 +48,21 @@ CameraManager.prototype.Update = function(aTimeInterval)
 	lCoeffMovLook = 1. - (1. + Math.cos(Math.min(1., lCoeffMov) * Math.PI)) * 0.5;
 	// lCoeffMovLook *= lCoeffMovLook;
 
-	if(this.camera.position.distanceTo(this.mTarget) > 1500)
+	if(this.camera.position.distanceTo(this.mTarget) > 1000)
 	{
 		this.movementType = this.movementTypeGroup.INTERPOLATION;
 	}
 
-	var lCamPosINTER;
-	var lCamPosPHY;
-
 	switch(this.movementType)
 	{
 		case this.movementTypeGroup.INTERPOLATION:
-			this.movementTypeCoeff = 1;
+			lCoeffMovPos = 1. - (1. + Math.cos(Math.min(1., lCoeffMov * 0.95) * Math.PI)) * 0.5;
+			this.camera.position = this.mPositionInit.clone().addSelf(this.mTarget.clone().subSelf(this.mPositionInit).multiplyScalar(lCoeffMovPos));
 		break;
 		case this.movementTypeGroup.PHYSICS:
-			this.movementTypeCoeff -= aTimeInterval;
+			this.camera.position.addSelf(this.mTarget.clone().subSelf(this.camera.position).multiplyScalar(2. * aTimeInterval));
 		break;
 	}
-
-	lCamPosPHY = this.camera.position.clone().addSelf(this.mTarget.clone().subSelf(this.camera.position).multiplyScalar(2. * aTimeInterval));
-
-	lCoeffMovPos = 1. - (1. + Math.cos(Math.min(1., lCoeffMov * 0.95) * Math.PI)) * 0.5;
-	lCamPosINTER = this.mPositionInit.clone().addSelf(this.mTarget.clone().subSelf(this.mPositionInit).multiplyScalar(lCoeffMovPos));
-
-	this.movementTypeCoeff = myClamp(this.movementTypeCoeff,0,1)
-	this.camera.position = lCamPosINTER.multiplyScalar(this.movementTypeCoeff).addSelf(lCamPosPHY.multiplyScalar(1 - this.movementTypeCoeff));
 
 	this.mCameraLookAt = this.mCameraLookAtInit.clone().addSelf(this.mCameraLookAtTarget.clone().subSelf(this.mCameraLookAtInit).multiplyScalar(lCoeffMovLook));
 

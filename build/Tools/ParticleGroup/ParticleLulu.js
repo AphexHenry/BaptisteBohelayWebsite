@@ -1,22 +1,26 @@
-function ParticleGroupVideos(positionCenter, name) 
+function ParticleGroupLulu(positionCenter, name) 
 {
 	this.name = name;
 	this.particles = [];
 	flyer = [];
-	flyer.push({name:"limacage", targetHTML:"html/videos/videoLimace.html"});
-	flyer.push({name:"choucrouteuse", targetHTML:"html/videos/videoChoucrouteuse.html"});
-	flyer.push({name:"fourmis", targetHTML:"html/videos/videoShadow.html", size:1.5});
-	flyer.push({name:"fire ball", targetHTML:"html/videos/videoFireball.html", size:1.});
-	flyer.push({name: "dancing robot", targetHTML:"html/dancingRobot.html", size:0.8});
+	flyer.push({name:"about the game", targetHTML:"html/LuluAbout.html"});
+	flyer.push({name:"soundtrack", targetHTML:"html/LuluSounds.html"});
+	flyer.push({name:"download", targetHTMLOpen:"http://itunes.apple.com/us/app/lulus-unreal-exploration/id478405155?mt=8"});
+	flyer.push({name:"reviews", targetHTML:"html/LuluReviews.html", addRandom:false});
+	flyer.push({name:"trailer", targetHTML:"html/LuluVideo.html"});
 
 	var width = window.innerWidth * 0.2;
 	this.cameraDistance = width * 2.;
 	this.positionCenter = positionCenter;
-	var angleDecay = 2 * Math.PI / flyer.length;
-	
+	var angleDecay = 2 * Math.PI / flyer.length + Math.random() * 0.2;
+
 	for ( var i = 0; i < flyer.length; i ++ ) 
 	{
-		sProjectsToRandom.push(flyer[i]);
+		if((isdefined(flyer[i].targetURL) || isdefined(flyer[i].targetHTML) || isdefined(flyer[i].targetHTMLOpen)) && !isdefined(flyer[i].addRandom))
+		{
+			sProjectsToRandom.push(flyer[i]);
+		}
+
 		// var particle = new THREE.Particle( new THREE.ParticleCanvasMaterial( { color: PickColor(), program: programStroke, transparent:true } ) );
 		var lPosition = new THREE.Vector3();
 
@@ -29,11 +33,16 @@ function ParticleGroupVideos(positionCenter, name)
 	}
 }
 
-ParticleGroupVideos.prototype.Init = function(){};
-ParticleGroupVideos.prototype.MouseUp = function(){};
-ParticleGroupVideos.prototype.Terminate = function(){};
+ParticleGroupLulu.prototype.Terminate = function()
+{
 
-ParticleGroupVideos.prototype.MouseDown = function()
+}
+
+ParticleGroupLulu.prototype.Init = function()
+{
+}
+
+ParticleGroupLulu.prototype.MouseDown = function()
 {
 	if(INTERSECTED)
 	{
@@ -45,7 +54,6 @@ ParticleGroupVideos.prototype.MouseDown = function()
 		}
 		else if(typeof INTERSECTED.TargetObject.targetHTML != "undefined")
 		{
-			INTERSECTED.material.program = programStroke;
 			CirclesToHtml(INTERSECTED.TargetObject.targetHTML);
 		}
 		else if(typeof INTERSECTED.TargetObject.targetHTMLOpen != "undefined")
@@ -60,7 +68,7 @@ ParticleGroupVideos.prototype.MouseDown = function()
 	}
 }
 
-ParticleGroupVideos.prototype.Update = function()
+ParticleGroupLulu.prototype.Update = function()
 {
 	var vector = new THREE.Vector3( mouse.x, mouse.y, 0.5 );
 	projector.unprojectVector( vector, camera );
@@ -89,7 +97,6 @@ ParticleGroupVideos.prototype.Update = function()
 		}
 
 		INTERSECTED.TargetObject.info.material.opacity += (1. - INTERSECTED.TargetObject.info.material.opacity) * 2. * 0.02;
-
 	} 
 	else 
 	{

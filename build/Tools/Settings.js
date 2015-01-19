@@ -38,47 +38,36 @@ else if(sAutomatedFadeIn)
     FadeIn();
 }
 
-function Tools()
+var ParticleGroups = [];
+var ParticleGroupID = 0;
+ParticleGroup = 
 {
-    this.CameraControlType = 
-    {
-        NONE : 0,
-        SATTELITE : 1,
-        MOUSE_MOVE : 2,
-    }
-
-    this.ParticleGroups = [];
-    var ParticleGroupID = 0;
-    this.ParticleGroup = 
-    {
-        PART_WEB : ParticleGroupID++,
-        PART_INTRO : ParticleGroupID++,
-        PART_CREA_LULU : ParticleGroupID++,
-        PART_LULU : ParticleGroupID++,
-        PART_SOUND_EXPERIMENTS : ParticleGroupID++,
-        PART_SOUND_MONSTER : ParticleGroupID++,
-        PART_VIDEOS : ParticleGroupID++,
-        PART_OTHER : ParticleGroupID++,
-        PART_FUNKY_CREATION : ParticleGroupID++,
-        PART_MONSTER : ParticleGroupID++,
-        PART_ABOUT_ME : ParticleGroupID++,
-    }
+    PART_WEB : ParticleGroupID++,
+    PART_INTRO : ParticleGroupID++,
+    PART_CREA_LULU : ParticleGroupID++,
+    PART_LULU : ParticleGroupID++,
+    PART_SOUND_EXPERIMENTS : ParticleGroupID++,
+    PART_SOUND_MONSTER : ParticleGroupID++,
+    PART_VIDEOS : ParticleGroupID++,
+    PART_OTHER : ParticleGroupID++,
+    PART_FUNKY_CREATION : ParticleGroupID++,
+    PART_MONSTER : ParticleGroupID++,
+    PART_ABOUT_ME : ParticleGroupID++,
 }
 
-var sTools = new Tools();
-
 // // fade intro + passer a transition, trucs qui tombent.
-Tools.prototype.FadeOut = function()
+function FadeOut()
 {
     ImageFrontCtx.fillStyle = '#f0f0f0';
     ImageFrontCtx.fillRect( 0, 0, ImageFront.width, ImageFront.height );
     $('#frontground').fadeTo('slow', 1.);
 }
 
-Tools.prototype.FadeIn = function()
+function FadeIn()
 {
     ImageFrontCtx.fillStyle = '#f0f0f0';
     ImageFrontCtx.fillRect( 0, 0, ImageFront.width, ImageFront.height );
+    // $('#frontground').fadeOut('slow', 0.);
 }
 
 function onMouseDownIntro()

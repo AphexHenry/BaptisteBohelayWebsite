@@ -1,0 +1,13 @@
+span,div {
+	position:absolute;
+	line-height:1px;
+	font-size:1px;
+}
+
+div#game {
+	top:100px;
+	border:1px solid black;
+	position:absolute;
+	overflow:hidden;
+}
+

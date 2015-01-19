@@ -133,7 +133,7 @@
 		position:absolute;
 		width:70px;
 		height:70px;
-		/*background-color: #123456;*/
+		background-color: #f0f0f0;
 		-moz-border-radius: 35px;
 		-webkit-border-radius: 35px;
 		border-radius:35px;
@@ -205,7 +205,7 @@
 	cursor:pointer;	
 	}
 
-	#contactButton
+/*	#contactButton
 	{
 		position:absolute;
 		right:6%;
@@ -214,9 +214,9 @@
 		display:none;
 		border-radius:50%;
 		opacity: 0.7;
-	}
+	}*/
 
-	#githubButton
+	#contactButton
 	{
 		position:absolute;
 		right:1%;

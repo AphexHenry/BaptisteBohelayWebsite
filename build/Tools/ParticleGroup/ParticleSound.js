@@ -1,18 +1,17 @@
-function ParticleGroupVideos(positionCenter, name) 
+function ParticleGroupSound(positionCenter, name) 
 {
 	this.name = name;
 	this.particles = [];
 	flyer = [];
-	flyer.push({name:"limacage", targetHTML:"html/videos/videoLimace.html"});
-	flyer.push({name:"choucrouteuse", targetHTML:"html/videos/videoChoucrouteuse.html"});
-	flyer.push({name:"fourmis", targetHTML:"html/videos/videoShadow.html", size:1.5});
-	flyer.push({name:"fire ball", targetHTML:"html/videos/videoFireball.html", size:1.});
-	flyer.push({name: "dancing robot", targetHTML:"html/dancingRobot.html", size:0.8});
+	var flyer = [];
+	flyer.push({name: "Lulu soundtrack", targetHTML:"html/LuluSounds.html"});
+	flyer.push({name: "sound monsters", targetHTML:"html/SoundMonsters.html"});
+	flyer.push({name: "dancing robot", targetHTML:"html/dancingRobot.html"});
 
 	var width = window.innerWidth * 0.2;
 	this.cameraDistance = width * 2.;
 	this.positionCenter = positionCenter;
-	var angleDecay = 2 * Math.PI / flyer.length;
+	var angleDecay = 2 * Math.PI / (flyer.length + 1.);
 	
 	for ( var i = 0; i < flyer.length; i ++ ) 
 	{
@@ -27,13 +26,23 @@ function ParticleGroupVideos(positionCenter, name)
 		var particle = new ParticleCircleNavigate(lPosition, flyer[i])
 		this.particles.push(particle);
 	}
+
+	this.soundPlayerArray = [];
+	lPosition.x = positionCenter.x + width * (1. + myRandom() * 0.3) * Math.sin( flyer.length * angleDecay + myRandom() * 0. );
+	lPosition.y = positionCenter.y + width * (1. + myRandom() * 0.3) * Math.sin( flyer.length * angleDecay + myRandom() * 0. );
+	lPosition.z = positionCenter.z + width * (1. + myRandom() * 0.3) * Math.cos( flyer.length * angleDecay + myRandom() * 0. );
+	this.soundPlayerArray.push(new SoundPlayerCanvas(lPosition, "sound monster"));
+
 }
 
-ParticleGroupVideos.prototype.Init = function(){};
-ParticleGroupVideos.prototype.MouseUp = function(){};
-ParticleGroupVideos.prototype.Terminate = function(){};
+ParticleGroupSound.prototype.MouseUp = function(){};
 
-ParticleGroupVideos.prototype.MouseDown = function()
+ParticleGroupSound.prototype.Terminate = function()
+{
+
+};
+
+ParticleGroupSound.prototype.MouseDown = function()
 {
 	if(INTERSECTED)
 	{
@@ -45,7 +54,6 @@ ParticleGroupVideos.prototype.MouseDown = function()
 		}
 		else if(typeof INTERSECTED.TargetObject.targetHTML != "undefined")
 		{
-			INTERSECTED.material.program = programStroke;
 			CirclesToHtml(INTERSECTED.TargetObject.targetHTML);
 		}
 		else if(typeof INTERSECTED.TargetObject.targetHTMLOpen != "undefined")
@@ -60,8 +68,13 @@ ParticleGroupVideos.prototype.MouseDown = function()
 	}
 }
 
-ParticleGroupVideos.prototype.Update = function()
+ParticleGroupSound.prototype.Update = function()
 {
+	for(var i = 0; i < this.soundPlayerArray.length; i++)
+	{
+		this.soundPlayerArray[i].Update(0.02);
+	}
+
 	var vector = new THREE.Vector3( mouse.x, mouse.y, 0.5 );
 	projector.unprojectVector( vector, camera );
 
