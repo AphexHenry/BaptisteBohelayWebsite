@@ -203,9 +203,10 @@
 				flyer.push({name: "musical baguette", targetHTML:"html/other/MusicalBaguette.html", size:0.8});
 				flyer.push({name: "Lulu - Iphone Game", targetHTML:"html/Lulu.html"});
 				flyer.push({name: "musical box", targetHTML:"html/other/MusicalBox.html"});
+				flyer.push({name: "Cocoons - Fête des Lumières", targetHTML:"html/other/Cocoons.html"});
 				flyer.push({name: "interactive dance", targetHTML:"html/other/InteractiveDance.html"});
 				flyer.push({name: "PIP - interactive installation", targetHTML:"html/other/pip.html"});
-				sProjectsLast = {name: "last project", targetHTML:"html/other/pip.html"};
+				sProjectsLast = {name: "last project", targetHTML:"html/other/Cocoons.html"};
 				var lBProjects = new ParticleGroupIntro(new THREE.Vector3(0, 2000, 2000), flyer, "projects", sTools.ParticleGroup.PART_OTHER);
 				lBProjects.mAngleAmplitude = Math.PI * .4;
 
@@ -246,18 +247,18 @@
 				 sTools.ParticleGroups[sTools.ParticleGroup.PART_WEB] = new ParticleGroupWebExperiment(new THREE.Vector3(-500, -2000, 1000), "WebExperiment");
 
 				 // Lulu
-				flyer = [];
-				flyer.push({name:"about the game", targetHTML:"html/LuluAbout.html"});
-				flyer.push({name:"soundtrack", targetHTML:"html/LuluSounds.html"});
-				flyer.push({name:"download", targetHTMLOpen:"http://itunes.apple.com/us/app/lulus-unreal-exploration/id478405155?mt=8"});
-				flyer.push({name:"reviews", targetHTML:"html/LuluReviews.html", addRandom:false});
-				flyer.push({name:"trailer", targetHTML:"html/LuluVideo.html"});
+				// flyer = [];
+				// flyer.push({name:"about the game", targetHTML:"html/LuluAbout.html"});
+				// flyer.push({name:"soundtrack", targetHTML:"html/LuluSounds.html"});
+				// flyer.push({name:"download", targetHTMLOpen:"http://itunes.apple.com/us/app/lulus-unreal-exploration/id478405155?mt=8"});
+				// flyer.push({name:"reviews", targetHTML:"html/LuluReviews.html", addRandom:false});
+				// flyer.push({name:"trailer", targetHTML:"html/LuluVideo.html"});
 
-				var lLLProjects = new ParticleGroupIntro(new THREE.Vector3(-500, 1000, -1000), flyer, "lulu", sTools.ParticleGroup.PART_LULU);
-				lLLProjects.mAngleAmplitude = Math.PI * .6;
-				 // sTools.ParticleGroups[sTools.ParticleGroup.PART_LULU] = new ParticleGroupLulu(new THREE.Vector3(-500, 1000, -1000), "lulu");
+				// var lLLProjects = new ParticleGroupIntro(new THREE.Vector3(-500, 1000, -1000), flyer, "lulu", sTools.ParticleGroup.PART_LULU);
+				// lLLProjects.mAngleAmplitude = Math.PI * .6;
+				//  // sTools.ParticleGroups[sTools.ParticleGroup.PART_LULU] = new ParticleGroupLulu(new THREE.Vector3(-500, 1000, -1000), "lulu");
 
-				 // Lulu
+				//  // Lulu
 				 sTools.ParticleGroups[sTools.ParticleGroup.PART_VIDEOS] = new ParticleGroupVideos(new THREE.Vector3(1000, 1000, -1000), "videos");
 
 				 // add the sounds as they are not in html in the website.

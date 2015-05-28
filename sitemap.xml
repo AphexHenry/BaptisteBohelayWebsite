@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" 
+  xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" 
+  xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
+
+<url>
+  <loc>http://lebaptiste.com/</loc>
+  <lastmod>2015-01-19T12:57:01+00:00</lastmod>
+  <changefreq>daily</changefreq>
+</url>
+<url>
+  <loc>http://lebaptiste.com/#AboutMe</loc>
+  <lastmod>2015-01-19T12:57:01+00:00</lastmod>
+  <changefreq>daily</changefreq>
+</url>
+<url>
+  <loc>http://lebaptiste.com/#videos</loc>
+  <lastmod>2015-01-19T12:57:01+00:00</lastmod>
+  <changefreq>daily</changefreq>
+</url>
+<url>
+  <loc>http://lebaptiste.com/#projects</loc>
+  <lastmod>2015-01-19T12:57:01+00:00</lastmod>
+  <changefreq>daily</changefreq>
+</url>
+<url>
+  <loc>http://lebaptiste.com/#projects+html&other&MusicalBaguette.html</loc>
+  <lastmod>2015-01-19T12:57:01+00:00</lastmod>
+  <changefreq>daily</changefreq>
+</url>
+<url>
+  <loc>http://lebaptiste.com/#projects+html&Lulu.html</loc>
+  <lastmod>2015-01-19T12:57:01+00:00</lastmod>
+  <changefreq>daily</changefreq>
+</url>
+<url>
+  <loc>http://lebaptiste.com/#projects+html&other&MusicalBox.html</loc>
+  <lastmod>2015-01-19T12:57:01+00:00</lastmod>
+  <changefreq>daily</changefreq>
+</url>
+<url>
+  <loc>http://lebaptiste.com/#projects+html&other&Cocoons.html</loc>
+  <lastmod>2015-01-19T12:57:01+00:00</lastmod>
+  <changefreq>daily</changefreq>
+</url>
+<url>
+  <loc>http://lebaptiste.com/#projects+html&other&MusicalBox.html</loc>
+  <lastmod>2015-01-19T12:57:01+00:00</lastmod>
+  <changefreq>daily</changefreq>
+</url>
+<url>
+  <loc>http://lebaptiste.com/#projects+html&other&InteractiveDance.html</loc>
+  <lastmod>2015-01-19T12:57:01+00:00</lastmod>
+  <changefreq>daily</changefreq>
+</url>
+<url>
+  <loc>http://lebaptiste.com/#projects+html&other&pip.html</loc>
+  <lastmod>2015-01-19T12:57:01+00:00</lastmod>
+  <changefreq>daily</changefreq>
+</url>
+<url>
+  <loc>http://lebaptiste.com/#SoundMonsters</loc>
+  <lastmod>2015-01-19T12:57:01+00:00</lastmod>
+  <changefreq>daily</changefreq>
+</url>
+<url>
+  <loc>http://lebaptiste.com/#home+html&contact.html</loc>
+  <lastmod>2015-01-19T12:57:01+00:00</lastmod>
+  <changefreq>daily</changefreq>
+</url>
+</urlset>
