@@ -1,5 +1,5 @@
 
-var FLIP_ROTATION_SPEED = 15.;
+var FLIP_ROTATION_SPEED = 7.;
 var CONSERVATION_OF_VELOCITY = 0.95;
 var TEXTURE_SIZE = 3;
 var sShowPartPosition = new THREE.Vector3(0., 0., 0.);
@@ -37,7 +37,6 @@ Particle.FlipState =
 	FLIP_BACKWARD : 2
 };
 
-var SIZE_PART_IDLE = 0.1;
 var sIndex = 0;
 var mParticleToShow = 0;
 
@@ -48,9 +47,8 @@ function Particle(aPosition, aTexture, aEnvMap)
 	this.mLastPosition = this.mPosition.clone();
 	this.mRotation = new THREE.Vector3(0, 0 , 0);
 	this.mRotationSpeed = new THREE.Vector3(0, 0 , 0);
-	this.mSize = SIZE_PART_IDLE;
+	this.mSize = 1;
 	this.mSizeSpeed = 0.;
-	this.mSizeIdle = SIZE_PART_IDLE;
 	this.mLimit;
 
 	this.mIndex = sIndex;
@@ -65,7 +63,6 @@ function Particle(aPosition, aTexture, aEnvMap)
 	this.mStateTimer;
 	
 	this.mFlipState = Particle.FlipState.FLIP_IDLE;
-
 	this.mAnimationCounter;
 	
     // we set the texture datas private because want to be sure that the two members are 
@@ -88,17 +85,20 @@ function Particle(aPosition, aTexture, aEnvMap)
 
 	mAnimationCounter = 0;
 
-	this.geometry = new THREE.PlaneBufferGeometry( 2, 1, 19 );
-	// this.geometry = new THREE.CubeGeometry( TEXTURE_SIZE, TEXTURE_SIZE * 0.1, TEXTURE_SIZE );
+	this.canvas = aTexture.image;
+	this.geometry = new THREE.PlaneBufferGeometry( this.canvas.width / this.canvas.height, 1, 19 );
 	this.mRatio = 1.;
 	this.geometry.doubleSided = true;
 
-	this.canvas = aTexture.image;
 	parameters = { color: 0xffffff, map: aTexture, envMap:aEnvMap, shading: THREE.FlatShading, reflectivity:0.1, transparent:true };
 	this.materials = new THREE.MeshBasicMaterial( parameters );
 	this.materials.color.setRGB( 1., 1., 1.);
 
 	this.mesh = new THREE.Mesh( this.geometry, this.materials );
+
+	this.mesh.matrixAutoUpdate = false;
+	this.mesh.updateMatrix();
+	sRenderer.scene.add( this.mesh );
 }
 
 /*
@@ -208,9 +208,9 @@ Particle.prototype.Update = function(aTimeInterval, awidth)
 		 this.mesh.rotation.y = this.mRotation.y;// + 0.5 * Math.PI;
 		 this.mesh.rotation.z = 0;// + 0.5 * Math.PI;
 		this.mSize = Math.max(this.mSize, 0.0001);
-		this.mesh.scale.x = this.mAlpha * (this.mFlipRotation * this.mSize *  awidth / TEXTURE_SIZE);
-		this.mesh.scale.y = this.mSize *  awidth / TEXTURE_SIZE;
-		this.mesh.scale.z = this.mSize *  awidth / TEXTURE_SIZE;
+		this.mesh.scale.x = 0.1 * this.mAlpha * (this.mFlipRotation * this.mSize *  awidth / TEXTURE_SIZE);
+		this.mesh.scale.y = 0.1 * this.mSize *  awidth / TEXTURE_SIZE;
+		this.mesh.scale.z = 0.1 * this.mSize *  awidth / TEXTURE_SIZE;
 		// this.mesh.scale.x = this.mesh.scale.y = this.mesh.scale.z = 60;
 		// this.mesh.doubleSided = true;
 		this.mesh.updateMatrix();
@@ -258,19 +258,13 @@ Particle.prototype.GlobalInit = function(aStateGlobal, aState)
  */
  Particle.prototype.SwitchTexture = function()
 {
-	//this.materials.map.needsUpdate = true;
+	this.materials.map.needsUpdate = true;
 }
 
 // Particle.prototype.SetTexture = function(aTexturePath, aTexture) 
 Particle.prototype.RefreshTexture = function()
 {
-	//this.mFlipState = Particle.FlipState.FLIP_FORWARD;
-	//var currentRatio = 1;//(aTexture.image.width / aTexture.image.height);
-	//if(this.mRatio != currentRatio)
-	//{
-	//	this.mRatio = currentRatio;
-	//	this.geometry = new THREE.PlaneGeometry( TEXTURE_SIZE * this.mRatio, TEXTURE_SIZE);
-	//}
+	this.mFlipState = Particle.FlipState.FLIP_FORWARD;
 }
 
 Particle.prototype.SetShow = function(aShow)

@@ -57,6 +57,7 @@ BehaviourMirror.prototype.FadeIn = function(aTimeInterval)
 
 BehaviourMirror.prototype.UpdateShow = function(aTimeInterval) 
 {
+	this.part.mSizeSpeed += (set.cards.sizeShow - this.part.mSize) * aTimeInterval;
 	this.mTimer += aTimeInterval;
 	this.part.mVelocity.multiplyScalar(0.98);
 	if(this.disapear) {
@@ -109,6 +110,7 @@ BehaviourMirror.prototype.Reset = function() {
 
 BehaviourMirror.prototype.Update = function(aTimeInterval) 
 {
+	this.part.mSizeSpeed += (1 - this.part.mSize) * aTimeInterval;
 	this.mTimer += aTimeInterval * this.rotationSpeed;
 
 	var lVelocityTarget = new THREE.Vector3(0.03 * this.speed.x,0);

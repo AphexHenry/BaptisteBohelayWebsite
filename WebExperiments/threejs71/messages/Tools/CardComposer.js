@@ -6,7 +6,7 @@ CardComposer.prototype.composeEmpty = function(aCanvas) {
 	this.drawSurface(aCanvas, false, true);
 }
 
-CardComposer.prototype.compose = function(aCanvas, aText, aName, aAvatarUrl, aImageUrl) {
+CardComposer.prototype.compose = function(aCanvas, aText, aName, aAvatarUrl, aImageUrl, aCallback) {
 
 	var lListImages = [];
 	this.avatarSize = aCanvas.width * 0.15;
@@ -40,14 +40,14 @@ CardComposer.prototype.compose = function(aCanvas, aText, aName, aAvatarUrl, aIm
 			that.drawImage(aCanvas, lImageImg);
 			context.restore();
 			that.drawSurface(aCanvas, false, true);
-
-			//that.drawTextWithImage(aCanvas, aText);
+			that.drawAvatarOut(aCanvas, lAvatarImg, aName);
 		}
 		else {
 			that.drawSurface(aCanvas, false);
 			that.drawAvatar(aCanvas, lAvatarImg, aName);
 			that.drawTextNoImage(aCanvas, aText);
 		}
+		aCallback();
 	});
 }
 
@@ -58,8 +58,10 @@ CardComposer.prototype.clear = function(aCanvas) {
 CardComposer.prototype.drawSurface = function(aCanvas, aClip, aImage) {
 	var lOptions = {
 		cornerRadius:50
-		, width:aCanvas.width
-		, height:aCanvas.height
+		, y: aCanvas.height * 0.15
+		, x: aCanvas.height * 0.15
+		, width:aCanvas.width * 0.85
+		, height:aCanvas.height * 0.85
 		, fill:aImage ? 'none' : 'white'
 		, stroke:'#666'
 		, clip: aClip
@@ -81,6 +83,38 @@ CardComposer.prototype.drawAvatar = function(aCanvas, aAvatar, aName) {
 		return;
 
 	var lSize = this.avatarSize;
+
+	var context = aCanvas.getContext('2d');
+	var lOptions = {
+		width:lSize * 1.1
+		, height:lSize * 1.1
+		, x:this.padding - lSize * 0.05
+		, y:this.padding - lSize * 0.05
+	};
+	context.save();
+	context.globalCompositeOperation = "destination-out";
+	this.drawAvatarFrame(aCanvas, lOptions);
+	context.restore();
+
+	var lOptions = {
+		width:lSize
+		, height:lSize
+		, x:this.padding
+		, y:this.padding
+	};
+	context.save();
+	this.drawAvatarFrame(aCanvas, lOptions);
+	CanvasUtils.drawImage(context, aAvatar, lOptions);
+	context.restore();
+
+	this.drawAvatarName(aCanvas, aName, lOptions);
+}
+
+CardComposer.prototype.drawAvatarOut = function(aCanvas, aAvatar, aName) {
+	if(!aAvatar)
+		return;
+
+	var lSize = this.avatarSize;
 	var lOptions = {
 		width:lSize
 		, height:lSize
@@ -89,12 +123,30 @@ CardComposer.prototype.drawAvatar = function(aCanvas, aAvatar, aName) {
 	};
 
 	var context = aCanvas.getContext('2d');
+
+	var lOptions = {
+		width:lSize * 1.1
+		, height:lSize * 1.1
+		, x:this.padding - lSize * 0.05
+		, y:this.padding - lSize * 0.05
+	};
+	context.save();
+	context.globalCompositeOperation = "destination-out";
+	this.drawAvatarFrame(aCanvas, lOptions);
+	context.restore();
+
+	var lOptions = {
+		width:lSize
+		, height:lSize
+		, x:this.padding
+		, y:this.padding
+	};
 	context.save();
 	this.drawAvatarFrame(aCanvas, lOptions);
 	CanvasUtils.drawImage(context, aAvatar, lOptions);
 	context.restore();
 
-	this.drawAvatarName(aCanvas, aName, lOptions);
+	//this.drawAvatarName(aCanvas, aName, lOptions);
 }
 
 CardComposer.prototype.drawAvatarName = function(aCanvas, aText, aOptions) {

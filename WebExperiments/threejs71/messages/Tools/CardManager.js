@@ -6,9 +6,9 @@ function CardManager() {
 	this.canvasNext = 0;
 	var lSize = 512;
 
-	for(var i = 0; i < 30; i++) {
+	for(var i = 0; i < 100; i++) {
 		var lCanvas = document.createElement('canvas');
-		lCanvas.width  = lSize * 2;
+		lCanvas.width  = lSize * 1.7;
 		lCanvas.height = lSize;
 
 		this.cardComposer.composeEmpty(lCanvas);
@@ -22,19 +22,18 @@ CardManager.prototype.GetCanvas = function(aIndex) {
 }
 
 CardManager.prototype.add = function(aObject) {
+	console.log("new card");
 	this.canvasNext++;
 	if(this.canvasNext >= this.canvas.length) {
 		this.canvasNext = 0;
 	}
 
 	var lCanvas = this.canvas[this.canvasNext];
-	this.cardComposer.compose(lCanvas, aObject.text, aObject.userName, aObject.userIcon, aObject.image);
-	sParticlesManager.SetCanvasFilled(lCanvas);
-
-	//var lTexture = new THREE.Texture(lCanvas);
-	//lTexture.needsUpdate = true;
-	//this.canvas.push(lTexture);
-	this.waitingList.push(lCanvas);
+	var that = this;
+	this.cardComposer.compose(lCanvas, aObject.text, aObject.userName, aObject.userIcon, aObject.image, function() {
+		sParticlesManager.SetCanvasFilled(lCanvas);
+		that.waitingList.push(lCanvas);
+	});
 }
 
 CardManager.prototype.GetTexture = function() {
