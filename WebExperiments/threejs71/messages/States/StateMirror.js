@@ -1,51 +1,36 @@
 
-// var Attractors = new Array();
-// Attractors[0] = new Attractor();
-
-var MirrorTouch = false;
-
-var sTimerEnd = 0;
 var ATTRACTOR_IDLE_SIZE = 1.;
-var controls;
+var LIMIT_LEFT = -200;
+var LIMIT_DEPTH = 200;
 
 function BehaviourMirror(aPart, aPosition) 
 {
 	this.part = aPart;
 	this.elementTarget = -1;
-	this.free = 0.;
+	var lspeed = Math.random() * 1.5 + 0.5;
+	this.angleSpeed = Math.random() * Math.PI;
+	this.speed = new THREE.Vector3(lspeed, Math.sin(this.angleSpeed), 0.);
+	this.disapear = false;
+	this.mTimer = Math.random() * 5.;
+	this.rotationSpeed = Math.random() * 1;
+	this.showRotationAmplitude = 0;
 }
 
 BehaviourMirror.prototype.GlobalUpdate = function(aTimeInterval)
 {
-	controls.update( aTimeInterval );
-
-	effectController.aperture += 0.025 * aTimeInterval;
-	effectController.aperture = Math.min(effectController.aperture, 0.025);
 }
 
 BehaviourMirror.prototype.GlobalInit = function(aTimeInterval)
 {
-	info = document.getElementById("info");
 
-	controls = new THREE.FlyControls( camera );
-
-	 controls.movementSpeed = 500;
-	// controls.domElement = container;
-	 controls.rollSpeed = Math.PI / 6;
-	// controls.dragToLook = false
-	controls.autoForward = false;
 }
 
 BehaviourMirror.prototype.GlobalMouseDown = function(aPosition)
 {				 
-	 controls.moveState.forward = 1;
-	 controls.updateMovementVector();
 }
 
 BehaviourMirror.prototype.GlobalMouseUp = function(aPosition)
 {
-	 controls.moveState.forward = 0;
-	 controls.updateMovementVector();
 }
 
 BehaviourMirror.prototype.GlobalMouseMove = function(aPosition)
@@ -55,6 +40,8 @@ BehaviourMirror.prototype.GlobalMouseMove = function(aPosition)
 
 BehaviourMirror.prototype.InitShow = function() 
 {
+	this.disapear = true;
+	this.showRotationAmplitude = 1;
 	return true;
 }
 
@@ -69,106 +56,77 @@ BehaviourMirror.prototype.FadeIn = function(aTimeInterval)
 }
 
 BehaviourMirror.prototype.UpdateShow = function(aTimeInterval) 
-{	
+{
+	this.mTimer += aTimeInterval;
+	this.part.mVelocity.multiplyScalar(0.98);
+	if(this.disapear) {
+		this.UpdateDisapear(aTimeInterval);
+	}
+	else {
+		this.part.mAlpha += ( 1 - this.part.mAlpha ) * aTimeInterval;
+		var lTimeLeft = sParticlesManager.GetTimeBeforeNextShow();
+		if(lTimeLeft < 2) {
+			this.part.mVelocity.x += -2 * (this.part.mPosition.x - 0.5) * aTimeInterval;
+			this.part.mVelocity.x *= 0.98;
+			this.part.mRotation.y = 0;
+		}
+		else {
+			this.part.mVelocity.x += -5 * this.part.mPosition.x * aTimeInterval;
+			this.part.mVelocity.x *= 0.98;
+		}
 
+		this.part.mRotation.y = Math.cos(this.mTimer) * 0.07 * this.showRotationAmplitude;
+
+		if(lTimeLeft < 8) {
+			this.showRotationAmplitude *= 0.995;
+			this.showRotationAmplitude = Math.max(0.2, this.showRotationAmplitude);
+		}
+	}
+}
+
+BehaviourMirror.prototype.UpdateDisapear = function(aTimeInterval) {
+	this.part.mAlpha -= aTimeInterval;
+	if(this.part.mAlpha < 0) {
+		this.Reset();
+	}
+}
+
+BehaviourMirror.prototype.Reset = function() {
+	if(sParticlesManager.GetParticleShow() === this.part) {
+		this.part.mPosition.x = -0.25;
+		this.part.mPosition.z = 0.11;//LIMIT_DEPTH;
+		this.part.mPosition.y = 0;//LIMIT_DEPTH;
+		this.disapear = false;
+		this.part.mRotation = new THREE.Vector3();
+	}
+	else {
+		this.part.mPosition.x = -0.7 + Math.random() * 0.05;
+		this.part.mPosition.z = 0.10 - Math.random() * 0.3;//LIMIT_DEPTH;
+		this.part.mPosition.y = 1 * (Math.random() - 0.5);//LIMIT_DEPTH;
+		this.disapear = false;
+	}
 }
 
 BehaviourMirror.prototype.Update = function(aTimeInterval) 
-{	
-	if(this.free >= 0.)
-	{
-		if(this.elementTarget < 0)
-		{
-			this.ChooseNewAttractor();
-		}
-		if((DoorsAttractorsArray[this.elementTarget].particleAttached >= 0) 
-			&& (DoorsAttractorsArray[this.elementTarget].particleAttached != this.part.mIndex))
-		{
-			this.ChooseNewAttractor();
-		}
-
-		var lStrength = 3.;
-		var lStrengthSpring = 1.8;
-		var lAttractorMatrix = DoorsAttractorsArray[this.elementTarget].position;
-		var lDistance = lAttractorMatrix.distanceTo(this.part.mPosition);
-
-		if(lDistance < 0.1)
-		{
-			DoorsAttractorsArray[this.elementTarget].particleAttached = this.part.mIndex;
-		}
-
-	 	this.part.mVelocity.addSelf(new THREE.Vector3().sub(lAttractorMatrix, this.part.mPosition).multiplyScalar( lStrengthSpring * aTimeInterval));
-	 	this.part.mSizeSpeed += 50 * (DoorsAttractorsArray[this.elementTarget].scale - this.part.mSize) * aTimeInterval;
-	 	this.part.mSizeSpeed *= 0.95;
- 	}
- 	else
- 	{
- 		this.free += aTimeInterval;
- 		this.part.mVelocity.addSelf(new THREE.Vector3(Math.random() * aTimeInterval, Math.random() * aTimeInterval, Math.random() * aTimeInterval));
- 		this.part.mRotation.addSelf(new THREE.Vector3(Math.random() * aTimeInterval, Math.random() * aTimeInterval, Math.random() * aTimeInterval));
- 		this.part.mVelocity.addSelf(new THREE.Vector3().sub(PixelToRelative(camera.position) , this.part.mPosition).multiplyScalar( 0.1 * aTimeInterval));	
- 	}
-}
-
-BehaviourMirror.prototype.ChooseNewAttractor = function()
 {
-		var targets = new Array();
-		var index;
-		for(var i = 0; i < 3; i++)
-		{
-			index = Math.floor(Math.random() * DoorsAttractorsArray.length);
-			var numTry = DoorsAttractorsArray.length;
-			while(DoorsAttractorsArray[index].particleAttached >= 0)
-			{
-				numTry--;
-				if(numTry < 0)
-				{
-					this.free = -20.;
-					return;
-				}
-				index++;
-				index = index % DoorsAttractorsArray.length;
-			}
-			targets.push(index);
-		}
+	this.mTimer += aTimeInterval * this.rotationSpeed;
 
-		var indexCloser = 0;
-		var distanceCloser = 100000;
-		var distanceCurrent;
-		for(var i = 0; i < targets.length; i++)
-		{
-			distanceCurrent = DoorsAttractorsArray[targets[i]].position.distanceTo(this.part.mPosition);
-			if(distanceCurrent < distanceCloser)
-			{
-				indexCloser = targets[i];
-				distanceCloser = distanceCurrent;
-			}
-		}
-		
-		this.elementTarget = indexCloser;
+	var lVelocityTarget = new THREE.Vector3(0.03 * this.speed.x,0);
+	this.part.mVelocity.add(lVelocityTarget.sub(this.part.mVelocity).multiplyScalar(aTimeInterval));
+
+	this.part.mRotation.y = Math.cos(this.mTimer) * 0.07;
+	this.part.mRotation.x = Math.cos(this.mTimer * 0.7) * 0.07;
+	this.part.mRotation.x = Math.cos(this.mTimer * 1.3) * 0.07;
+
+	if(this.part.mPosition.x > .8) {
+		this.UpdateDisapear(aTimeInterval);
+	}
+	else {
+		this.part.mAlpha += ( 1 - this.part.mAlpha ) * aTimeInterval;
+	}
 }
 
 BehaviourMirror.prototype.FadeOut = function(aTimeInterval) 
 {
-	var lStrengthAtt = (1. - (sTimerEnd / set.TIME_BEFORE_OUT)) * set.STRENGTH_ATTRACTOR * 3.;
-    lDistance = Math.max(this.part.mPosition.length(), 0.15);
-    this.part.mVelocity.addSelf(MinusMult(Vec3f(0., 0., -1.), this.part.mPosition, 1. * lStrengthAtt * aTimeInterval / (lDistance * lDistance)));
-    var lAttractorMatrix = this.GetResized();
 
-    if(sTimerEnd < 0.)
-    {
-		var lStrength = 4. * (0.75 + (Math.random() * 0.75));
-		var lXrelative = (lAttractorMatrix.x - 0.5);
-		var lYrelative = (lAttractorMatrix.y - 0.5) / (0.5);
-		this.part.mVelocity.x	= lXrelative * lStrength;
-		this.part.mVelocity.y	= lYrelative * lStrength;
-		this.part.mVelocity.z	= -2. * Math.cos(Math.PI * lXrelative) * Math.sin(Math.PI * lYrelative) * lStrength;
-		this.part.mSizeSpeed	= (ATTRACTOR_IDLE_SIZE * 0.5 - this.part.mSize) * aTimeInterval;
-
-		this.part.mRotationSpeed.addSelf( new THREE.Vector3().sub( new THREE.Vector3(0., lXrelative * 90, 0.), this.part.mRotation).multiplyScalar(aTimeInterval));
-
-		return true;
-	}
-
-	 return false;
 }

@@ -1,7 +1,7 @@
 
 var FLIP_ROTATION_SPEED = 15.;
 var CONSERVATION_OF_VELOCITY = 0.95;
-var TEXTURE_SIZE = 30;
+var TEXTURE_SIZE = 3;
 var sShowPartPosition = new THREE.Vector3(0., 0., 0.);
 var sFrameRate = 1.;
 
@@ -41,7 +41,7 @@ var SIZE_PART_IDLE = 0.1;
 var sIndex = 0;
 var mParticleToShow = 0;
 
-function Particle(aPosition) 
+function Particle(aPosition, aTexture, aEnvMap)
 {
 	this.mPosition = aPosition;
 	this.mVelocity = new THREE.Vector3(0., 0., 0. );
@@ -52,7 +52,6 @@ function Particle(aPosition)
 	this.mSizeSpeed = 0.;
 	this.mSizeIdle = SIZE_PART_IDLE;
 	this.mLimit;
-	this.mAlpha = 1.;
 
 	this.mIndex = sIndex;
 	sIndex++;
@@ -76,8 +75,8 @@ function Particle(aPosition)
 	
 	this.mStateUpdate = Particle.StateUpdate.UPDATE_INIT;
 	this.mParticleState = new Array();
-	this.mParticleState[0] = new BehaviourIntro(this, aPosition);
-	this.mParticleState[1] = new BehaviourMirror(this, aPosition);
+	//this.mParticleState[0] = new BehaviourIntro(this, aPosition);
+	this.mParticleState[0] = new BehaviourMirror(this, aPosition);
 
 	this.mStateCurrent = 0;
 	this.mStateNext = 0;
@@ -85,24 +84,21 @@ function Particle(aPosition)
 	this.mTimerShow = 0.;
 	// delay during which the particle is not responsive to camera closness.
 	this.mImmunityToCamTimer = 0.;
+	this.mAlpha = 1;
 
 	mAnimationCounter = 0;
-
-	// this.materials = new THREE.MeshBasicMaterial( parameters );
-	this.materials = null;
-	this.materialsNext = null;
-	//materials.transparent = true;
 
 	this.geometry = new THREE.PlaneBufferGeometry( 2, 1, 19 );
 	// this.geometry = new THREE.CubeGeometry( TEXTURE_SIZE, TEXTURE_SIZE * 0.1, TEXTURE_SIZE );
 	this.mRatio = 1.;
-	//this.geometry.doubleSided = false;
+	this.geometry.doubleSided = true;
 
-	this.mesh = null;//new THREE.Mesh( this.geometry, this.materials );
+	this.canvas = aTexture.image;
+	parameters = { color: 0xffffff, map: aTexture, envMap:aEnvMap, shading: THREE.FlatShading, reflectivity:0.1, transparent:true };
+	this.materials = new THREE.MeshBasicMaterial( parameters );
+	this.materials.color.setRGB( 1., 1., 1.);
 
-	// parameters = { color: 0xff1100, envMap: aTextureCube, shading: THREE.FlatShading };
-
-	this.materials = null;//new THREE.MeshBasicMaterial( parameters );
+	this.mesh = new THREE.Mesh( this.geometry, this.materials );
 }
 
 /*
@@ -194,9 +190,9 @@ Particle.prototype.Update = function(aTimeInterval, awidth)
 	}
 
 		// classic physics equations.
-	// this.mPosition.x += this.mVelocity.x * aTimeInterval;
-	// this.mPosition.y += this.mVelocity.y * aTimeInterval;
-	// this.mPosition.z += this.mVelocity.z * aTimeInterval;
+	 this.mPosition.x += this.mVelocity.x * aTimeInterval;
+	 this.mPosition.y += this.mVelocity.y * aTimeInterval;
+	 this.mPosition.z += this.mVelocity.z * aTimeInterval;
 	this.mVelocity.multiplyScalar(CONSERVATION_OF_VELOCITY);
 
 	this.mSize += this.mSizeSpeed * aTimeInterval;
@@ -208,10 +204,11 @@ Particle.prototype.Update = function(aTimeInterval, awidth)
 	{
 		var lPos = RelativeToPixel(this.mPosition);
 		this.mesh.position.set(lPos.x,lPos.y,lPos.z);// =  RelativeToPixel(this.mPosition);
-		// this.mesh.rotation.x = this.mRotation.x;
-		// this.mesh.rotation.y = this.mRotation.y + 0.5 * Math.PI;
-		// this.mesh.rotation.z = 0. + 0.5 * Math.PI;
-		this.mesh.scale.x = (this.mFlipRotation * this.mSize *  awidth / TEXTURE_SIZE);
+		 this.mesh.rotation.x = this.mRotation.x;
+		 this.mesh.rotation.y = this.mRotation.y;// + 0.5 * Math.PI;
+		 this.mesh.rotation.z = 0;// + 0.5 * Math.PI;
+		this.mSize = Math.max(this.mSize, 0.0001);
+		this.mesh.scale.x = this.mAlpha * (this.mFlipRotation * this.mSize *  awidth / TEXTURE_SIZE);
 		this.mesh.scale.y = this.mSize *  awidth / TEXTURE_SIZE;
 		this.mesh.scale.z = this.mSize *  awidth / TEXTURE_SIZE;
 		// this.mesh.scale.x = this.mesh.scale.y = this.mesh.scale.z = 60;
@@ -219,6 +216,10 @@ Particle.prototype.Update = function(aTimeInterval, awidth)
 		this.mesh.updateMatrix();
 		
 	}
+}
+
+Particle.prototype.GetCanvas = function() {
+	return this.canvas;
 }
 
 Particle.prototype.MouseDown = function(aPosition)
@@ -255,56 +256,21 @@ Particle.prototype.GlobalInit = function(aStateGlobal, aState)
  * @Note:   We do that because it is important to be able to know what is the source of the texture.
  *          We might want to delete it for example if the user want to.
  */
- Particle.prototype.SwitchTexture = function() 
+ Particle.prototype.SwitchTexture = function()
 {
-	if(this.materials == null)
-	{
-		this.materials = this.materialsNext;
-		this.mesh = new THREE.Mesh( this.geometry, this.materials );
-		// this.mesh = new THREE.Mesh( this.geometry, this.materials );
-
-		// this.mesh.scale.x = 1;
-		// this.mesh.scale.y = 1;
-		// this.mesh.scale.z = 1;
-		// this.mesh.rotation.x = 0. * Math.PI;//Math.random() * Math.PI;//Math.random() * Math.PI;
-		// this.mesh.rotation.y = 0.5 * Math.PI;
-		// this.mesh.rotation.z = 0.5 * Math.PI;
-
-		this.mesh.matrixAutoUpdate = false;
-		var enableShadow = false;
-		if(enableShadow)
-		{
-			this.mesh.castShadow = true;
-			this.mesh.receiveShadow = true;
-		}
-		this.mesh.updateMatrix();
-		scene.add( this.mesh );
-	}
-	else
-	{
-		// scene.remove(this.mesh);
-		this.material = this.materialsNext;
-		this.mesh.material = this.material;
-		// this.mesh = new THREE.Mesh( this.geometry, this.materials );
-		// scene.add(this.mesh);
-	}
+	//this.materials.map.needsUpdate = true;
 }
 
 // Particle.prototype.SetTexture = function(aTexturePath, aTexture) 
-Particle.prototype.SetTexture = function(aTexture)
+Particle.prototype.RefreshTexture = function()
 {
-	parameters = { color: 0xfff, map: aTexture, shading: THREE.FlatShading, transparent:true };
-
-	this.materialsNext = new THREE.MeshBasicMaterial( parameters );
-	this.materialsNext.color.setRGB( 1., 1., 1.);
-
-	this.mFlipState = Particle.FlipState.FLIP_FORWARD;
-	var currentRatio = 1;//(aTexture.image.width / aTexture.image.height);
-	if(this.mRatio != currentRatio)
-	{
-		this.mRatio = currentRatio;
-		this.geometry = new THREE.PlaneGeometry( TEXTURE_SIZE * this.mRatio, TEXTURE_SIZE);
-	}
+	//this.mFlipState = Particle.FlipState.FLIP_FORWARD;
+	//var currentRatio = 1;//(aTexture.image.width / aTexture.image.height);
+	//if(this.mRatio != currentRatio)
+	//{
+	//	this.mRatio = currentRatio;
+	//	this.geometry = new THREE.PlaneGeometry( TEXTURE_SIZE * this.mRatio, TEXTURE_SIZE);
+	//}
 }
 
 Particle.prototype.SetShow = function(aShow)

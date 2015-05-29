@@ -2,6 +2,10 @@
 function CardComposer() {
 }
 
+CardComposer.prototype.composeEmpty = function(aCanvas) {
+	this.drawSurface(aCanvas, false, true);
+}
+
 CardComposer.prototype.compose = function(aCanvas, aText, aName, aAvatarUrl, aImageUrl) {
 
 	var lListImages = [];
@@ -9,6 +13,8 @@ CardComposer.prototype.compose = function(aCanvas, aText, aName, aAvatarUrl, aIm
 	this.padding = aCanvas.width * 0.05;
 	var context = aCanvas.getContext('2d');
 
+	if(aText.length == 0 && !aImageUrl)
+		return;
 
 	if(aAvatarUrl) {
 		lListImages['avatar'] = aAvatarUrl;
@@ -21,21 +27,24 @@ CardComposer.prototype.compose = function(aCanvas, aText, aName, aAvatarUrl, aIm
 	var that = this;
 
 	LoadingUtils.load(lListImages, function(aImages) {
-		var lAvatarImg = aImages['avatar'];
-		var lImageImg = aImages['image'];
+		if(aImages) {
+			var lAvatarImg = aImages['avatar'];
+			var lImageImg = aImages['image'];
+		}
 
 		that.clear(aCanvas);
 
-		that.drawSurface(aCanvas, false);
-		// this will restraint the next drawings to the rounded frame.
-
 		if(lImageImg) {
+			context.save();
 			that.drawSurface(aCanvas, true);
 			that.drawImage(aCanvas, lImageImg);
 			context.restore();
+			that.drawSurface(aCanvas, false, true);
+
 			//that.drawTextWithImage(aCanvas, aText);
 		}
 		else {
+			that.drawSurface(aCanvas, false);
 			that.drawAvatar(aCanvas, lAvatarImg, aName);
 			that.drawTextNoImage(aCanvas, aText);
 		}
@@ -46,24 +55,31 @@ CardComposer.prototype.clear = function(aCanvas) {
 	aCanvas.width = aCanvas.width;
 }
 
-CardComposer.prototype.drawSurface = function(aCanvas, aClip) {
+CardComposer.prototype.drawSurface = function(aCanvas, aClip, aImage) {
 	var lOptions = {
 		cornerRadius:50
 		, width:aCanvas.width
 		, height:aCanvas.height
-		, fill:'white'
+		, fill:aImage ? 'none' : 'white'
+		, stroke:'#666'
 		, clip: aClip
+		, lineWidth: 5
+
 	}
 	CanvasUtils.drawRoundedRectangle(aCanvas.getContext('2d'), lOptions);
 }
 
 CardComposer.prototype.drawAvatarFrame = function(aCanvas, aOptions) {
+	aOptions.stroke = '#800';
 	CanvasUtils.drawRoundedRectangle(aCanvas.getContext('2d'), aOptions);
 	aOptions.clip = true;
 	CanvasUtils.drawRoundedRectangle(aCanvas.getContext('2d'), aOptions);
 }
 
 CardComposer.prototype.drawAvatar = function(aCanvas, aAvatar, aName) {
+	if(!aAvatar)
+		return;
+
 	var lSize = this.avatarSize;
 	var lOptions = {
 		width:lSize
@@ -86,7 +102,7 @@ CardComposer.prototype.drawAvatarName = function(aCanvas, aText, aOptions) {
 		color:'#333'
 		,wrap:true
 		,maxLines:1
-		,paddingLeft:aOptions.x + aOptions.width  + this.padding
+		,paddingLeft:aOptions.x + aOptions.width  + this.padding * 0.5
 		,paddingTop:aOptions.y + aOptions.height * 0.1
 		,width:aCanvas.width
 	};
@@ -115,21 +131,28 @@ CardComposer.prototype.drawImage = function(aCanvas, aAvatar) {
 	CanvasUtils.drawImage(aCanvas.getContext('2d'), aAvatar, lOptions);
 }
 
-CardComposer.prototype.drawTextWithImage = function(aCanvas, aText) {
-	var lOptions = {
-		color:'#000'
-		,wrap:true
-		,maxLines:4
-		,paddingLeft:this.padding
-		,paddingRight:this.padding
-		,paddingBottom:this.padding
-		,paddingTop:this.avatarSize + this.padding
-		,width:aCanvas.width * 0.5
-	};
-	CanvasUtils.drawText(aCanvas, aText, lOptions);
-}
+//CardComposer.prototype.drawTextWithImage = function(aCanvas, aText) {
+//
+//	var lSize = aText.length > 30 ? 40 : 60;
+//
+//	var lOptions = {
+//		color:'#000'
+//		,wrap:true
+//		,maxLines:4
+//		,paddingLeft:this.padding
+//		,paddingRight:this.padding
+//		,paddingBottom:this.padding
+//		,paddingTop:this.avatarSize + this.padding
+//		,width:aCanvas.width * 0.5
+//		,size:lSize + 'px'
+//	};
+//	CanvasUtils.drawText(aCanvas, aText, lOptions);
+//}
 
 CardComposer.prototype.drawTextNoImage = function(aCanvas, aText) {
+
+	var lSize = Math.min(Math.max(40, 40 * 70 / aText.length), 90);
+
 	var lOptions = {
 		color:'#000'
 		,wrap:true
@@ -137,8 +160,10 @@ CardComposer.prototype.drawTextNoImage = function(aCanvas, aText) {
 		,paddingLeft:this.padding
 		,paddingRight:this.padding
 		,paddingBottom:this.padding
-		,paddingTop:this.avatarSize + this.padding
+		,paddingTop:this.avatarSize + this.padding * 0.5 + lSize
 		,width:aCanvas.width
+		,size:lSize + 'px'
+		//,font: 'Comic Sans MS'
 	};
 	CanvasUtils.drawText(aCanvas, aText, lOptions);
 }

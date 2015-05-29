@@ -3,41 +3,38 @@ function CardManager() {
 	this.canvas = [];
 	this.waitingList = [];
 	this.cardComposer = new CardComposer();
-
-	var lListText = [];
+	this.canvasNext = 0;
 	var lSize = 512;
 
-	var lNames = ['henriette!', 'Marie;)', 'Ron Hubbard', 'Blondy Love'];
-	var lIcons = ['icon1.png', 'icon2.jpg', 'icon3.jpg'];
-	var lPictures = ['jazzConcert.jpg', 'jazzConcert2.jpg'];
-
-	for(var i = 0; i < 10; i++) {
-		lListText.push("this is a text " + i);
-	}
-
-	for(var i = 0; i < 10; i++) {
-		lListText.push("Then the perilous path was planted:And a river, and a spring On every cliff and tomb; And on the bleached bones Red clay brought forth."
-			+"Till the villain left the paths of ease, To walk in perilous paths, and drive The just man into barren climes."
-		);
-	}
-
-	for(var i = 0; i < lListText.length; i++) {
+	for(var i = 0; i < 30; i++) {
 		var lCanvas = document.createElement('canvas');
 		lCanvas.width  = lSize * 2;
 		lCanvas.height = lSize;
 
-		var lAvatarPath = 'textures/' + lIcons[Math.floor(Math.random() * lIcons.length)];
-		var lImagePath = i%2 ?  'textures/' + lPictures[Math.floor(Math.random() * lPictures.length)] : null;
-		var lUserName = lNames[Math.floor(Math.random() * lNames.length)];
+		this.cardComposer.composeEmpty(lCanvas);
 
-		this.cardComposer.compose(lCanvas, lListText[i], lUserName, lAvatarPath, lImagePath );
+		this.canvas.push(lCanvas);
+	}
+}
 
-		var lTexture = new THREE.Texture(lCanvas);
-		lTexture.needsUpdate = true;
-		this.canvas.push(lTexture);
-		this.waitingList.push(lTexture);
+CardManager.prototype.GetCanvas = function(aIndex) {
+	return this.canvas[aIndex % this.canvas.length];
+}
+
+CardManager.prototype.add = function(aObject) {
+	this.canvasNext++;
+	if(this.canvasNext >= this.canvas.length) {
+		this.canvasNext = 0;
 	}
 
+	var lCanvas = this.canvas[this.canvasNext];
+	this.cardComposer.compose(lCanvas, aObject.text, aObject.userName, aObject.userIcon, aObject.image);
+	sParticlesManager.SetCanvasFilled(lCanvas);
+
+	//var lTexture = new THREE.Texture(lCanvas);
+	//lTexture.needsUpdate = true;
+	//this.canvas.push(lTexture);
+	this.waitingList.push(lCanvas);
 }
 
 CardManager.prototype.GetTexture = function() {
@@ -51,6 +48,6 @@ CardManager.prototype.GetTexture = function() {
 	}
 }
 
-CardManager.prototype.GetCardCound = function() {
+CardManager.prototype.GetCardCount = function() {
 	return this.canvas.length;
 }

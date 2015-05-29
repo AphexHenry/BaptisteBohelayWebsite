@@ -2,26 +2,52 @@
 function ParticlesManager() {
 	this.particles = [];
 	this.nextRangeId = 0;
+	this.textureEnvMap = null;
+	this.particleShow = null;
+	this.mTimerShow = 8;
+	this.mTimeBetweenShow = 15;
+	this.mShowList = [];
 }
 
 ParticlesManager.prototype.init = function() {
-	var xgrid = 14,
-	ygrid = 9,
-	zgrid = 14;
-	var lCoeffDist = ygrid * zgrid * xgrid;
+
+	var lCount = 250;
 
 	this.particles = [];
 
-	for (var i = 0; i < xgrid; i ++ )
-	for (var j = 0; j < ygrid; j ++ )
-	for (var k = 0; k < zgrid; k ++ ) {
-
-		x = 200 * ( i - xgrid/2 ) / lCoeffDist;
-		y = 200 * ( j - ygrid/2 ) / lCoeffDist;
-		z = 200 * ( k - zgrid/2 ) / lCoeffDist;
-
-		this.particles.push(new Particle(new THREE.Vector3(x, y, z)));
+	var lEnvMap = this.GetEnvMap("textures/cube/triber/");
+	var lTexture = new THREE.Texture(lCanvas);
+	var lTextures = [];
+	for(var i = 0; i < sCardManager.GetCardCount(); i++) {
+		var lCanvas = sCardManager.GetCanvas(i);
+		var lTexture = new THREE.Texture(lCanvas);
+		lTexture.needsUpdate = true;
+		lTextures.push(lTexture);
 	}
+
+	for (var i = 0; i < lCount; i ++ )
+	{
+		x = 1. * (Math.random() - 0.5);
+		z = 0.11 - Math.random() * 0.3;
+		y = 1 * (Math.random() - 0.5);
+
+		this.particles.push(new Particle(new THREE.Vector3(x, y, z), lTextures[i % lTextures.length], lEnvMap));
+	}
+}
+
+ParticlesManager.prototype.GetEnvMap = function(aPath) {
+	material_depth = new THREE.MeshDepthMaterial();
+
+	var path = aPath;
+	var format = '.jpg';
+	var urls = [
+		path + 'px' + format, path + 'nx' + format,
+		path + 'py' + format, path + 'ny' + format,
+		path + 'pz' + format, path + 'nz' + format
+	];
+
+	return THREE.ImageUtils.loadTextureCube( urls );
+
 }
 
 ParticlesManager.prototype.GetCount = function() {
@@ -35,34 +61,62 @@ ParticlesManager.prototype.GetCount = function() {
  */
 ParticlesManager.prototype.Update = function(aTimeInterval, awidth) 
 {
-	var lTexture = sCardManager.GetTexture();
+	this.mTimerShow += aTimeInterval;
+
+	if(this.GetTimeBeforeNextShow() <= 0) {
+		this.ShowNewParticle();
+	}
 
 	for(var i = 0; i < this.particles.length; i++) {
 		this.particles[i].Update(aTimeInterval, awidth);
 
-		if(lTexture && this.IsNextChange(i)) {
-			this.particles[ i ].SetTexture(lTexture);
-		}
-	}
-
-	if(lTexture) {
-		this.nextRangeId++;
+		//if(lTexture && this.IsNextChange(i)) {
+		//	this.particles[ i ].SetTexture(lTexture, this.textureEnvMap);
+		//}
 	}
 
 	this.particles[0].GlobalUpdate(aTimeInterval);
 }
 
-ParticlesManager.prototype.IsNextChange = function(aIndex) {
-	var lCardCount = sCardManager.GetCardCound();
-	
-	return ((aIndex + this.nextRangeId) % lCardCount) == 0;
+//ParticlesManager.prototype.IsNextChange = function(aIndex) {
+//
+//	return ((aIndex + this.nextRangeId) % lCardCount) == 0;
+//}
+
+ParticlesManager.prototype.ShowNewParticle = function() {
+	this.mTimerShow = 0.;
+	if(this.particleShow) {
+		this.particleShow.SetShow(false);
+	}
+
+	// chose first one in the list or a random one.
+	if(this.mShowList.length > 0) {
+		this.particleShow = this.mShowList[0];
+		this.mShowList.splice(0,1);
+	}
+	else {
+		var lIndexPart = Math.floor(this.particles.length * Math.random());
+		this.particleShow = this.particles[lIndexPart];
+	}
+
+	this.particleShow.SetShow(true);
+}
+
+ParticlesManager.prototype.SetCanvasFilled = function(aCanvas) {
+	var lPartGroupChanged = [];
+	for(var i = 0; i < this.particles.length; i ++) {
+		if(this.particles[i].GetCanvas() === aCanvas) {
+			this.particles[i].RefreshTexture();
+			lPartGroupChanged.push(this.particles[i]);
+		}
+	}
+
+	this.mShowList.push(lPartGroupChanged[Math.floor(Math.random(lPartGroupChanged.length))]);
+
 }
 
 ParticlesManager.prototype.SetTextureAll = function(aTexture) {
-	// for (var j = 0; j < this.particles.length; j ++ ) 
-	// {
-	// 	 this.particles[ j ].SetTexture(aTexture);
-	// }
+	this.textureEnvMap = aTexture;
 }
 
 /*
@@ -79,4 +133,10 @@ ParticlesManager.prototype.SwitchState = function(aIndex)
 	this.particles[0].PrepareTransition();
 }
 
+ParticlesManager.prototype.GetTimeBeforeNextShow = function() {
+	return this.mTimeBetweenShow - this.mTimerShow;
+}
 
+ParticlesManager.prototype.GetParticleShow = function() {
+	return this.particleShow;
+}

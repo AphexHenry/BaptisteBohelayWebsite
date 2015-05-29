@@ -35,7 +35,7 @@ function init() {
 
 	scene = new THREE.Scene();
 
-	renderer = new THREE.WebGLRenderer( { antialias: false, alpha:true } );
+	renderer = new THREE.WebGLRenderer( { antialias: true, alpha:true } );
 	renderer.setPixelRatio( window.devicePixelRatio );
 	renderer.setSize( width, height );
 	container.appendChild( renderer.domElement );
@@ -48,9 +48,6 @@ function init() {
 
 	sParticlesManager = new ParticlesManager();
 	sParticlesManager.init();
-	initTexture("textures/cube/SwedishRoyalCastle/");
-
-	//console.log("init time: ", Date.now() - start );
 
 	scene.matrixAutoUpdate = false;
 
@@ -63,19 +60,22 @@ function init() {
 	stats.domElement.style.top = '0px';
 	container.appendChild( stats.domElement );
 
-	document.addEventListener( 'mousemove', onDocumentMouseMove, false );
-	document.addEventListener( 'touchstart', onDocumentTouchStart, false );
-	document.addEventListener( 'touchmove', onDocumentTouchMove, false );
+	document.addEventListener( 'keydown', onDocumentKeyDown, false );
 
 	window.addEventListener( 'resize', onWindowResize, false );
 
 	var effectController  = {
 
 		focus: 		1.0,
-		aperture:	0.025,
+		aperture:	0.005,
 		maxblur:	1.0
-
 	};
+
+	settings = {
+		backR:0,
+		backG:0,
+		backB:0
+	}
 
 	var matChanger = function( ) {
 		postprocessing.bokeh.uniforms[ "focus" ].value = effectController.focus;
@@ -87,56 +87,59 @@ function init() {
 	gui.add( effectController, "focus", 0.0, 3.0, 0.025 ).onChange( matChanger );
 	gui.add( effectController, "aperture", 0.001, 0.2, 0.001 ).onChange( matChanger );
 	gui.add( effectController, "maxblur", 0.0, 3.0, 0.025 ).onChange( matChanger );
+	gui.add( settings, "backR", 0.0, 1, 0.01 );
+	gui.add( settings, "backG", 0.0, 1, 0.01 );
+	gui.add( settings, "backB", 0.0, 1, 0.01 );
 	gui.close();
 
+	setupTest();
 }
 
-function initTexture(aPath) 
-{	
-	material_depth = new THREE.MeshDepthMaterial();
-
-	var path = aPath;
-	var format = '.jpg';
-	var urls = [
-			path + 'px' + format, path + 'nx' + format,
-			path + 'py' + format, path + 'ny' + format,
-			path + 'pz' + format, path + 'nz' + format
-		];
-
-	var texturePart = THREE.ImageUtils.loadTextureCube( urls );
-
-	sParticlesManager.SetTextureAll(texturePart);
-}
-
-function onDocumentMouseMove( event ) {
-
-	mouseX = event.clientX - windowHalfX;
-	mouseY = event.clientY - windowHalfY;
-
-}
-
-function onDocumentTouchStart( event ) {
-
-	if ( event.touches.length == 1 ) {
-
-		event.preventDefault();
-
-		mouseX = event.touches[ 0 ].pageX - windowHalfX;
-		mouseY = event.touches[ 0 ].pageY - windowHalfY;
-
+/*
+ * Add various fake cards for test purposes.
+ */
+function setupTest() {
+	for(var i = 0; i < 30; i++) {
+		addFakeCard();
 	}
 }
 
-function onDocumentTouchMove( event ) {
+function addFakeCard() {
+	var lNames = ['henriette!', 'Marie;)', 'Ron Hubbard', 'Blondy Love'];
+	var lIcons = ['icon1.png', 'icon2.jpg', 'icon3.jpg'];
+	var lPictures = ['jazzConcert.jpg', 'jazzConcert2.jpg'];
 
-	if ( event.touches.length == 1 ) {
+	var lAvatarPath = 'textures/' + lIcons[Math.floor(Math.random() * lIcons.length)];
+	var lImagePath = i%2 ?  'textures/' + lPictures[Math.floor(Math.random() * lPictures.length)] : null;
+	var lUserName = lNames[Math.floor(Math.random() * lNames.length)];
 
-		event.preventDefault();
-
-		mouseX = event.touches[ 0 ].pageX - windowHalfX;
-		mouseY = event.touches[ 0 ].pageY - windowHalfY;
-
+	var lText = '';
+	var lTextIndex = Math.floor(Math.random() * 3);
+	switch(lTextIndex) {
+		case 0:
+			lText = "NICE!"
+			break;
+		case 1:
+			lText = "Holy cow! This guys know something about music!"
+			break;
+		case 2:
+			lText = "Then the perilous path was planted:And a river, and a spring On every cliff and tomb; And on the bleached bones Red clay brought forth."
+				+"Till the villain left the paths of ease, To walk in perilous paths, and drive The just man into barren climes."
+			break;
 	}
+
+	var lObject = {
+		userIcon:lAvatarPath,
+		userName:lUserName,
+		text:lText,
+		image:lImagePath
+	}
+
+	sCardManager.add(lObject);
+
+}
+
+function onDocumentKeyDown() {
 
 }
 
@@ -161,7 +164,7 @@ function initPostprocessing() {
 
 	var bokehPass = new THREE.BokehPass( scene, camera, {
 		focus: 		1.0,
-		aperture:	0.025,
+		aperture:	0.005,
 		maxblur:	1.0,
 
 		width: width,
@@ -196,12 +199,12 @@ function render() {
 	var lwidth = getWidth();
 	sParticlesManager.Update(delta, lwidth);
 
-	camera.position.x += ( mouseX * 0.3 - camera.position.x ) * 0.036;
-	camera.position.y += ( - (mouseY * 0.3) - camera.position.y ) * 0.036;
+	//camera.position.x += ( mouseX * 0.3 - camera.position.x ) * 0.036;
+	//camera.position.y += ( - (mouseY * 0.3) - camera.position.y ) * 0.036;
 
 	camera.lookAt( scene.position );
 
-	renderer.setClearColor( 0xffffff, 1);
+	renderer.setClearColor( new THREE.Color(settings.backR, settings.backG, settings.backB), 1);
 	renderer.clear();
 
 	postprocessing.composer.render( 0.1 );
