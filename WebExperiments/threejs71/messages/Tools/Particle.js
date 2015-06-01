@@ -208,9 +208,9 @@ Particle.prototype.Update = function(aTimeInterval, awidth)
 		 this.mesh.rotation.y = this.mRotation.y;// + 0.5 * Math.PI;
 		 this.mesh.rotation.z = 0;// + 0.5 * Math.PI;
 		this.mSize = Math.max(this.mSize, 0.0001);
-		this.mesh.scale.x = 0.1 * this.mAlpha * (this.mFlipRotation * this.mSize *  awidth / TEXTURE_SIZE);
-		this.mesh.scale.y = 0.1 * this.mSize *  awidth / TEXTURE_SIZE;
-		this.mesh.scale.z = 0.1 * this.mSize *  awidth / TEXTURE_SIZE;
+		this.mesh.scale.x = 0.05 * this.mAlpha * (this.mFlipRotation * this.mSize *  awidth / TEXTURE_SIZE);
+		this.mesh.scale.y = 0.05 * this.mSize *  awidth / TEXTURE_SIZE;
+		this.mesh.scale.z = 0.05 * this.mSize *  awidth / TEXTURE_SIZE;
 		// this.mesh.scale.x = this.mesh.scale.y = this.mesh.scale.z = 60;
 		// this.mesh.doubleSided = true;
 		this.mesh.updateMatrix();

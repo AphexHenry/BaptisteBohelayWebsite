@@ -6,7 +6,7 @@ CardComposer.prototype.composeEmpty = function(aCanvas) {
 	this.drawSurface(aCanvas, false, true);
 }
 
-CardComposer.prototype.compose = function(aCanvas, aText, aName, aAvatarUrl, aImageUrl, aCallback) {
+CardComposer.prototype.compose = function(aCanvas, aText, aName, aAvatarUrl, aImageUrl, aColor, aCallback) {
 
 	var lListImages = [];
 	this.avatarSize = aCanvas.width * 0.15;
@@ -43,7 +43,7 @@ CardComposer.prototype.compose = function(aCanvas, aText, aName, aAvatarUrl, aIm
 			that.drawAvatarOut(aCanvas, lAvatarImg, aName);
 		}
 		else {
-			that.drawSurface(aCanvas, false);
+			that.drawSurface(aCanvas, false, false, aColor);
 			that.drawAvatar(aCanvas, lAvatarImg, aName);
 			that.drawTextNoImage(aCanvas, aText);
 		}
@@ -55,15 +55,16 @@ CardComposer.prototype.clear = function(aCanvas) {
 	aCanvas.width = aCanvas.width;
 }
 
-CardComposer.prototype.drawSurface = function(aCanvas, aClip, aImage) {
+CardComposer.prototype.drawSurface = function(aCanvas, aClip, aImage, aColor) {
+	var lShrinkRight = 0;
 	var lOptions = {
 		cornerRadius:50
-		, y: aCanvas.height * 0.15
-		, x: aCanvas.height * 0.15
-		, width:aCanvas.width * 0.85
-		, height:aCanvas.height * 0.85
-		, fill:aImage ? 'none' : 'white'
-		, stroke:'#666'
+		, y: aCanvas.height * lShrinkRight
+		, x: aCanvas.height * lShrinkRight
+		, width:aCanvas.width * (1 - lShrinkRight)
+		, height:aCanvas.height * (1 - lShrinkRight)
+		, fill:aImage ? 'none' : aColor
+		, stroke:'#555'
 		, clip: aClip
 		, lineWidth: 5
 
@@ -72,7 +73,7 @@ CardComposer.prototype.drawSurface = function(aCanvas, aClip, aImage) {
 }
 
 CardComposer.prototype.drawAvatarFrame = function(aCanvas, aOptions) {
-	aOptions.stroke = '#800';
+	aOptions.stroke = '#fff';
 	CanvasUtils.drawRoundedRectangle(aCanvas.getContext('2d'), aOptions);
 	aOptions.clip = true;
 	CanvasUtils.drawRoundedRectangle(aCanvas.getContext('2d'), aOptions);
@@ -84,23 +85,40 @@ CardComposer.prototype.drawAvatar = function(aCanvas, aAvatar, aName) {
 
 	var lSize = this.avatarSize;
 
+	var lGap = 0.5
+
 	var context = aCanvas.getContext('2d');
 	var lOptions = {
 		width:lSize * 1.1
 		, height:lSize * 1.1
-		, x:this.padding - lSize * 0.05
-		, y:this.padding - lSize * 0.05
+		, x:this.padding * lGap - lSize * 0.03
+		, y:this.padding * lGap - lSize * 0.03
 	};
+	context.beginPath();
+	context.fillStyle = "rgba(0,0,0,1	)";
+	context.arc(35 + lOptions.x,35 + lOptions.y,120,0,2*Math.PI);
+	context.fill();
+
 	context.save();
 	context.globalCompositeOperation = "destination-out";
+	context.beginPath();
+	context.fillStyle = "rgba(0,0,0,1)";
+	context.arc(30 + lOptions.x,30 + lOptions.y,120,0,2*Math.PI);
+	context.fill();
+
+
 	this.drawAvatarFrame(aCanvas, lOptions);
+
+
 	context.restore();
+
+
 
 	var lOptions = {
 		width:lSize
 		, height:lSize
-		, x:this.padding
-		, y:this.padding
+		, x:this.padding * lGap
+		, y:this.padding * lGap
 	};
 	context.save();
 	this.drawAvatarFrame(aCanvas, lOptions);
@@ -154,7 +172,7 @@ CardComposer.prototype.drawAvatarName = function(aCanvas, aText, aOptions) {
 		color:'#333'
 		,wrap:true
 		,maxLines:1
-		,paddingLeft:aOptions.x + aOptions.width  + this.padding * 0.5
+		,paddingLeft:aOptions.x + aOptions.width  + this.padding * 1.
 		,paddingTop:aOptions.y + aOptions.height * 0.1
 		,width:aCanvas.width
 	};

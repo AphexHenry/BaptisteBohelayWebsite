@@ -69,7 +69,7 @@ function addFakeCard() {
 	var lUserName = lNames[Math.floor(Math.random() * lNames.length)];
 
 	var lText = '';
-	var lTextIndex = Math.floor(Math.random() * 3);
+	var lTextIndex = Math.floor(Math.random() * 4);
 	switch(lTextIndex) {
 		case 0:
 			lText = "NICE!"
@@ -78,8 +78,11 @@ function addFakeCard() {
 			lText = "Holy cow! This guys know something about music!"
 			break;
 		case 2:
+			lText = "This is bearable.";
+			break;
+		case 3:
 			lText = "Then the perilous path was planted:And a river, and a spring On every cliff and tomb; And on the bleached bones Red clay brought forth."
-				+"Till the villain left the paths of ease, To walk in perilous paths, and drive The just man into barren climes."
+				+"Till the villain left the paths of ease, To walk in perilous paths, and drive The just man into barren climes.";
 			break;
 	}
 

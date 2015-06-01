@@ -15,6 +15,13 @@ function CardManager() {
 
 		this.canvas.push(lCanvas);
 	}
+
+	sColors = [];
+	sColors.push('#f8f9fc');
+	sColors.push('#f8f9fd');
+	sColors.push('#fff8f9');
+	sColors.push('#f8fbff');
+	sColors.push('#f8f7f7');
 }
 
 CardManager.prototype.GetCanvas = function(aIndex) {
@@ -30,7 +37,8 @@ CardManager.prototype.add = function(aObject) {
 
 	var lCanvas = this.canvas[this.canvasNext];
 	var that = this;
-	this.cardComposer.compose(lCanvas, aObject.text, aObject.userName, aObject.userIcon, aObject.image, function() {
+	var lColor = sColors[Math.floor(Math.random() * sColors.length)];
+	this.cardComposer.compose(lCanvas, aObject.text, aObject.userName, aObject.userIcon, aObject.image, lColor, function() {
 		sParticlesManager.SetCanvasFilled(lCanvas);
 		that.waitingList.push(lCanvas);
 	});
