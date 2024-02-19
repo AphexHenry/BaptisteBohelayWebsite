@@ -41,7 +41,7 @@ ParticleGroupAboutMe.prototype.Init = function()
 	$("#roundCorner").load("html/aboutMe.html");
 	
 	setTimeout(function() {$("#roundCorner").slideDown(500);}, 1500);
-	$('body').click(function(e){
+	$('body').bind('touchend mousedown',function(e){
    	if( e.target.id == 'roundCorner' )
    	{
     	return true; 
@@ -52,6 +52,8 @@ ParticleGroupAboutMe.prototype.Init = function()
 	}
 
 	});
+
+	this.social.particle.SetTextVisible(true);
 }
 
 ParticleGroupAboutMe.prototype.MouseDown = function()
@@ -88,7 +90,7 @@ ParticleGroupAboutMe.prototype.MouseDown = function()
 	var intersectsSocial = ray.intersectObject( this.social.plane );
 	if(intersectsSocial.length > 0)
 	{
-		this.cameraDistance = window.innerWidth * 0.07;
+		this.cameraDistance = window.innerWidth * 0.09;
 		this.social.SetTouched(true);
 	}
 	else
@@ -158,4 +160,5 @@ ParticleGroupAboutMe.prototype.Terminate = function()
 {
 	this.htmlDisplayed = false;
 	$("#roundCorner").slideUp(400);
+	this.social.particle.SetTextVisible(false);
 }

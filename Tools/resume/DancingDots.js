@@ -227,7 +227,7 @@ DancingDots.prototype.SetAttacked = function(strength)
 	this.speed.y += strengthAtt * -monsterDirection.y;
 	for(var i = 0; i < 2; i++)
 	{
-		ParticleGroups[ParticleGroup.PART_MONSTER].AddFood(this.listSkills[this.indexListSkills].type, 
+		ParticleGroups[sTools.ParticleGroup.PART_MONSTER].AddFood(this.listSkills[this.indexListSkills].type, 
 															this.listSkills[this.indexListSkills].name, 
 															this.particle.position, 
 															new THREE.Vector3(window.innerWidth * myRandom(), window.innerHeight * myRandom(), 0.),
@@ -247,6 +247,6 @@ DancingDots.prototype.SetDead = function()
 	scene.remove(this.particle);
 	this.isDead = true;
 	DisplayMessage("Challenge completed","the creature was strong enough", "Continue feeding it with skills.", "");
-	ParticleGroups[ParticleGroup.PART_MONSTER].SwitchNextState();
+	ParticleGroups[sTools.ParticleGroup.PART_MONSTER].SwitchNextState();
 		
 }

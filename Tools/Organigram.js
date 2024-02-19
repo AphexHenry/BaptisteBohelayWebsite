@@ -12,7 +12,7 @@ Organigram.prototype.GetFather = function(index)
         {
             if(this.tree[i][childId] == index)
             {
-                return i;
+                return parseInt(i);
             }
         }
     }

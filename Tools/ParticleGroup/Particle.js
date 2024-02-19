@@ -4,7 +4,7 @@ var CONSERVATION_OF_VELOCITY = 0.95;
 var sShowPartPosition = new THREE.Vector3(0., 0., 0.);
 var sFrameRate = 1.;
 
-var sGroupCurrent = ParticleGroup.PART_INTRO;
+var sGroupCurrent = sTools.ParticleGroup.PART_INTRO;
 
 function GetReference(aName, aDescription, aPath, aChromeOnly, aCPUUse, aOtherPage)
 {
@@ -23,7 +23,9 @@ function ParticleGroupWebExperiment(positionCenter, name)
 	this.references.push(GetReference("Slug Journey", "", "WebExperiments/slug", true, "high"));
 	this.references.push(GetReference("Moving Mirror", "", "WebExperiments/mirror", true, "high"));
 	this.references.push(GetReference("3D Videos", "", "WebExperiments/videos", true, "high"));
-	this.references.push(GetReference("Plane forest", "", "WebExperiments/LightForest", true, "high"));
+	this.references.push(GetReference("Plane Forest", "", "WebExperiments/LightForest", true, "high"));
+	this.references.push(GetReference("Plane Forest", "", "WebExperiments/LightForest", true, "high"));
+	this.references.push(GetReference("Sound Visu", "", "WebExperiments/SoundVisu", true, "high"));
 	var width = window.innerWidth * .7;
 	this.cameraDistance = width * 0.6;
 	this.positionCenter = positionCenter;
@@ -50,7 +52,7 @@ ParticleGroupWebExperiment.prototype.Init = function()
 	$("#roundCorner").load("html/aboutWebExperiments.html");
 	
 	setTimeout(function() {$("#roundCorner").slideDown(500);}, 1500);
-	$('body').click(function(e){
+	$('body').bind('touchend mousedown',function(e){
    	if( e.target.id == 'roundCorner' )
    	{
     	return true; 
@@ -176,15 +178,16 @@ function ParticleGroupIntro(positionCenter, flyer, name, id)
 {
 	this.name = name;
 	this.id = id;
-	ParticleGroups[id] = this;
+	sTools.ParticleGroups[id] = this;
+	this.mAngleAmplitude = Math.PI * 0.5;
 
 	this.particles = [];
 	this.particlesToUpdate = [];
 
-	this.cameraDistance = window.innerWidth * 0.27;
-	this.cameraDistanceNormal = this.cameraDistance;
+	this.SetShortDistance();
+
 	this.positionCenter = positionCenter;
-	var angleDecay = 2 * Math.PI / flyer.length + Math.random() * 0.2;
+	var angleDecay = 1 * Math.PI / flyer.length + Math.random() * 0.2;
 
 	for ( var i = 0; i < flyer.length; i ++ ) 
 	{
@@ -207,14 +210,23 @@ function ParticleGroupIntro(positionCenter, flyer, name, id)
 		}
 		else
 		{
-			lPosition.x = positionCenter.x + 1.2 * sWIDTH * Math.sin( i * angleDecay + Math.PI + Math.random() * 1. / flyer.length);
-			lPosition.y = positionCenter.y + 1.2 * sWIDTH * Math.sin( i * angleDecay + Math.random() * 2. / flyer.length);
-			lPosition.z = positionCenter.z + 1.2 * sWIDTH * Math.cos( i * angleDecay + Math.PI+ Math.random() * 2. / flyer.length);
+			var lAngle = i * angleDecay - Math.PI * 0.5;
+			lPosition.x = positionCenter.x + 2. * sWIDTH * Math.sin( lAngle ) - sWIDTH * 0.4;
+			lPosition.y = positionCenter.y + Math.cos(lAngle * 2.) * .9 * sWIDTH / getRatio();
+			lPosition.z = positionCenter.z + 2. * sWIDTH * Math.cos( lAngle );
+			this.cameraDistance = window.innerWidth * .37;
+			this.cameraDistanceNormal = this.cameraDistance;
 		}
 
-		var particle = new ParticleCircleNavigate(lPosition, flyer[i])
+		var particle = new ParticleCircleNavigate(lPosition, flyer[i]);
 		this.particles.push(particle);
 	}
+}
+
+ParticleGroupIntro.prototype.SetShortDistance = function()
+{
+	this.cameraDistance = window.innerWidth * 0.27;
+	this.cameraDistanceNormal = this.cameraDistance;
 }
 
 ParticleGroupIntro.prototype.MouseDown = function()
@@ -261,6 +273,13 @@ ParticleGroupIntro.prototype.AddParticle = function(aParticleObject)
 {
 	this.particles.push(aParticleObject.particle);
 	this.particlesToUpdate.push(aParticleObject);
+	if(isdefined(aParticleObject.target))
+	{
+		if(isdefined(aParticleObject.target.target))
+		{
+			Organigram.Map(this.id, aParticleObject.target.target);
+		}
+	}
 }
 
 ParticleGroupIntro.prototype.MouseUp = function()
@@ -273,11 +292,31 @@ ParticleGroupIntro.prototype.BackFromHTML = function()
 	this.cameraDistance = this.cameraDistanceNormal;
 }
 
-ParticleGroupIntro.prototype.Init = function(){};
+ParticleGroupIntro.prototype.GetParticleThatLeadTo = function(aTarget)
+{
+	for(var i = 0; i< this.particles.length; i++)
+	{
+		if(this.particles[i].TargetObject.target == aTarget)
+		{
+			return this.particles[i];
+		}
+	}
+}
+
+ParticleGroupIntro.prototype.Init = function()
+{
+	for(var i in this.particles)
+	{
+		if(isdefined(this.particles[i].SetTextVisible))
+		{
+			this.particles[i].SetTextVisible(true);
+		}
+	}
+};
 
 ParticleGroupIntro.prototype.Terminate = function()
 {
-	if(INTERSECTED)
+	if(INTERSECTED && !isdefined(INTERSECTED.TargetObject.isAutonomous))
 	{
 		INTERSECTED.material.program = programStroke;
 	}
@@ -285,9 +324,14 @@ ParticleGroupIntro.prototype.Terminate = function()
 
 ParticleGroupIntro.prototype.Update = function()
 {
+	controlAuto = sTools.CameraControlType.MOUSE_MOVE;
+
 	for(var i = 0; i < this.particlesToUpdate.length; i++)
 	{
-		this.particlesToUpdate[i].Update(0.02);
+		if(isdefined(this.particlesToUpdate[i].Update))
+		{
+			this.particlesToUpdate[i].Update(0.02);
+		}
 	}
 
 	var vector = new THREE.Vector3( mouse.x, mouse.y, 0.5 );
@@ -299,7 +343,6 @@ ParticleGroupIntro.prototype.Update = function()
 
 	if ( intersects.length > 0 ) 
 	{
-
 		if ( INTERSECTED != intersects[ 0 ].object ) {
 
 			if ( INTERSECTED ) 
@@ -307,12 +350,13 @@ ParticleGroupIntro.prototype.Update = function()
 				if(isdefined(INTERSECTED.TargetObject.isAutonomous))
 				{
 					INTERSECTED.MyMouseOff(intersects[ 0 ]);
-					return;
 				}
 				else
 				{
 					INTERSECTED.material.program = programStroke;
 				}
+
+				INTERSECTED.TargetObject.info.material.opacity = OPACITY_INFO;
 			}
 
 			INTERSECTED = intersects[ 0 ].object;
@@ -339,13 +383,20 @@ ParticleGroupIntro.prototype.Update = function()
 		{
 			if(isdefined(INTERSECTED.TargetObject.isAutonomous))
 			{
-				INTERSECTED.MyMouseOff(intersects[ 0 ]);
+				if(!IS_PHONE)
+				{
+					INTERSECTED.MyMouseOff(intersects[ 0 ]);
+				}
+				else
+				{
+					INTERSECTED.MyMouseOn(intersects[ 0 ]);
+				}
 			}
 			else
 			{
 				INTERSECTED.material.program = programStroke;
-				INTERSECTED.TargetObject.info.material.opacity = OPACITY_INFO;
 			}
+			INTERSECTED.TargetObject.info.material.opacity = OPACITY_INFO;
 		}
 		INTERSECTED = null;
 	}

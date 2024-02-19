@@ -9,7 +9,7 @@ sCurrentResumeSate = ResumeStates.INIT;
 
 function ParticleGroupMonster(positionCenter, name) 
 {
-	this.width = window.innerWidth * 0.3;
+	this.width = (window.innerWidth + window.innerHeight) * 0.5 * 0.3;
 	this.cameraDistance = this.width * 3.;
 	this.positionCenter = positionCenter;
 	this.name = name;
@@ -95,14 +95,19 @@ ParticleGroupMonster.prototype.MouseDown = function()
 	{
 		sEnd = true;
 		this.goAway = true;
+		
+		$('#githubButton').slideUp(300);
+		$('#contactButton').slideUp(200);
+		
 		infoDisplay.FadeOut();
-		setTimeout(function() {GoToIndex(ParticleGroup.PART_CREA_LULU);}, 1000);
+		// $('#githubButton').slideUp();
+		setTimeout(function() {GoToIndex(sTools.ParticleGroup.PART_CREA_LULU);}, 1000);
 	}
 }
 
 ParticleGroupMonster.prototype.UpdateCamera = function(delta)
 {
-	cameraTarget = ParticleGroups[ParticleGroup.PART_INTRO].positionCenter;
+	cameraTarget = sTools.ParticleGroups[sTools.ParticleGroup.PART_INTRO].positionCenter;
 	cameraPosition.x = this.positionCenter.x;
 	cameraPosition.y = this.positionCenter.y;
 	cameraPosition.z = this.positionCenter.z + this.cameraDistance;
@@ -110,7 +115,6 @@ ParticleGroupMonster.prototype.UpdateCamera = function(delta)
 
 ParticleGroupMonster.prototype.UpdateFood = function(delta)
 {
-	$('#BackCircle').hide();
 	var lPart;
 	for(var i = 0; i < sFoodArray.length; i++)
 	{
@@ -171,7 +175,7 @@ ParticleGroupMonster.prototype.Update = function(delta)
 	{
 		delta *= 0.05;
 	}
-	controlAuto = false;
+	controlAuto = sTools.CameraControlType.NONE;
 	this.UpdateCamera(delta);
 
 	this.UpdateFood(delta);

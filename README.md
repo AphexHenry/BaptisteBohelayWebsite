@@ -1,4 +1,3 @@
-BaptisteBohelayWebsite
-======================
+# Baptiste Bohelay Website
 
-public code for baptistebohelay.com
+Experimental website introducing my personnal projects.

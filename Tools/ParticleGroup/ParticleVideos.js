@@ -45,6 +45,7 @@ ParticleGroupVideos.prototype.MouseDown = function()
 		}
 		else if(typeof INTERSECTED.TargetObject.targetHTML != "undefined")
 		{
+			INTERSECTED.material.program = programStroke;
 			CirclesToHtml(INTERSECTED.TargetObject.targetHTML);
 		}
 		else if(typeof INTERSECTED.TargetObject.targetHTMLOpen != "undefined")

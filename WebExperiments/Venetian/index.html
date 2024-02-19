@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Senki Dala Visual</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<style>
+			body {
+				background-color: #000000;
+				margin: 0px;
+				overflow: hidden;
+				width:100%;
+				cursor: none;
+			}
+
+			#fader {
+				position: absolute;
+				width:100%;
+				height:100%;
+				background-color: black;
+				opacity: 1;
+				cursor: none;
+			}
+
+			.centered {
+				position:absolute;
+				margin:0;
+				display: block;
+				vertical-align: middle;
+				left:50%;
+				top:50%;
+				transform: translateX(-50%) translateY(-50%);
+				color:white;
+				cursor: none;
+
+				/*left:0;*/
+				/*right:0;*/
+				/*top:0;*/
+				/*bottom:0;*/
+			}
+
+			#loading {
+				opacity: 1;
+			}
+
+			#credits {
+				display: none;
+			}
+
+			#sm2-container {
+				position:absolute;
+			}
+
+			a {
+				color: #ffffff;
+			}
+		</style>
+
+		<!-- the core stuff -->
+		<!--<script type="text/javascript" src="libs/soundmanager/script/soundmanager2.js"></script>-->
+
+		<script src="libs/jquery.min.js"></script>
+		<script src="libs/angular.min.js"></script>
+		<script src="libs/threejs/three.min.js"></script>
+
+		<script src="libs/threejs/shaders/CopyShader.js"></script>
+		<script src="libs/threejs/shaders/BokehShader2.js"></script>
+		<script src="libs/threejs/postprocessing/EffectComposer.js"></script>
+		<script src="libs/threejs/postprocessing/EffectComposer.js"></script>
+		<script src="libs/threejs/postprocessing/RenderPass.js"></script>
+		<script src="libs/threejs/postprocessing/ShaderPass.js"></script>
+		<script src="libs/threejs/postprocessing/MaskPass.js"></script>
+		<script src="libs/threejs/postprocessing/BokehPass.js"></script>
+
+		<script src="libs/dat.gui.min.js"></script>
+		<script src='js/Tools.js'></script>
+		<script src="js/angular/controllers/mainCtrl.js"></script>
+
+		<script src="js/angular/services/updateCallService.js"></script>
+		<script src="js/angular/services/blurService.js"></script>
+		<script src="js/angular/services/settingsService.js"></script>
+		<script src="js/angular/services/stateManagerService.js"></script>
+		<script src="js/angular/services/stateFlowService.js"></script>
+		<script src="js/angular/services/stateIdleService.js"></script>
+		<script src="js/angular/services/stateIntenseService.js"></script>
+		<script src='js/angular/services/ParticleManagerService.js'></script>
+		<script src='js/angular/services/cameraService.js'></script>
+		<script src='js/angular/services/ParticleService.js'></script>
+		<script src='js/angular/services/audioMovementService.js'></script>
+		<script src='js/angular/services/analyzeParserService.js'></script>
+		<script src='audio/attack.js'></script>
+
+	</head>
+	<body ng-app="myApp" ng-controller="mainCtrl">
+		<div id="fader"></div>
+		<div class="centered" id="credits">
+			<h3>music by Venetian Snares<br>
+				photo by Jón Ragnarsson<br>
+				visual by Baptiste Bohelay
+			</h3>
+		</div>
+		<div class="centered" id="loading">
+			<h2>loading {{loadingProgress}}</h2>
+		</div>
+	</body>
+
+	<script>
+		var gRoot = '.';
+		var gAnimated = true;
+		window.stopAnimation = function() {
+			gAnimated = false
+		};
+
+		window.startAnimation = function() {
+			gAnimated = true
+		};
+	</script>
+</html>

@@ -1,5 +1,5 @@
 var lIndexStates = 0;
-var sPutALetter = false;
+var sPutALetter = 0;
 var sEnd = false;
 
 var MonsterStates =
@@ -54,7 +54,7 @@ function getCloseFood()
 			}
 
 			closeElements.push({pos:sFoodArray[i].position, indexLeg:index, particle:sFoodArray[i]});
-			sTimerClose = 2.;
+			sTimerClose = 0.7;
 		}
 	}
 
@@ -167,7 +167,13 @@ drawOneArmTwo = function (context, size, i, amp)
 				gotObject.particle.position.x = gotObject.particle.TargetObject.positionTarget.x;
 				gotObject.particle.position.y = gotObject.particle.TargetObject.positionTarget.y;
 				sLegArray[i].gotObject = null;
-				sPutALetter = true;
+				sPutALetter++;
+				// we display the github button at the 20th letter.
+				if(sPutALetter == 20)
+				{
+					$('#githubButton').slideDown(300);
+					$('#contactButton').slideDown(200);
+				}
 				SetStateLeg(i, 0);
 			}
 		break;
@@ -243,12 +249,12 @@ Monster.prototype.Update = function(delta)
 
 	sRayCircle += (sRayCircleTarget - sRayCircle) * delta * 0.5;
 
-	if(sSizeLegs < 0.52 && sPutALetter && !sEnd)
+	if(sSizeLegs < 0.52 && (sPutALetter > 0) && !sEnd)
 	{
 		infoDisplay.SetSize(1.3);
 		infoDisplay.SetText([{string:"enter", size: 2}]);
 		infoDisplay.FadeIn();	
-		sEnd = true;	
+		sEnd = true;
 	}
 	infoDisplay.SetPosition(sMonster.position, true);
 }

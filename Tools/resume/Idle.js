@@ -17,7 +17,7 @@ function Idle(positionCenter)
 	{
 		angle = myRandom() * Math.PI;
 		distance = 1.5 + myRandom() * 0.5;
-		this.listSkills[i].particle = ParticleGroups[ParticleGroup.PART_MONSTER].AddFood(this.listSkills[i].type, 
+		this.listSkills[i].particle = ParticleGroups[sTools.ParticleGroup.PART_MONSTER].AddFood(this.listSkills[i].type, 
 																this.listSkills[i].name, 
 																new THREE.Vector3(distance * window.innerWidth * Math.cos(angle) + positionCenter.x, distance * window.innerHeight * Math.sin(angle) + positionCenter.y, 0.), 
 																new THREE.Vector3(0., 0., 0.),
@@ -31,7 +31,7 @@ Idle.prototype.Update = function(delta)
 	this.timer -= delta;
 	if((this.timer < 0) || (sFoodArray.length <= 0))
 	{
-		ParticleGroups[ParticleGroup.PART_MONSTER].SwitchNextState();
+		ParticleGroups[sTools.ParticleGroup.PART_MONSTER].SwitchNextState();
 	}
 
 	for(var i = 0; i < this.listSkills.length; i++)

@@ -1,7 +1,7 @@
 
 var MAX_Z = (window.innerWidth + window.innerHeight) * 0.5;
 var MIN_Z = -window.innerWidth
-var WINDOW_HEIGHT = window.innerHeight * 0.9;
+var WINDOW_HEIGHT = window.innerHeight * 1.;
 
 var ImageFront = document.createElement('canvas');
 document.body.appendChild(ImageFront);
@@ -29,37 +29,56 @@ var sDurationFade = 1;
 var isBlack = false;
 var sWIDTH;
 
-FadeIn();
-
-var ParticleGroups = [];
-var ParticleGroupID = 0;
-ParticleGroup = 
+if(!isdefined(sAutomatedFadeIn))
 {
-    PART_WEB : ParticleGroupID++,
-    PART_INTRO : ParticleGroupID++,
-    PART_CREA_LULU : ParticleGroupID++,
-    PART_LULU : ParticleGroupID++,
-    PART_SOUND_EXPERIMENTS : ParticleGroupID++,
-    PART_SOUND_MONSTER : ParticleGroupID++,
-    PART_VIDEOS : ParticleGroupID++,
-    PART_FUNKY_CREATION : ParticleGroupID++,
-    PART_MONSTER : ParticleGroupID++,
-    PART_ABOUT_ME : ParticleGroupID++,
+    FadeIn();
+}
+else if(sAutomatedFadeIn)
+{
+    FadeIn();
 }
 
+function Tools()
+{
+    this.CameraControlType = 
+    {
+        NONE : 0,
+        SATTELITE : 1,
+        MOUSE_MOVE : 2,
+    }
+
+    this.ParticleGroups = [];
+    var ParticleGroupID = 0;
+    this.ParticleGroup = 
+    {
+        PART_WEB : ParticleGroupID++,
+        PART_INTRO : ParticleGroupID++,
+        PART_CREA_LULU : ParticleGroupID++,
+        PART_LULU : ParticleGroupID++,
+        PART_SOUND_EXPERIMENTS : ParticleGroupID++,
+        PART_SOUND_MONSTER : ParticleGroupID++,
+        PART_VIDEOS : ParticleGroupID++,
+        PART_OTHER : ParticleGroupID++,
+        PART_FUNKY_CREATION : ParticleGroupID++,
+        PART_MONSTER : ParticleGroupID++,
+        PART_ABOUT_ME : ParticleGroupID++,
+    }
+}
+
+var sTools = new Tools();
+
 // // fade intro + passer a transition, trucs qui tombent.
-function FadeOut()
+Tools.prototype.FadeOut = function()
 {
     ImageFrontCtx.fillStyle = '#f0f0f0';
     ImageFrontCtx.fillRect( 0, 0, ImageFront.width, ImageFront.height );
     $('#frontground').fadeTo('slow', 1.);
 }
 
-function FadeIn()
+Tools.prototype.FadeIn = function()
 {
     ImageFrontCtx.fillStyle = '#f0f0f0';
     ImageFrontCtx.fillRect( 0, 0, ImageFront.width, ImageFront.height );
-    $('#frontground').fadeOut('slow', 0.);
 }
 
 function onMouseDownIntro()
@@ -75,7 +94,7 @@ function GoToURL(aURL)
     if(!IsNextPage)
     {
         isBlack = true;
-        FadeOut();
+        sTools.FadeOut();
         setTimeout(function() {document.location.href = aURL;}, 1000);
         IsNextPage = true;
     }

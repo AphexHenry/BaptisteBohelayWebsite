@@ -154,7 +154,7 @@ ParticleGroupMonsterSound.prototype.SwitchNextState = function()
 
 ParticleGroupMonsterSound.prototype.Update = function(delta)
 {
-	controlAuto = false;
+	controlAuto = sTools.CameraControlType.NONE;
 	this.UpdateCamera(delta);
 
 	this.UpdateFood(delta);

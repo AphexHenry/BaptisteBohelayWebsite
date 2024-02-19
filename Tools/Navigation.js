@@ -1,16 +1,25 @@
 	function GoToIndex(index)
 	{
-		controlAuto = true;
+		if(sIsInHTML)
+		{
+			HtmlToCircles();
+			return;
+		}
+
+		controlAuto = sTools.CameraControlType.SATTELITE;;
 		if(index != sGroupCurrent)
 		{
 			if(sGroupCurrent >= 0)
-				ParticleGroups[sGroupCurrent].Terminate();
+			{
+				GlobalGroupTeminate();				
+			}
 			sGroupCurrent = index;
-			if(typeof isdefined(ParticleGroups[sGroupCurrent].Init == 'function'))
-				ParticleGroups[sGroupCurrent].Init();
-			window.location.hash = ParticleGroups[sGroupCurrent].name;
+			GlobalGroupInit();
+
+			SetHashGroup(sTools.ParticleGroups[sGroupCurrent].name);
 			SELECTED = INTERSECTED = null;
 			sCoeffCameraMove = 0;
+			sButtonsBack.OnChange();
 				var prev = Organigram.GetFather(sGroupCurrent);
 			if(prev < 0)
 			{
@@ -25,9 +34,51 @@
 		}   				
 	}
 
+	function GoBack()
+	{
+		GoToIndex(Organigram.GetFather(sGroupCurrent));
+	}
+
+	function GlobalGroupInit()
+	{
+		lCurrentGroup = sTools.ParticleGroups[sGroupCurrent];
+		lCurrentGroup.Init();
+
+		// stop display text for particles of this group.
+		if(isdefined(lCurrentGroup.particles))
+		{
+			for(var i in lCurrentGroup.particles)
+			{
+				if(isdefined(lCurrentGroup.particles[i].SetTextVisible))
+				{
+					lCurrentGroup.particles[i].SetTextVisible(true);
+				}
+			}
+		}
+	}
+
+	function GlobalGroupTeminate()
+	{
+		lCurrentGroup = sTools.ParticleGroups[sGroupCurrent];
+		lCurrentGroup.Terminate();
+
+		// stop display text for particles of this group.
+		if(isdefined(lCurrentGroup.particles))
+		{
+			for(var i in lCurrentGroup.particles)
+			{
+				if(isdefined(lCurrentGroup.particles[i].SetTextVisible))
+				{
+					lCurrentGroup.particles[i].SetTextVisible(false);
+				}
+			}
+		}
+	}
+
 	var sIsInHTML = false;
 	function HtmlToCircles(aSpeed)
 	{
+		sDrawScene = true;
 		var lSpeed = 1000;
 		if(isdefined(aSpeed))
 		{
@@ -46,22 +97,92 @@
 		$('#frontground').fadeOut(lSpeed);
 		canInteract = true;
 		SetBackButton(true);
-		if(isdefined(ParticleGroups[sGroupCurrent].BackFromHTML))
+		sButtonsBack.OnChange();
+		SetHashHTML('');
+		if(isdefined(sTools.ParticleGroups[sGroupCurrent].BackFromHTML))
 		{
-			ParticleGroups[sGroupCurrent].BackFromHTML();
+			sTools.ParticleGroups[sGroupCurrent].BackFromHTML();
 		}
 	}
 
-	function CirclesToHtml(path)
+	function LoadedInitDisplay()
 	{
+		sDrawScene = true;
+		var lSpeed = 1000;
+		sIsInHTML = false;
+		$("#info").fadeOut(lSpeed, function()
+		{
+			$("#info").children().filter("iframe").each(function()
+			{
+				this.postMessage('{"event":"command","func": pauseVideo,"args":""}', '*');
+			});
+			$("#info").empty();
+			$("#info").unload();
+		});
+		$('#frontground').fadeOut(lSpeed);
+		canInteract = true;
+		SetBackButton(true);
+		// sButtonsBack.OnChange();
+		SetHashHTML('');
+		if(isdefined(sTools.ParticleGroups[sGroupCurrent].BackFromHTML))
+		{
+			sTools.ParticleGroups[sGroupCurrent].BackFromHTML();
+		}
+	}
+
+	function SetHashHTML(aPath)
+	{
+		var hashSplit = window.location.hash.split('+');
+		var newHash = hashSplit[0] + ((aPath.length > 0) ? '+' + aPath.replace(/\//g, '&') : '');
+		window.location.hash = newHash;
+	}
+
+	function SetHashGroup(aPath)
+	{
+		var hashSplit = window.location.hash.split('+');
+		var newHash = aPath;
+		newHash += (hashSplit.length > 1) ? '+' + hashSplit[1] : '';
+		window.location.hash = newHash;
+	}
+
+	function GetHashGroup(aPath)
+	{
+		var hashSplit = window.location.hash.split('+');
+		return hashSplit[0].replace('#','');
+	}
+
+	function CirclesToHtmlEncoded(path)
+	{
+		path = path.replace(/&/g, '/');
+		CirclesToHtml(path, false);
+	}
+
+	function CirclesToHtml(path, aUpdateHash)
+	{
+		if(!isdefined(aUpdateHash))
+		{
+			SetHashHTML(path);
+		}
+		else if(aUpdateHash)
+		{
+			SetHashHTML(path);
+		}
+
 		$("#info").load(path, 
 		function(response, status, xhr)
 		{
+			if(status == 'error')
+			{
+				SetHashHTML('');
+			}
 			sIsInHTML = true;
+			INTERSECTED = null;
+			sButtonsBack.OnChange();
 			$("#info").fadeIn(1000);
 			$('#frontground').fadeTo('slow', 0.85);
 			canInteract = false;
 			 SetBackButton(true);
+			 sDrawScene = false;;
 
 			$("#info").click(	function(event)
 			{
@@ -82,10 +203,6 @@
 	{
 		container.style.cursor = 'auto';
 		canInteract = true;
-		if(!isRoot)
-			$("#BackCircle").fadeTo(400, 0.4);
-		// document.getElementById("BackCircle").style.background = "#f9dfcb";
-		// document.getElementById("BackCircle").style.color = "#96a";
 	}
 
 	function inAppCirlceBackIn()
@@ -93,10 +210,6 @@
 		container.style.cursor = 'pointer';
 		// container.style.cursor = 'move';
 		canInteract = false;
-		if(!isRoot)
-			$("#BackCircle").fadeTo(200, 1.);
-		// document.getElementById("BackCircle").style.background = "#d9cfbb";
-		// document.getElementById("BackCircle").style.color = "#345";
 	}
 
 	function changeButtonBackOut()
@@ -142,14 +255,7 @@
 
 	function SetBackButton(visible)
 	{
-		if(visible && (!isRoot || sIsInHTML))
-		{
-			$("#BackCircle").slideDown(400);
-		}
-		else
-		{
-			$("#BackCircle").slideUp(400);	
-		}
+
 	}
 
 	function removeRoundCorner()
