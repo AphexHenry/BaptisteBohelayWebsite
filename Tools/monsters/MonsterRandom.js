@@ -155,6 +155,9 @@ MonsterRandom.prototype.RunRandomProject = function()
 	}
 }
 
+/*
+ * update.
+ */
 MonsterRandom.prototype.Update = function(delta)
 {
 	if(sIsPicking)
