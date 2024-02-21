@@ -63,7 +63,6 @@
 						$(lLoadBoard).addClass('fadeout');
 						clearInterval(lThisInterval);
 					}
-					// console.log("draw!" + lLoadBoard.width + " "  + lLoadBoard.height);
 				}, 30);
 			})();
 		}
@@ -244,18 +243,6 @@
 
 			// Web
 			sTools.ParticleGroups[sTools.ParticleGroup.PART_WEB] = new ParticleGroupWebExperiment(new THREE.Vector3(-500, -2000, 1000), "WebExperiment");
-
-			// Lulu
-			// flyer = [];
-			// flyer.push({name:"about the game", targetHTML:"html/LuluAbout.html"});
-			// flyer.push({name:"soundtrack", targetHTML:"html/LuluSounds.html"});
-			// flyer.push({name:"download", targetHTMLOpen:"http://itunes.apple.com/us/app/lulus-unreal-exploration/id478405155?mt=8"});
-			// flyer.push({name:"reviews", targetHTML:"html/LuluReviews.html", addRandom:false});
-			// flyer.push({name:"trailer", targetHTML:"html/LuluVideo.html"});
-
-			// var lLLProjects = new ParticleGroupIntro(new THREE.Vector3(-500, 1000, -1000), flyer, "lulu", sTools.ParticleGroup.PART_LULU);
-			// lLLProjects.mAngleAmplitude = Math.PI * .6;
-			//  // sTools.ParticleGroups[sTools.ParticleGroup.PART_LULU] = new ParticleGroupLulu(new THREE.Vector3(-500, 1000, -1000), "lulu");
 
 			//  // Lulu
 			sTools.ParticleGroups[sTools.ParticleGroup.PART_VIDEOS] = new ParticleGroupVideos(new THREE.Vector3(1000, 1000, -1000), "videos");
