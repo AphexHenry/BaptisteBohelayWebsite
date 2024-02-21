@@ -1,3 +1,3 @@
 # Baptiste Bohelay Website
 
-Experimental website introducing my personnal projects.
+experimental website to show my work and my world.
