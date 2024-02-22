@@ -89,7 +89,7 @@
 
 		var sAutomatedFadeIn = false;
 	</script>
-
+	<div id="framerate">framerate</div>
 	<div id="roundCorner"> </div>
 	<div id="backButtonsContainer"> </div>
 
@@ -121,6 +121,7 @@
 	<script src='Tools/monsters/MonsterNoise.js'></script>
 	<script src='Tools/monsters/MonsterVideo.js'></script>
 	<script src='Tools/monsters/MonsterProjects.js'></script>
+	<script src='Tools/monsters/MonsterIntro.js'></script>
 	<script src='Tools/ParticleGroup/Particle.js'></script>
 	<script src='Tools/ParticleGroup/ParticleAboutMe.js'></script>
 	<script src='Tools/ParticleGroup/ParticleLulu.js'></script>
@@ -128,7 +129,6 @@
 	<script src='Tools/ParticleGroup/ParticleSound.js'></script>
 	<script src='Tools/InfoDisplay.js'></script>
 	<script src='Tools/intro/EvolutionManager.js'></script>
-	<script src='Tools/intro/Monster.js'></script>
 	<script src='Tools/intro/ParticleGroupMonster.js'></script>
 	<script src='Tools/intro/ParticleLetter.js'></script>
 
@@ -195,7 +195,6 @@
 			// Let's get all the particles group initialized each group at a time.
 			// Monster
 			sTools.ParticleGroups[sTools.ParticleGroup.PART_INTRO] = new ParticleGroupMonster(new THREE.Vector3(-500, -1000, -1000), "");
-
 
 			var flyer = [];
 			flyer.push({ name: "musical baguette", targetHTML: "html/other/MusicalBaguette.html", size: 0.8 });
@@ -401,6 +400,8 @@
 
 			var radius = sTools.ParticleGroups[sGroupCurrent].cameraDistance;
 			var delta = Math.max(Math.min(clock.getDelta(), 0.06), 0.001);
+
+			$("#framerate").html("framerate:" + Math.round(1 / delta))
 
 			sButtonsBack.Update(delta);
 

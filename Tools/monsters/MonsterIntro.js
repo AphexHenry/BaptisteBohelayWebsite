@@ -10,11 +10,6 @@ var MonsterStates =
 	EAT_IN:lIndexStates++,
 }
 
-for(var i = 0; i < 9; i++)
-{
-	AddLeg();
-}
-
 function getCloseFood()
 {
 	if(sEnd)
@@ -61,52 +56,89 @@ function getCloseFood()
 	return closeElements;
 }
 
-monsterTouched = function(context)
-{
-	context.beginPath();
-    context.arc( 0, 0, sRayCircle, 0, PI2, true );
-    context.closePath();
-    context.fill();
-}
 
-programMonster = function ( context ) 
-{
-	var closeStuffs = getCloseFood();
 
-	context.lineWidth = 0.01;
+// programMonster = function ( context ) 
+// {
+// 	var closeStuffs = getCloseFood();
 
-	if(sSizeLegs > 0.05)
-	{
-		for(var i = 0; i < sLegArray.length; i++)
-		{
-			var pos = null;
-			var partToMove = null;
-			for(var j = 0; j < closeStuffs.length; j++)
-			{
-				if((closeStuffs[j].indexLeg == i) && !closeStuffs[j].particle.isTarget && (sLegArray[i].state == 0))
-				{
-					closeStuffs[j].particle.isTarget = true;
-					partToMove = closeStuffs[j];
-					sLegArray[i].gotObject = partToMove;
-					SetStateLeg(i, 1);
-					break;
-				}
-			}
+// 	context.lineWidth = 0.01;
 
-			drawOneArmTwo(context, sSizeLegs, i, 0.2);
-		}
+// 	if(sSizeLegs > 0.05)
+// 	{
+// 		for(var i = 0; i < sLegArray.length; i++)
+// 		{
+// 			var pos = null;
+// 			var partToMove = null;
+// 			for(var j = 0; j < closeStuffs.length; j++)
+// 			{
+// 				if((closeStuffs[j].indexLeg == i) && !closeStuffs[j].particle.isTarget && (sLegArray[i].state == 0))
+// 				{
+// 					closeStuffs[j].particle.isTarget = true;
+// 					partToMove = closeStuffs[j];
+// 					sLegArray[i].gotObject = partToMove;
+// 					SetStateLeg(i, 1);
+// 					break;
+// 				}
+// 			}
+
+// 			drawOneArmTwo(context, sSizeLegs, i, 0.2);
+// 		}
+// 	}
+
+//     var centerX = 0.;
+//     var centerY = 0.;
+//     context.lineWidth = 0.02;
+//     context.beginPath();
+//     context.arc( centerX, centerY, sRayCircle, 0, PI2, true );
+//     context.closePath();
+//     context.stroke();
+// }
+
+drawHair = function (context, count) {
+	var random = sfc32(1, 3, 4, 5);
+	var lAngleSpeed = Math.atan2(sMonster.speed.y , sMonster.speed.x);
+	var lAmplitudeFromSpeed = Math.min(0.3, 0.5 * Math.sqrt(sMonster.speed.y * sMonster.speed.y + sMonster.speed.x * sMonster.speed.x) / window.innerWidth);
+	for (var i = 0; i < count; i++) {
+		context.beginPath();
+		
+		var lRadiusNorm = sRayCircle * random();
+		lRadiusNorm *= 1.2;
+		var lAngle = random() * Math.PI * 2 + sGeneralTimer * 0.2;
+		var posStartX = lRadiusNorm * Math.cos(lAngle);
+		var posStartY = lRadiusNorm * Math.sin(lAngle);
+
+		var excitationLevel = Math.max(0, Math.cos(lAngle + sGeneralTimer * 0.8));
+		var lEndAngle = (1 + random() * 0.5) * sGeneralTimer + random() * 4 * excitationLevel;
+
+		var lAmplitude = (1.3 + excitationLevel * 0.2);
+		var posEndX = lRadiusNorm * lAmplitude * Math.cos(lAngle) + lRadiusNorm * 0.2 * Math.sin(lEndAngle) - lAmplitudeFromSpeed * Math.cos(lAngleSpeed);
+		var posEndY = lRadiusNorm * lAmplitude * Math.sin(lAngle) + lRadiusNorm * 0.2 * Math.cos(lEndAngle) - lAmplitudeFromSpeed * Math.sin(lAngleSpeed);
+
+		var lInAngle = 1.6 * sGeneralTimer + random() * 3;
+		var posInBetweenX = posStartX + (posEndX - posStartX) * 0.5 + lRadiusNorm * 0.2 * Math.sin(lInAngle);
+		var posInBetweenY = posStartY + (posEndY - posStartY) * 0.5 + lRadiusNorm * 0.2 * Math.cos(lInAngle);
+		context.lineWidth = 0.005;
+		context.moveTo(posStartX, posStartY);
+		context.quadraticCurveTo(posInBetweenX, posInBetweenY, posEndX, posEndY);
+		context.stroke();
 	}
-
-    var centerX = 0.;
-    var centerY = 0.;
-    context.lineWidth = 0.02;
-    context.beginPath();
-    context.arc( centerX, centerY, sRayCircle, 0, PI2, true );
-    context.closePath();
-    context.stroke();
 }
 
-drawOneArmTwo = function (context, size, i, amp)
+function sfc32(a, b, c, d) {
+    return function() {
+      a |= 0; b |= 0; c |= 0; d |= 0; 
+      var t = (a + b | 0) + d | 0;
+      d = d + 1 | 0;
+      a = b ^ b >>> 9;
+      b = c + (c << 3) | 0;
+      c = (c << 21 | c >>> 11);
+      c = c + t | 0;
+      return (t >>> 0) / 4294967296;
+    }
+}
+
+drawArm = function (context, size, i, amp)
 {
 	var decay = sLegArray[i].random;
 	var angle = sLegArray[i].angle;
@@ -200,9 +232,14 @@ function Attack(part, indexLeg)
 	}
 }
 
-function Monster(positionCenter, width)
+function MonsterIntro(positionCenter, width)
 {
-	this.particle = new THREE.Particle( new THREE.ParticleCanvasMaterial( { color: PickColor() * 0.3, program: programMonster, transparent:true } ) );
+	for(var i = 0; i < 9; i++)
+	{
+		AddLeg();
+	}
+
+	this.particle = new THREE.Particle( new THREE.ParticleCanvasMaterial( { color: PickColor() * 0.3, program: this.programMonster, transparent:true } ) );
 
 	this.particle.position.x = positionCenter.x - 2. * window.innerWidth; 
 	this.particle.position.y = positionCenter.y - window.innerHeight * 1.; 
@@ -217,13 +254,13 @@ function Monster(positionCenter, width)
 	sMonster = this.particle;
 }
 
-Monster.prototype.WakeUp = function(duration)
+MonsterIntro.prototype.WakeUp = function(duration)
 {
 	sTimerClose = Math.max(duration, sTimerClose);
 }
 
 var sTimerClose = 0;
-Monster.prototype.Update = function(delta)
+MonsterIntro.prototype.Update = function(delta)
 {
 	sTimerClose -= delta;
 
@@ -252,15 +289,68 @@ Monster.prototype.Update = function(delta)
 	if(sSizeLegs < 0.52 && (sPutALetter > 0) && !sEnd)
 	{
 		infoDisplay.SetSize(1.3);
-		infoDisplay.SetText([{string:"enter", size: 2}]);
+		// infoDisplay.SetText([{string:"enter", size: 2}]);
 		infoDisplay.FadeIn();	
-		sEnd = true;
+		// sEnd = true;
 	}
 	infoDisplay.SetPosition(sMonster.position, true);
 }
 
-Monster.prototype.SetFood = function(foodArray)
+MonsterIntro.prototype.programMonster = function ( context ) 
+{
+	var closeStuffs = getCloseFood();
+
+	context.lineWidth = 0.01;
+
+	if(sSizeLegs > 0.05)
+	{
+		for(var i = 0; i < sLegArray.length; i++)
+		{
+			var pos = null;
+			var partToMove = null;
+			for(var j = 0; j < closeStuffs.length; j++)
+			{
+				if((closeStuffs[j].indexLeg == i) && !closeStuffs[j].particle.isTarget && (sLegArray[i].state == 0))
+				{
+					closeStuffs[j].particle.isTarget = true;
+					partToMove = closeStuffs[j];
+					sLegArray[i].gotObject = partToMove;
+					SetStateLeg(i, 1);
+					break;
+				}
+			}
+
+			drawArm(context, sSizeLegs, i, 0.2);
+		}
+	}
+
+    var centerX = 0.;
+    var centerY = 0.;
+    context.lineWidth = 0.02;
+    // context.beginPath();
+    // context.arc( centerX, centerY, sRayCircle, 0, PI2, true );
+    // context.closePath();
+	// context.stroke();
+	drawHair(context, 2500);
+}
+
+MonsterIntro.prototype.monsterTouched = function(context)
+{
+	context.beginPath();
+    context.arc( 0, 0, sRayCircle, 0, PI2, true );
+    context.closePath();
+    context.fill();
+}
+
+MonsterIntro.prototype.SetFood = function(foodArray)
 {
 	sFoodArray = foodArray;
 }
 
+MonsterIntro.prototype.setNormalDisplay = function() {
+	this.particle.material.program = this.programMonster;
+}
+
+MonsterIntro.prototype.setMouseOverDisplay = function() {
+	this.particle.material.program = this.monsterTouched;
+}

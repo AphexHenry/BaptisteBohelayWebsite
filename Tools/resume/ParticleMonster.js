@@ -14,7 +14,7 @@ function ParticleGroupMonster(positionCenter, name)
 	this.positionCenter = positionCenter;
 	this.name = name;
 
-	this.monster = new Monster(positionCenter, this.width);
+	this.monster = new MonsterIntro(positionCenter, this.width);
 	this.InitFood(this.width);
 	this.InitSurface(this.width);
 	this.InitChallenges();

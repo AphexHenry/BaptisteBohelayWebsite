@@ -14,8 +14,9 @@ function ParticleGroupMonster(positionCenter, name)
 	this.positionCenter = positionCenter;
 	this.name = name;
 	this.goAway = false;
+	this.speed = { x: 0, y: 0 };
 
-	this.monster = new Monster(positionCenter, this.width);
+	this.monster = new MonsterIntro(positionCenter, this.width);
 	this.InitFood(this.width);
 	this.InitSurface(this.width);
 }
@@ -113,6 +114,9 @@ ParticleGroupMonster.prototype.UpdateCamera = function(delta)
 	cameraPosition.z = this.positionCenter.z + this.cameraDistance;
 }
 
+/*
+* update the position of the letters.
+*/
 ParticleGroupMonster.prototype.UpdateFood = function(delta)
 {
 	var lPart;
@@ -143,8 +147,12 @@ ParticleGroupMonster.prototype.UpdateFood = function(delta)
 		}
 	}
 
-	sMonster.position.x += (this.positionCenter.x + window.innerWidth * 0.5 - sMonster.position.x) * delta * 0.25;
-	sMonster.position.y += (this.positionCenter.y + window.innerHeight * 0.5 - sMonster.position.y) * delta * 0.25;
+	var lSpeedX = (this.positionCenter.x + window.innerWidth * 0.3 - sMonster.position.x - Math.cos(0.5 * sGeneralTimer) * window.innerWidth * 0.5);
+	var lSpeedY = (this.positionCenter.y + window.innerHeight * 0.3 - sMonster.position.y + Math.sin(sGeneralTimer * 0.7) * window.innerHeight * 0.5);
+	sMonster.speed = { x: lSpeedX, y: lSpeedY };
+
+	sMonster.position.x += lSpeedX * delta * 0.25;
+	sMonster.position.y += lSpeedY * delta * 0.25;
 }
 
 ParticleGroupMonster.prototype.SwitchNextState = function()
@@ -220,10 +228,11 @@ ParticleGroupMonster.prototype.UpdatePointer = function()
 			INTERSECTED = intersects[ 0 ].object;
 			if(intersects[0].distance < INTERSECTED.boundRadiusScale * sRayCircle)
 			{
-				sMonster.material.program = monsterTouched;
+				// sMonster.material.program = monsterTouched;
+				this.monster.setMouseOverDisplay();
 				return;
 			}
 	} 
-	sMonster.material.program = programMonster;
+	this.monster.setNormalDisplay();
 }
 
