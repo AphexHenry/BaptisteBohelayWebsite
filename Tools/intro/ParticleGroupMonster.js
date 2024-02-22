@@ -31,11 +31,17 @@ ParticleGroupMonster.prototype.InitSurface = function(width)
 	scene.add( particleClear );
 
 	// create the mesh's material
-		this.plane = new THREE.Mesh( new THREE.PlaneGeometry( 2000, 2000, 8, 8 ), new THREE.MeshBasicMaterial( { color: 0x000000, opacity: 0.25, transparent: true, wireframe: true } ) );
-				this.plane.geometry.applyMatrix( new THREE.Matrix4().makeRotationX( Math.PI / 2 ) );
-				this.plane.visible = false;
-				this.plane.position = this.positionCenter;
-				scene.add( this.plane );
+		this.plane = new THREE.Mesh( new THREE.PlaneGeometry( 2 * window.innerWidth, 2 * window.innerHeight, 8, 8 ), new THREE.MeshBasicMaterial( { color: 0xff0000, opacity: 0.5, transparent: false, wireframe: true } ) );
+		this.plane.geometry.applyMatrix( new THREE.Matrix4().makeRotationX( Math.PI / 2 ) );
+		// this.plane.visible = false;
+		this.plane.position = this.positionCenter;
+	scene.add(this.plane);
+	
+	this.debugTouch = new THREE.Mesh( new THREE.PlaneGeometry( 20, 20, 8, 8 ), new THREE.MeshBasicMaterial( { color: 0x0000ff, opacity: 0.5, transparent: false, wireframe: false } ) );
+	this.debugTouch.geometry.applyMatrix( new THREE.Matrix4().makeRotationX( Math.PI / 2 ) );
+	// this.plane.visible = false;
+	this.debugTouch.position = this.positionCenter;
+	scene.add( this.debugTouch );
 }
 
 ParticleGroupMonster.prototype.AddFood = function(aName, position, speed, size, aPositionTarget)
@@ -148,7 +154,7 @@ ParticleGroupMonster.prototype.UpdateFood = function(delta)
 	}
 
 	var lSpeedX = (this.positionCenter.x + window.innerWidth * 0.3 - sMonster.position.x - Math.cos(0.5 * sGeneralTimer) * window.innerWidth * 0.5);
-	var lSpeedY = (this.positionCenter.y + window.innerHeight * 0.3 - sMonster.position.y + Math.sin(sGeneralTimer * 0.7) * window.innerHeight * 0.5);
+	var lSpeedY = (this.positionCenter.y + window.innerHeight * 0.3 - sMonster.position.y + Math.sin(sGeneralTimer * 0.7) * window.innerHeight * 0);
 	sMonster.speed = { x: lSpeedX, y: lSpeedY };
 
 	sMonster.position.x += lSpeedX * delta * 0.25;
@@ -204,8 +210,8 @@ ParticleGroupMonster.prototype.Terminate = function()
 
 ParticleGroupMonster.prototype.UpdateIntersectPlane = function()
 {
-	if(!sEnd)
-		return;
+	// if(!sEnd)
+	// 	return;
 
 	if(IS_PHONE)
 		return;
@@ -219,20 +225,32 @@ ParticleGroupMonster.prototype.UpdatePointer = function()
 	var vector = new THREE.Vector3( mouse.x, mouse.y, 0.5 );
 	projector.unprojectVector( vector, camera );
 
-	var ray = new THREE.Ray( camera.position, vector.subSelf( camera.position ).normalize() );
-
-	var intersects = ray.intersectObject( sMonster );
-
-	if ( intersects.length > 0 ) 
 	{
-			INTERSECTED = intersects[ 0 ].object;
-			if(intersects[0].distance < INTERSECTED.boundRadiusScale * sRayCircle)
-			{
+		var ray = new THREE.Ray(camera.position, vector.subSelf(camera.position).normalize());
+
+		var intersects = ray.intersectObject(sMonster);
+
+		if (intersects.length > 0) {
+			INTERSECTED = intersects[0].object;
+			if (intersects[0].distance < INTERSECTED.boundRadiusScale * sRayCircle) {
 				// sMonster.material.program = monsterTouched;
 				this.monster.setMouseOverDisplay();
 				return;
 			}
-	} 
-	this.monster.setNormalDisplay();
+		}
+		this.monster.setNormalDisplay();
+	}
+
+	{
+		var intersects = ray.intersectObject(this.plane);
+
+		if (intersects.length > 0) {
+			INTERSECTED = intersects[0].object;
+			this.debugTouch.position = intersects[0].point;
+			this.debugTouch.position.x += 10;
+			this.debugTouch.position.y += 10;
+			this.monster.setPointer(this.debugTouch.position);
+		}
+	}
 }
 
