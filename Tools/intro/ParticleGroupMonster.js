@@ -153,8 +153,8 @@ ParticleGroupMonster.prototype.UpdateFood = function(delta)
 		}
 	}
 
-	var lSpeedX = (this.positionCenter.x + window.innerWidth * 0.3 - sMonster.position.x - Math.cos(0.5 * sGeneralTimer) * window.innerWidth * 0.5);
-	var lSpeedY = (this.positionCenter.y + window.innerHeight * 0.3 - sMonster.position.y + Math.sin(sGeneralTimer * 0.7) * window.innerHeight * 0.5);
+	var lSpeedX = (this.positionCenter.x + window.innerWidth * 0.3 - sMonster.position.x - Math.cos(0.1 * sGeneralTimer) * Math.cos(0.5 * sGeneralTimer) * window.innerWidth * 0.5);
+	var lSpeedY = (this.positionCenter.y + window.innerHeight * 0.3 - sMonster.position.y + Math.cos(0.1 * sGeneralTimer) * Math.sin(sGeneralTimer * 0.7) * window.innerHeight * 0.5);
 	sMonster.speed = { x: lSpeedX, y: lSpeedY };
 
 	sMonster.position.x += lSpeedX * delta * 0.25;

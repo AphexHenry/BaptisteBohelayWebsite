@@ -412,8 +412,8 @@ MonsterHair.prototype.update = function (aDelta) {
 	var lAngleSpeed = Math.atan2(sMonster.speed.y, sMonster.speed.x);
 	
 	
-
-	var lSpeedAmp = 0.7;
+	var lAmplitudeDeployed = 2;
+	var lSpeedAmp = 0.4;
 	var lAmplitudeFromSpeed = Math.min(lSpeedAmp, lSpeedAmp * Math.sqrt(sMonster.speed.y * sMonster.speed.y + sMonster.speed.x * sMonster.speed.x) / window.innerWidth);
 
 
@@ -432,8 +432,8 @@ MonsterHair.prototype.update = function (aDelta) {
 	var excitationLevel = lRadiusNormStart * 0.5 * Math.max(0, Math.cos(lAngle + sGeneralTimer * 0.8));
 	var lEndAngle = (1 + this.randomValue * 0.5) * sGeneralTimer;
 
-	var lPosIdleX = this.posStart.x * 3;
-	var lPosIdleY = this.posStart.y * 3;
+	var lPosIdleX = this.posStart.x * lAmplitudeDeployed;
+	var lPosIdleY = this.posStart.y * lAmplitudeDeployed;
 
 	this.magnetPosition.x = (1 - deploymentStr) * this.magnetPosition.x + deploymentStr * lPosIdleX + Math.cos(lEndAngle) * excitationLevel;
 	this.magnetPosition.y = (1 - deploymentStr) * this.magnetPosition.y + deploymentStr * lPosIdleY + Math.cos(lEndAngle) * excitationLevel;
