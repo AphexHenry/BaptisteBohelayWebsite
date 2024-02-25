@@ -258,7 +258,7 @@ function MonsterIntro(positionCenter, width)
 
 	this.hairs = [];
 
-	for (var i = 0; i < 3020; i++) {
+	for (var i = 0; i < 1800; i++) {
 		this.hairs.push(new MonsterHair());
 	}
 }
@@ -340,10 +340,10 @@ MonsterIntro.prototype.programMonster = function ( context )
     var centerX = 0.;
     var centerY = 0.;
     context.lineWidth = 0.02;
-    // context.beginPath();
-    // context.arc( centerX, centerY, sRayCircle, 0, PI2, true );
-    // context.closePath();
-	// context.stroke();
+    context.beginPath();
+    context.arc( centerX, centerY, sRayCircle * 0.25, 0, PI2, true );
+    context.closePath();
+	context.fill();
 	drawHair(context);
 }
 
@@ -398,6 +398,11 @@ function MonsterHair() {
 }
 
 MonsterHair.prototype.draw = function (context) {
+	//set fill color
+	var posCentered = { x: this.posStart.x, y: this.posStart.y};
+	var correctedColour = (1 - Math.sqrt(this.radius)) * 150;
+	// context.strokeStyle = "rgb(" + correctedColour + ", " + Math.round(correctedColour * 0.7) + ", " + Math.round(correctedColour * 0.2) + ")";
+	
 	context.beginPath();
 	context.lineWidth = 0.005;
 	context.moveTo(this.posStart.x, this.posStart.y);
@@ -411,14 +416,12 @@ MonsterHair.prototype.update = function (aDelta) {
 
 	var lAngleSpeed = Math.atan2(sMonster.speed.y, sMonster.speed.x);
 	
-	
 	var lAmplitudeDeployed = 2;
 	var lSpeedAmp = 0.4;
 	var lAmplitudeFromSpeed = Math.min(lSpeedAmp, lSpeedAmp * Math.sqrt(sMonster.speed.y * sMonster.speed.y + sMonster.speed.x * sMonster.speed.x) / window.innerWidth);
 
-
 	var lRadiusNormStart = sRayCircle * this.radius * 1.2;
-	var lAngle = this.angle + sGeneralTimer * 0.2;
+	var lAngle = this.angle + sGeneralTimer * 0.15;
 
 	this.posStart.x = lRadiusNormStart * Math.cos(lAngle);
 	this.posStart.y = lRadiusNormStart * Math.sin(lAngle);
@@ -427,19 +430,42 @@ MonsterHair.prototype.update = function (aDelta) {
 	this.magnetPosition.y = this.posStart.y -lAmplitudeFromSpeed * Math.sin(lAngleSpeed) * lRadiusNormStart * 5;
 
 	var deploymentStr = (lSpeedAmp - lAmplitudeFromSpeed) / lSpeedAmp;
-	deploymentStr *= deploymentStr * deploymentStr;
+	deploymentStr *= deploymentStr;
 
-	var excitationLevel = lRadiusNormStart * 0.5 * Math.max(0, Math.cos(lAngle + sGeneralTimer * 0.8));
+	var excitationLevel = lRadiusNormStart * 0.8 * Math.max(0, Math.cos(lAngle + sGeneralTimer * 0.8));
 	var lEndAngle = (1 + this.randomValue * 0.5) * sGeneralTimer;
 
 	var lPosIdleX = this.posStart.x * lAmplitudeDeployed;
 	var lPosIdleY = this.posStart.y * lAmplitudeDeployed;
 
+	if (sPointer) {
+		var pointerRelX = (sPointer.x - sMonster.position.x) / sMonster.scale.x;
+		var pointerRelY = (sPointer.y - sMonster.position.y) / sMonster.scale.y;
+
+		pointerRelX += Math.cos(this.randomValue * 4) * 0.1;
+		pointerRelX += Math.cos(this.randomValue * 14) * 0.1;
+
+		var lAngleToPointer = Math.atan2(pointerRelY, pointerRelX);
+		var angleNorm = Math.atan2(this.posStart.y, this.posStart.x);
+		var pointerAngleAmplitudeLimit = 2.3;
+		var angleDistanceFromPointer = Math.abs(angleNorm - lAngleToPointer);
+
+		if (angleDistanceFromPointer < pointerAngleAmplitudeLimit) {
+			var distanceToPointer = pointerRelX * pointerRelX + pointerRelY * pointerRelY;
+			if (distanceToPointer < 2) {
+				var coeffAffectPointer = angleDistanceFromPointer / pointerAngleAmplitudeLimit;
+				coeffAffectPointer = Math.sqrt(coeffAffectPointer);
+				lPosIdleX = lPosIdleX  * coeffAffectPointer + this.radius * pointerRelX * (1 - coeffAffectPointer);
+				lPosIdleY = lPosIdleY  * coeffAffectPointer + this.radius * pointerRelY * (1 - coeffAffectPointer);
+			}
+		}
+	}
+
 	this.magnetPosition.x = (1 - deploymentStr) * this.magnetPosition.x + deploymentStr * lPosIdleX + Math.cos(lEndAngle) * excitationLevel;
 	this.magnetPosition.y = (1 - deploymentStr) * this.magnetPosition.y + deploymentStr * lPosIdleY + Math.cos(lEndAngle) * excitationLevel;
 
-	this.speedEnd.x = (this.magnetPosition.x - this.positionEnd.x) * aDelta;
-	this.speedEnd.y = (this.magnetPosition.y - this.positionEnd.y) * aDelta;
+	this.speedEnd.x = 0.3 * (this.magnetPosition.x - this.positionEnd.x) * aDelta;
+	this.speedEnd.y = 0.3 * (this.magnetPosition.y - this.positionEnd.y) * aDelta;
 
 	this.speedEnd.x *= 0.98;
 	this.speedEnd.y *= 0.98;
@@ -466,7 +492,7 @@ MonsterHair.prototype.update = function (aDelta) {
 	// this.positionEnd.y -= 1 * sMonster.speed.y / window.innerWidth * aDelta;
 
 	
-	var distanceMiddle = 1.2 * lRadiusNormStart * (0.2 + 0.1 * deploymentStr); // to simulate the curvature of the hair.
+	var distanceMiddle = 2.2 * lRadiusNormStart * (0.2 + 0.1 * deploymentStr); // to simulate the curvature of the hair.
 	// var distanceTarget = 1 * lHairLength * lRadiusNorm;
 // {
 

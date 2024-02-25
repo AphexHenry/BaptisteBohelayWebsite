@@ -33,7 +33,7 @@ ParticleGroupMonster.prototype.InitSurface = function(width)
 	// create the mesh's material
 		this.plane = new THREE.Mesh( new THREE.PlaneGeometry( 2 * window.innerWidth, 2 * window.innerHeight, 8, 8 ), new THREE.MeshBasicMaterial( { color: 0xff0000, opacity: 0.5, transparent: false, wireframe: true } ) );
 		this.plane.geometry.applyMatrix( new THREE.Matrix4().makeRotationX( Math.PI / 2 ) );
-		// this.plane.visible = false;
+		this.plane.visible = false;
 		this.plane.position = this.positionCenter;
 	scene.add(this.plane);
 	
@@ -153,8 +153,8 @@ ParticleGroupMonster.prototype.UpdateFood = function(delta)
 		}
 	}
 
-	var lSpeedX = (this.positionCenter.x + window.innerWidth * 0.3 - sMonster.position.x - Math.cos(0.1 * sGeneralTimer) * Math.cos(0.5 * sGeneralTimer) * window.innerWidth * 0.5);
-	var lSpeedY = (this.positionCenter.y + window.innerHeight * 0.3 - sMonster.position.y + Math.cos(0.1 * sGeneralTimer) * Math.sin(sGeneralTimer * 0.7) * window.innerHeight * 0.5);
+	var lSpeedX = (this.positionCenter.x + window.innerWidth * 0.3 - sMonster.position.x - Math.cos(0.1 * sGeneralTimer) * Math.cos(0.5 * sGeneralTimer) * window.innerWidth * 0);
+	var lSpeedY = (this.positionCenter.y + window.innerHeight * 0.3 - sMonster.position.y + Math.cos(0.1 * sGeneralTimer) * Math.sin(sGeneralTimer * 0.7) * window.innerHeight * 0);
 	sMonster.speed = { x: lSpeedX, y: lSpeedY };
 
 	sMonster.position.x += lSpeedX * delta * 0.25;
@@ -234,7 +234,7 @@ ParticleGroupMonster.prototype.UpdatePointer = function()
 			INTERSECTED = intersects[0].object;
 			if (intersects[0].distance < INTERSECTED.boundRadiusScale * sRayCircle) {
 				// sMonster.material.program = monsterTouched;
-				this.monster.setMouseOverDisplay();
+				// this.monster.setMouseOverDisplay();
 				return;
 			}
 		}
