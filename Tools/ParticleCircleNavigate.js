@@ -1,9 +1,11 @@
+
 // basic particle object.
-function ParticleCircleNavigate(position, aTargetObject) 
+function ParticleCircleNavigate(position, aTargetObject, aColor) 
 {
 	this.name = aTargetObject.name;
 
-	var particle = new THREE.Particle( new THREE.ParticleCanvasMaterial( { color: PickColor(), program: programStroke, transparent:true } ) );
+	var strokeColor = isdefined(aColor) ? aColor : PickColor();
+	var particle = new THREE.Particle( new THREE.ParticleCanvasMaterial( { color: strokeColor, program: programStroke, transparent:true } ) );
 
 	particle.position = position;
 
@@ -31,7 +33,8 @@ function ParticleCircleNavigate(position, aTargetObject)
 		SetTextInCanvas(infoText, context.canvas)
 	}
 
-	var info = new THREE.Particle( new THREE.ParticleCanvasMaterial( { color: PickColor(), program: programText, transparent:true, opacity:OPACITY_INFO } ) );
+	var infoColor = isdefined(aColor) ? aColor : PickColor();
+	var info = new THREE.Particle( new THREE.ParticleCanvasMaterial( { color: infoColor, program: programText, transparent:true, opacity:OPACITY_INFO } ) );
 	info.position = particle.position;
 
 	particle.scale.x = particle.scale.y = 3 * sWIDTH * 0.07 * size * lScaleCoeff;

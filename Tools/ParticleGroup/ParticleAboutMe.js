@@ -33,27 +33,28 @@ function ParticleGroupAboutMe(positionCenter, name)
 	lPosition.x = positionCenter.x + thisWidth * width * Math.sin( flyer.length * angleDecay + myRandom() * 0.7 );
 	lPosition.y = positionCenter.y + thisWidth * width * Math.sin( flyer.length * angleDecay + myRandom() * 0.7 );
 	lPosition.z = positionCenter.z + thisWidth * width * Math.cos( flyer.length * angleDecay + myRandom() * 0.7 );
-	this.social = new ParticleSocial(lPosition, width * 0.4);
+	// this.social = new ParticleSocial(lPosition, width * 0.4);
+	this.description = new ParticleTextDescription(lPosition, width * 0.4);
 }
 
 ParticleGroupAboutMe.prototype.Init = function()
 {
-	$("#roundCorner").load("html/aboutMe.html");
+	// $("#roundCorner").load("html/aboutMe.html");
 	
-	setTimeout(function() {$("#roundCorner").slideDown(500);}, 1500);
-	$('body').bind('touchend mousedown',function(e){
-   	if( e.target.id == 'roundCorner' )
-   	{
-    	return true; 
-   	}
-   	else
-   	{
-    	$("#roundCorner").slideUp(400);
-	}
+	// setTimeout(function() {$("#roundCorner").slideDown(500);}, 1500);
+	// $('body').bind('touchend mousedown',function(e){
+   	// if( e.target.id == 'roundCorner' )
+   	// {
+    // 	return true; 
+   	// }
+   	// else
+   	// {
+    // 	$("#roundCorner").slideUp(400);
+	// }
 
-	});
+	// });
 
-	this.social.particle.SetTextVisible(true);
+	this.description.particle.SetTextVisible(true);
 }
 
 ParticleGroupAboutMe.prototype.MouseDown = function()
@@ -81,23 +82,6 @@ ParticleGroupAboutMe.prototype.MouseDown = function()
 			open_in_new_tab(newURL);
 		}
 	}
-
-	var vector = new THREE.Vector3( mouse.x, mouse.y, 0.5 );
-	projector.unprojectVector( vector, camera );
-
-	var ray = new THREE.Ray( camera.position, vector.subSelf( camera.position ).normalize() );
-
-	var intersectsSocial = ray.intersectObject( this.social.plane );
-	if(intersectsSocial.length > 0)
-	{
-		this.cameraDistance = window.innerWidth * 0.09;
-		this.social.SetTouched(true);
-	}
-	else
-	{
-		this.social.SetTouched(false);
-		this.cameraDistance = this.cameraDistanceOrigine;
-	}
 }
 
 ParticleGroupAboutMe.prototype.MouseUp = function()
@@ -107,23 +91,14 @@ ParticleGroupAboutMe.prototype.MouseUp = function()
 
 ParticleGroupAboutMe.prototype.Update = function()
 {
-	this.social.Update(0.03);
 
+	controlAuto = sTools.CameraControlType.NONE;
 	var vector = new THREE.Vector3( mouse.x, mouse.y, 0.5 );
 	projector.unprojectVector( vector, camera );
 
 	var ray = new THREE.Ray( camera.position, vector.subSelf( camera.position ).normalize() );
 
 	var intersects = ray.intersectObjects( this.particles );
-	var intersectsSocial = ray.intersectObject( this.social.plane );
-	if(intersectsSocial.length > 0)
-	{
-		this.social.SetTarget(true, intersectsSocial[0].face.a);
-	}
-	else
-	{
-		this.social.SetTarget(false);	
-	}
 
 	if ( intersects.length > 0 ) 
 	{
@@ -160,5 +135,5 @@ ParticleGroupAboutMe.prototype.Terminate = function()
 {
 	this.htmlDisplayed = false;
 	$("#roundCorner").slideUp(400);
-	this.social.particle.SetTextVisible(false);
+	this.description.particle.SetTextVisible(false);
 }

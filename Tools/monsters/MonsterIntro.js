@@ -111,7 +111,7 @@ drawHair = function (context, count) {
 		var excitationLevel = Math.max(0, Math.cos(lAngle + sGeneralTimer * 0.8));
 		var lEndAngle = (1 + random() * 0.5) * sGeneralTimer + random() * 4 * excitationLevel;
 
-		var lAmplitude = (1.3 + excitationLevel * 0.2);
+		var lAmplitude = 1.3 * (1.3 + excitationLevel * 0.2);
 		var posEndX = lRadiusNorm * lAmplitude * Math.cos(lAngle) + lRadiusNorm * 0.2 * Math.sin(lEndAngle) - lAmplitudeFromSpeed * Math.cos(lAngleSpeed);
 		var posEndY = lRadiusNorm * lAmplitude * Math.sin(lAngle) + lRadiusNorm * 0.2 * Math.cos(lEndAngle) - lAmplitudeFromSpeed * Math.sin(lAngleSpeed);
 
@@ -327,11 +327,11 @@ MonsterIntro.prototype.programMonster = function ( context )
     var centerX = 0.;
     var centerY = 0.;
     context.lineWidth = 0.02;
-    // context.beginPath();
-    // context.arc( centerX, centerY, sRayCircle, 0, PI2, true );
-    // context.closePath();
-	// context.stroke();
-	drawHair(context, 2500);
+    context.beginPath();
+    context.arc( centerX, centerY, sRayCircle, 0, PI2, true );
+    context.closePath();
+	context.stroke();
+	// drawHair(context, 2900);
 }
 
 MonsterIntro.prototype.monsterTouched = function(context)

@@ -123,6 +123,7 @@
 	<script src='Tools/monsters/MonsterProjects.js'></script>
 	<script src='Tools/monsters/MonsterIntro.js'></script>
 	<script src='Tools/ParticleGroup/Particle.js'></script>
+	<script src='Tools/ParticleGroup/ParticleTextDescription.js'></script>
 	<script src='Tools/ParticleGroup/ParticleAboutMe.js'></script>
 	<script src='Tools/ParticleGroup/ParticleLulu.js'></script>
 	<script src='Tools/ParticleGroup/ParticleVideos.js'></script>
@@ -209,14 +210,14 @@
 
 			// Main choice
 			var flyer = [];
-			flyer.push({ name: "contact", targetHTML: "html/contact.html", size: 0.5, addRandom: false, position: new THREE.Vector3(100, 100, 0) });
+			// flyer.push({ name: "contact", targetHTML: "html/contact.html", size: 0.5, addRandom: false, position: new THREE.Vector3(100, 100, 0) });
 			flyer.push({ name: "about me", target: sTools.ParticleGroup.PART_ABOUT_ME, position: new THREE.Vector3(-0, 140, 10) });
 
 			var lMenu = new ParticleGroupIntro(new THREE.Vector3(1000, 2000, 2000), flyer, "home", sTools.ParticleGroup.PART_CREA_LULU);
 
 			var randomMonster = new MonsterRandom(new THREE.Vector3(lMenu.positionCenter.x + -sWIDTH * 1.5, lMenu.positionCenter.y - sWIDTH / getRatio() * 0.4, lMenu.positionCenter.z), window.innerWidth * 0.06);
 			var randomLastProject = new MonsterTournicoti(new THREE.Vector3(lMenu.positionCenter.x + sWIDTH * 1., lMenu.positionCenter.y - 1. * sWIDTH / getRatio(), lMenu.positionCenter.z + sWIDTH * 0.3), window.innerWidth * 0.06, sProjectsLast, 1);
-			var funkyCreation = new MonsterTournicoti(lMenu.positionCenter, window.innerWidth * 0.1, { name: "creations", target: sTools.ParticleGroup.PART_FUNKY_CREATION, size: 1.5 }, -1);
+			var funkyCreation = new MonsterTournicoti(lMenu.positionCenter, window.innerWidth * 0.1, { name: "creations", target: sTools.ParticleGroup.PART_FUNKY_CREATION, size: 1.5 }, -1, false, 0xf97316);
 			lMenu.AddParticle(funkyCreation);
 			lMenu.AddParticle(randomMonster);
 			lMenu.AddParticle(randomLastProject);

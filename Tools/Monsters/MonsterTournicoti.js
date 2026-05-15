@@ -1,5 +1,5 @@
 
-function MonsterTournicoti(aPosition, aSize, aTarget, aDrawParam, aStayAwake)
+function MonsterTournicoti(aPosition, aSize, aTarget, aDrawParam, aStayAwake, aColor)
 {
 	var that = this;
 	this.target = aTarget;
@@ -11,7 +11,7 @@ function MonsterTournicoti(aPosition, aSize, aTarget, aDrawParam, aStayAwake)
 	{
 	    var centerX = 0.;
 	    var centerY = 0.;
-		context.lineWidth = 0.015;
+		context.lineWidth = 0.01;
 		if(that.distanceLastProject > 0.01)
 		{
 		    drawOneArmLastProject(context, Math.PI * 0 );
@@ -50,7 +50,7 @@ function MonsterTournicoti(aPosition, aSize, aTarget, aDrawParam, aStayAwake)
 	  context.stroke();
 	}
 
-	this.particle = new ParticleCircleNavigate(aPosition, aTarget);
+	this.particle = new ParticleCircleNavigate(aPosition, aTarget, aColor);
 	this.particle.material.program = programLastProject;
 	this.particle.scale.x *= 3.;
 	this.particle.scale.y *= 3.;

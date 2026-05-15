@@ -191,44 +191,31 @@ function rotateAroundObjectAxis(object, axis, radians)
 }
 
 var sColors = [];
-sColors.push(0x54570f);
-sColors.push(0x1e7b44);
-sColors.push(0xd5675a);
-sColors.push(0x5a9574);
-sColors.push(0x512076);
-sColors.push(0x7f4363);
-sColors.push(0x512056);
-sColors.push(0x0d834f);
-sColors.push(0xc55f7d);
-sColors.push(0xa9a600);
-sColors.push(0x1067f1);
-sColors.push(0x4469d5);
-sColors.push(0xdb4516);
-sColors.push(0xaa0247);
-sColors.push(0x0b81b9);
-sColors.push(0x307f32);
-sColors.push(0xaa6a2a);
-sColors.push(0xb25361);
-sColors.push(0x6421bd);
-sColors.push(0xa61a87);
-sColors.push(0x006bb4);
-sColors.push(0x1e4610);
-sColors.push(0x8b3e3a);
-sColors.push(0x0dbf60);
-sColors.push(0x00118e);
-sColors.push(0x3e8e44);
-sColors.push(0x6f157d);
-sColors.push(0x7b5f00);
-sColors.push(0x197467);
-sColors.push(0x14567a);
+// 16 accents tuned for contrast on warm beige: crisp blues/teals, coral, jewel tones
+sColors.push(0x2563eb);
+sColors.push(0x0891b2);
+sColors.push(0x14b8a6);
+sColors.push(0x0f766e);
+sColors.push(0x4338ca);
+sColors.push(0x7c3aed);
+sColors.push(0xa855f7);
+sColors.push(0xd946ef);
+sColors.push(0xdb2777);
+sColors.push(0xe11d48);
+sColors.push(0xf43f5e);
+sColors.push(0xf97316);
+sColors.push(0xd97706);
+sColors.push(0x65a30d);
+sColors.push(0x16a34a);
+sColors.push(0x15803d);
+
+var sPickColorSeq = 0;
 
 function PickColor()
 {
-    return sColors[Math.floor(Math.random() * sColors.length)];
-    // var color = parseInt(temp,16);
-    // var color2 = Math.random() * 0x808080 + 0x505050;
-    // return color;
-//
+    var i = sPickColorSeq % sColors.length;
+    sPickColorSeq++;
+    return sColors[i];
 }
 
 var OPACITY_INFO = 0.4;

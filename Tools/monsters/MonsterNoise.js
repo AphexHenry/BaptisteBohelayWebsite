@@ -13,7 +13,7 @@ function MonsterNoise(aPosition, aSize, aTarget)
 		{
 		    var centerX = 0.;
 		    var centerY = 0.;
-		    context.lineWidth = 0.02;
+		    context.lineWidth = 0.01;
 		    context.arc( centerX, centerY, that.rayCircle, 0, PI2, true );
 		}
 		else
