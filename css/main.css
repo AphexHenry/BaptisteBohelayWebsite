@@ -5,6 +5,31 @@
 		/* src: url(../fonts/Demos_Fonts/Fontspring-DEMO-discovery-regular.otf); */
 	}
 
+	/* About panel — display typography (pairs with Georgia body) */
+	@font-face {
+		font-family: "Raleway";
+		src: url("../fonts/Raleway/static/Raleway-Light.ttf") format("truetype");
+		font-weight: 300;
+		font-style: normal;
+		font-display: swap;
+	}
+
+	@font-face {
+		font-family: "Raleway";
+		src: url("../fonts/Raleway/static/Raleway-Medium.ttf") format("truetype");
+		font-weight: 500;
+		font-style: normal;
+		font-display: swap;
+	}
+
+	@font-face {
+		font-family: "Raleway";
+		src: url("../fonts/Raleway/static/Raleway-Italic.ttf") format("truetype");
+		font-weight: 400;
+		font-style: italic;
+		font-display: swap;
+	}
+
 	H2 {
 		font-family: "Times New Roman", Georgia, serif;
 		font-weight: 00;
@@ -118,6 +143,101 @@
 		display: none;
 		overflow: auto;
 		border-radius: 20px;
+	}
+
+	/* Left half of the viewport: programmatic copy panel (see TextDescriptionDOMController.js) */
+	#textDescription {
+		position: fixed;
+		left: 0;
+		top: 0;
+		width: 50vw;
+		height: 100vh;
+		height: 100dvh;
+		box-sizing: border-box;
+		padding: clamp(1.35rem, 4.5vmin, 2.85rem) clamp(1rem, 3vw, 2rem) clamp(1.35rem, 4.5vmin, 2.85rem) clamp(1.1rem, 2.8vw, 1.85rem);
+		margin: 0;
+		z-index: 240;
+		opacity: 0;
+		visibility: hidden;
+		pointer-events: none;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+	}
+
+	#textDescriptionArea.about-description {
+		flex: 0 1 auto;
+		width: 100%;
+		max-width: 30rem;
+		min-height: 0;
+		box-sizing: border-box;
+		margin: 3rem;
+		padding: 0;
+		overflow-y: auto;
+		overflow-x: hidden;
+		-webkit-overflow-scrolling: touch;
+		background: transparent;
+		color: #0f0310;
+		font-family: Georgia, "Times New Roman", Times, serif;
+		font-size: 1.0625rem;
+		font-weight: 400;
+		line-height: 1.62;
+		text-rendering: optimizeLegibility;
+		-webkit-font-smoothing: antialiased;
+		hyphens: auto;
+		text-align: justify;
+	}
+
+	.about-description__header {
+		margin-bottom: clamp(1.25rem, 3vh, 1.85rem);
+	}
+
+	.about-description__name {
+		font-family: "Raleway", system-ui, -apple-system, sans-serif;
+		font-size: clamp(1.5rem, 2.8vw, 1.9375rem);
+		font-weight: 500;
+		line-height: 1.2;
+		margin: 0 0 0rem;
+		letter-spacing: 0.04em;
+		font-variant-numeric: lining-nums;
+		color: #0f0310;
+	}
+
+	.about-description__tagline {
+		font-family: "Raleway", system-ui, -apple-system, sans-serif;
+		font-weight: 300;
+		margin: 0;
+		padding: 0 0 1.35rem;
+		border-bottom: 1px solid rgba(15, 3, 16, 0.14);
+		font-size: 0.9375rem;
+		line-height: 1.52;
+		letter-spacing: 0.02em;
+		color: rgba(15, 3, 16, 0.62);
+	}
+
+	.about-description__body {
+		padding-left: 0.85rem;
+		border-left: 2px solid rgba(15, 3, 16, 0.09);
+	}
+
+	.about-description__body>p {
+		margin: 0 0 1.05em;
+		max-width: 38em;
+		color: rgba(15, 3, 16, 0.9);
+	}
+
+	.about-description__body>p:last-child {
+		margin-bottom: 0;
+	}
+
+	.about-description__signoff {
+		margin-top: 1.35rem;
+		font-family: Georgia, "Times New Roman", Times, serif;
+		font-style: italic;
+		font-size: 1.05rem;
+		letter-spacing: 0.02em;
+		color: rgba(15, 3, 16, 0.55);
+		text-align: right;
 	}
 
 	#backButtonsContainer {

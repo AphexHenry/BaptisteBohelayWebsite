@@ -27,14 +27,6 @@ function ParticleGroupAboutMe(positionCenter, name)
 		this.particles.push(particle);
 		particle.TargetObject.info.material.opacity = 0.5;
 	}
-
-	var lPosition = new THREE.Vector3();
-	var thisWidth = 0.1;
-	lPosition.x = positionCenter.x + thisWidth * width * Math.sin( flyer.length * angleDecay + myRandom() * 0.7 );
-	lPosition.y = positionCenter.y + thisWidth * width * Math.sin( flyer.length * angleDecay + myRandom() * 0.7 );
-	lPosition.z = positionCenter.z + thisWidth * width * Math.cos( flyer.length * angleDecay + myRandom() * 0.7 );
-	// this.social = new ParticleSocial(lPosition, width * 0.4);
-	this.description = new ParticleTextDescription(lPosition, width * 0.4);
 }
 
 ParticleGroupAboutMe.prototype.Init = function()
@@ -54,7 +46,10 @@ ParticleGroupAboutMe.prototype.Init = function()
 
 	// });
 
-	this.description.particle.SetTextVisible(true);
+	if (typeof sTextDescriptionDOMController !== "undefined")
+	{
+		sTextDescriptionDOMController.show();
+	}
 }
 
 ParticleGroupAboutMe.prototype.MouseDown = function()
@@ -92,7 +87,7 @@ ParticleGroupAboutMe.prototype.MouseUp = function()
 ParticleGroupAboutMe.prototype.Update = function()
 {
 
-	controlAuto = sTools.CameraControlType.NONE;
+	controlAuto = sTools.CameraControlType.MOUSE_MOVE;
 	var vector = new THREE.Vector3( mouse.x, mouse.y, 0.5 );
 	projector.unprojectVector( vector, camera );
 
@@ -135,5 +130,8 @@ ParticleGroupAboutMe.prototype.Terminate = function()
 {
 	this.htmlDisplayed = false;
 	$("#roundCorner").slideUp(400);
-	this.description.particle.SetTextVisible(false);
+	if (typeof sTextDescriptionDOMController !== "undefined")
+	{
+		sTextDescriptionDOMController.hide();
+	}
 }
