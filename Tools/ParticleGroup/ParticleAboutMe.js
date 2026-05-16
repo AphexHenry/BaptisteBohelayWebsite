@@ -76,7 +76,7 @@ function ParticleAboutMe_createResumeParticle(position, entry, labelCenter) {
 	var particleResume =
 		typeof ParticleResumeLowImportanceEntry !== "undefined" && ParticleResume.isLowImportance(entry)
 			? new ParticleResumeLowImportanceEntry(position, entry, undefined, labelCenter)
-			: new ParticleCircleNavigate(position, flyerResume, undefined);
+			: new ParticleCircleNavigate(position, flyerResume, undefined, true);
 	flyerResume = particleResume.TargetObject;
 	if (entry.type === "study") {
 		flyerResume.resumeProgramsWithHat = {

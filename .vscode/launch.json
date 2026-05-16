@@ -1,0 +1,21 @@
+{
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"name": "Chrome: lebaptiste (Python server)",
+			"type": "chrome",
+			"request": "launch",
+			"url": "http://127.0.0.1:8766/",
+			"webRoot": "${workspaceFolder}",
+			"preLaunchTask": "Serve lebaptiste (Python)"
+		},
+		{
+			"name": "Edge: lebaptiste (Python server)",
+			"type": "msedge",
+			"request": "launch",
+			"url": "http://127.0.0.1:8766/",
+			"webRoot": "${workspaceFolder}",
+			"preLaunchTask": "Serve lebaptiste (Python)"
+		}
+	]
+}
