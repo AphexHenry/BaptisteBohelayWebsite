@@ -94,6 +94,7 @@ function ParticleAboutMe_createResumeParticle(position, entry, labelCenter) {
 		flyerResume.resumeProgramsWithHat = ParticleResume.tangibleInteractionPrograms(particleResume);
 		particleResume.material.program = flyerResume.resumeProgramsWithHat.stroke;
 	}
+	ParticleAboutMe_applyOpaqueResumeCircleBackground(particleResume, entry);
 	if (typeof particleResume.SetResumeCalloutActive === "undefined") {
 		particleResume.TargetObject.info.material.opacity = 0.5;
 	}
@@ -117,7 +118,7 @@ function ParticleAboutMe_orbitalRadiusFromAngularSpeed(angularSpeed, referenceAn
 	return Math.max(orbitalRadius, minimumRadius);
 }
 
-function ParticleAboutMe_applyOpaqueSatelliteBackground(particleResume, entry) {
+function ParticleAboutMe_applyOpaqueResumeCircleBackground(particleResume, entry) {
 	if (
 		typeof ParticleResume === "undefined" ||
 		typeof ParticleResume.composeProgramWithTangibleInteractionLogo !== "function"
@@ -317,7 +318,6 @@ function ParticleGroupAboutMe(positionCenter, name)
 				parentParticle.position.z
 			);
 			var satteliteParticle = ParticleAboutMe_createResumeParticle(initialPosition, sattelites[satIndex].entry, parentParticle.position);
-			ParticleAboutMe_applyOpaqueSatelliteBackground(satteliteParticle, sattelites[satIndex].entry);
 			var speedScale = 0.5 + (satIndex % 3) * 0.22;
 			var minimumRadius = parentParticle.scale.x * 0.78 + satteliteParticle.scale.x * 1.18;
 			var referenceRadius = Math.max(resumePathScale * 0.23, minimumRadius * 1.18);
@@ -348,7 +348,7 @@ function ParticleGroupAboutMe(positionCenter, name)
 	if (typeof ParticleResume.createDecorativeDashedPath !== "undefined") {
 		this.resumePath = ParticleResume.createDecorativeDashedPath(
 			stackEntries,
-			positionCenter,
+			new THREE.Vector3(positionCenter.x, positionCenter.y, positionCenter.z - 10.5),
 			resumePathScale,
 			resumePositions.length === stackEntries.length ? resumePositions : null
 		);
