@@ -117,6 +117,47 @@ function ParticleAboutMe_orbitalRadiusFromAngularSpeed(angularSpeed, referenceAn
 	return Math.max(orbitalRadius, minimumRadius);
 }
 
+function ParticleAboutMe_applyOpaqueSatelliteBackground(particleResume, entry) {
+	if (
+		typeof ParticleResume === "undefined" ||
+		typeof ParticleResume.composeProgramWithTangibleInteractionLogo !== "function"
+	) {
+		return;
+	}
+	if (typeof ParticleResume.isTangibleInteraction === "function" && ParticleResume.isTangibleInteraction(entry)) {
+		return;
+	}
+	var flyer = particleResume.TargetObject;
+	if (!flyer) {
+		return;
+	}
+	var wrap = ParticleResume.composeProgramWithTangibleInteractionLogo;
+	if (flyer.resumePrograms) {
+		var rp = flyer.resumePrograms;
+		flyer.resumePrograms = {
+			stroke: wrap(rp.stroke, particleResume),
+			fill: wrap(rp.fill, particleResume),
+			triangle: wrap(rp.triangle, particleResume),
+		};
+	} else if (flyer.resumeProgramsWithHat) {
+		var rw = flyer.resumeProgramsWithHat;
+		flyer.resumeProgramsWithHat = {
+			stroke: wrap(rw.stroke, particleResume),
+			fill: wrap(rw.fill, particleResume),
+			triangle: wrap(rw.triangle, particleResume),
+		};
+	} else {
+		flyer.resumeProgramsWithHat = {
+			stroke: wrap(programStroke, particleResume),
+			fill: wrap(programFill, particleResume),
+			triangle: wrap(programTriangle, particleResume),
+		};
+	}
+	particleResume.material.program = flyer.resumePrograms
+		? flyer.resumePrograms.stroke
+		: flyer.resumeProgramsWithHat.stroke;
+}
+
 function ParticleAboutMe_updateSatteliteResumeOrbit(group) {
 	var orbitParticles = group.resumeSatteliteOrbitParticles;
 	if (!orbitParticles || orbitParticles.length === 0) {
@@ -136,9 +177,9 @@ function ParticleAboutMe_updateSatteliteResumeOrbit(group) {
 		);
 		var angle = group.resumeSatteliteOrbitAngle * orbit.speedScale + orbit.phase;
 		var position = new THREE.Vector3(
-			parentPosition.x + Math.cos(angle) * radius,
-			parentPosition.y + Math.sin(angle) * radius * 0.3,
-			parentPosition.z + Math.sin(angle) * radius * 0.5
+			parentPosition.x + Math.cos(angle) * radius * 1.1,
+			parentPosition.y + Math.sin(angle - 0.6) * radius * 0.3,
+			parentPosition.z + Math.sin(angle) * radius * 0.1
 		);
 		orbit.particle.SetPosition(position);
 	}
@@ -276,6 +317,7 @@ function ParticleGroupAboutMe(positionCenter, name)
 				parentParticle.position.z
 			);
 			var satteliteParticle = ParticleAboutMe_createResumeParticle(initialPosition, sattelites[satIndex].entry, parentParticle.position);
+			ParticleAboutMe_applyOpaqueSatelliteBackground(satteliteParticle, sattelites[satIndex].entry);
 			var speedScale = 0.5 + (satIndex % 3) * 0.22;
 			var minimumRadius = parentParticle.scale.x * 0.78 + satteliteParticle.scale.x * 1.18;
 			var referenceRadius = Math.max(resumePathScale * 0.23, minimumRadius * 1.18);

@@ -74,7 +74,7 @@ function ParticleCircleNavigate(position, aTargetObject, aColor)
 
 	var infoColor = isdefined(aColor) ? aColor : PickColor();
 	var info = new THREE.Particle( new THREE.ParticleCanvasMaterial( { color: infoColor, program: programText, transparent:true, opacity:OPACITY_INFO } ) );
-	info.position = particle.position;
+	info.position = new THREE.Vector3(particle.position.x, particle.position.y, particle.position.z - 10.5);
 
 	particle.scale.x = particle.scale.y = 3 * sWIDTH * 0.07 * size * lScaleCoeff;
 	info.scale.x = particle.scale.x * 0.3;
@@ -93,7 +93,7 @@ function ParticleCircleNavigate(position, aTargetObject, aColor)
 	{
 		particle.position = aPosition;
 		particle.TargetObject.particleClear.position = aPosition;
-		particle.TargetObject.info.position = aPosition;
+		particle.TargetObject.info.position = new THREE.Vector3(aPosition.x, aPosition.y, aPosition.z - 10.5);
 	};
 
 	particle.SetName = function(aName, aSubTitle)

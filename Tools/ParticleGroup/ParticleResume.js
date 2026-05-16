@@ -266,7 +266,32 @@ ParticleResume.ENTRIES = [
 		type: "pro",
 		yearStart: 2016,
 		xOffset: -0.1,
-		
+	},
+	{
+		company: "Orchplay",
+		title: "Educational Musical Software",
+		years: "2018 – 2025",
+		place: "Montreal · Remote",
+		description:
+			"Programming OrchView, software for classical music theory researchers: annotate scores with maximum automation and versatility for conversion into the Orchard Database.\n\nSkills: software infrastructure, software development.",
+		importance: 0.3,
+		type: "pro",
+		yearStart: 2016,
+		xOffset: -0.1,
+		satteliteOf:"McGill University"
+	},
+	{
+		company: "Orchview",
+		title: "Research Tool for Music Theory",
+		years: "2018 – 2025",
+		place: "Montreal · Remote",
+		description:
+			"Programming OrchView, software for classical music theory researchers: annotate scores with maximum automation and versatility for conversion into the Orchard Database.\n\nSkills: software infrastructure, software development.",
+		importance: 0.3,
+		type: "pro",
+		yearStart: 2018,
+		xOffset: -0.1,
+		satteliteOf:"McGill University"
 	},
 	{
 		company: "Badly Drawn",
@@ -431,11 +456,25 @@ function ParticleResumeLowImportanceEntry(position, entry, aColor, labelCenter) 
 		return text.substring(0, Math.floor(text.length * clamp01(progress)));
 	};
 
+	var calloutCircleScaleMul = function () {
+		var tObj = particle.TargetObject;
+		var mul = 1;
+		if (tObj.size) {
+			mul *= tObj.size;
+		}
+		if (isdefined(tObj.scale)) {
+			mul *= tObj.scale;
+		}
+		return isFinite(mul) && mul > 0 ? mul : 1;
+	};
+
 	var programCallout = function (context) {
 		var progress = calloutState.progress;
 		if (progress <= 0.001) {
 			return;
 		}
+
+		var textComp = 0.5 / calloutCircleScaleMul();
 
 		var lineProgress = clamp01(progress / 0.42);
 		var nameProgress = clamp01((progress - 0.28) / 0.44);
@@ -449,12 +488,12 @@ function ParticleResumeLowImportanceEntry(position, entry, aColor, labelCenter) 
 		var endY = directionY * 7.25;
 		var drawEndX = startX + (endX - startX) * lineProgress;
 		var drawEndY = startY + (endY - startY) * lineProgress;
-		var textX = endX + side * 0.5;
+		var textX = endX + side * 0.5 * textComp;
 
 		context.save();
 		context.strokeStyle = "#555555";
 		context.fillStyle = "#555555";
-		context.lineWidth = 0.08;
+		context.lineWidth = 0.08 * textComp;
 		context.lineCap = "round";
 		context.textAlign = side > 0 ? "left" : "right";
 		context.textBaseline = "middle";
@@ -465,12 +504,12 @@ function ParticleResumeLowImportanceEntry(position, entry, aColor, labelCenter) 
 		context.stroke();
 
 		if (nameProgress > 0) {
-			context.font = "2.25pt TitleText";
-			context.fillText(visibleText(calloutState.name, nameProgress), textX, endY - 1);
+			context.font = 2.25 * textComp + "pt TitleText";
+			context.fillText(visibleText(calloutState.name, nameProgress), textX, endY - 1 * textComp);
 		}
 		if (subTitleProgress > 0 && calloutState.subTitle && calloutState.subTitle.length > 0) {
-			context.font = "1.45pt TitleText";
-			context.fillText(visibleText(calloutState.subTitle, subTitleProgress), textX, endY + 1.2);
+			context.font = 1.45 * textComp + "pt TitleText";
+			context.fillText(visibleText(calloutState.subTitle, subTitleProgress), textX, endY + 1.2 * textComp);
 		}
 
 		context.restore();
