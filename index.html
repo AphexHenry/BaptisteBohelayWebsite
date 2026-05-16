@@ -95,14 +95,17 @@
 		<article id="textDescriptionArea" class="about-description" aria-label="About">
 			<header class="about-description__header">
 				<h2 class="about-description__name">Baptiste Bohelay</h2>
-				<p class="about-description__tagline">Exploring Interactivity, Science and Sonic experiences since 2008.</p>
+				<p class="about-description__tagline">Exploring Interactivity, Science and Sonic experiences since 2008.
+				</p>
 			</header>
 			<div class="about-description__body">
-				<p>Since I graduated at the Ircam in Paris, I have gravitated around various constellations: Video Games,
+				<p>Coming from a background in Science of Music, I have gravitated around various constellations: Video
+					Games,
 					Interactive Installations, Research in Music and Art. I kept one foot building my professional
 					experience, one playing and collaborating with passionate artists.</p>
 				<p>I have been working with clients such as MTV, Heineken, Konami, the McGill University, Tangible
-					Interaction, and contributed to various art projects sometimes big, mostly small, always fun and very
+					Interaction, and contributed to various art projects sometimes big, mostly small, always fun and
+					very
 					human.</p>
 				<p>This website aims to reflect this exploration.</p>
 				<p class="about-description__signoff">Bon voyage!</p>
@@ -142,6 +145,7 @@
 	<script src='Tools/monsters/MonsterProjects.js'></script>
 	<script src='Tools/monsters/MonsterIntro.js'></script>
 	<script src='Tools/ParticleGroup/Particle.js'></script>
+	<script src='Tools/ParticleGroup/ParticleResume.js'></script>
 	<script src='Tools/ParticleGroup/ParticleAboutMe.js'></script>
 	<script src='Tools/ParticleGroup/ParticleLulu.js'></script>
 	<script src='Tools/ParticleGroup/ParticleVideos.js'></script>
@@ -457,12 +461,19 @@
 					cameraManager.SetMovementType(cameraManager.movementTypeGroup.INTERPOLATION);
 				}
 				else if (controlAuto == sTools.CameraControlType.MOUSE_MOVE) {
-					cameraTarget = sTools.ParticleGroups[sGroupCurrent].positionCenter;
-					var lAngleAmp = isdefined(sTools.ParticleGroups[sGroupCurrent].mAngleAmplitude) ? sTools.ParticleGroups[sGroupCurrent].mAngleAmplitude : Math.PI / 2.;
-					cameraPosition.x = sTools.ParticleGroups[sGroupCurrent].positionCenter.x + radius * Math.sin(mouse.x * lAngleAmp);
-					cameraPosition.z = sTools.ParticleGroups[sGroupCurrent].positionCenter.z + radius * Math.cos(mouse.x * lAngleAmp);
-
-					cameraPosition.y = sTools.ParticleGroups[sGroupCurrent].positionCenter.y;
+					var pg = sTools.ParticleGroups[sGroupCurrent];
+					cameraTarget = pg.positionCenter;
+					var lAngleAmp = isdefined(pg.mAngleAmplitude) ? pg.mAngleAmplitude : Math.PI / 2.;
+					var lVerticalAmp = isdefined(pg.mVerticalAngleAmplitude) ? pg.mVerticalAngleAmplitude : 0.;
+					var theta = mouse.x * lAngleAmp;
+					var phi = mouse.y * lVerticalAmp;
+					var phiClamp = Math.PI * 0.42;
+					if (phi > phiClamp) phi = phiClamp;
+					if (phi < -phiClamp) phi = -phiClamp;
+					var cp = Math.cos(phi);
+					cameraPosition.x = pg.positionCenter.x + radius * cp * Math.sin(theta);
+					cameraPosition.y = pg.positionCenter.y + radius * Math.sin(phi);
+					cameraPosition.z = pg.positionCenter.z + radius * cp * Math.cos(theta);
 
 					// if(cameraManager.mTarget.distanceTo(cameraManager.camera.position) > sWIDTH * 10)
 					// {

@@ -70,9 +70,19 @@ var programStroke = function ( context ) {
     context.lineWidth = 0.04;
     context.beginPath();
     context.arc( 0, 0, 1. - 0.05, 0, PI2, true );
-    context.closePath();
+    // context.closePath();
     context.stroke();
 }
+
+var programStrokeLimited = function ( context ) {
+
+    context.lineWidth = 0.04;
+    context.beginPath();
+    context.arc( 0, 0, 1. - 0.05, -2.1 * Math.PI / 2, 1 * Math.PI / 2, false );
+    // context.closePath();
+    context.stroke();
+}
+
 
 var programFill = function ( context ) 
 {

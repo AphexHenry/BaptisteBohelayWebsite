@@ -3,6 +3,7 @@
 function ParticleCircleNavigate(position, aTargetObject, aColor) 
 {
 	this.name = aTargetObject.name;
+	this.subTitle = aTargetObject.subTitle;
 
 	var strokeColor = isdefined(aColor) ? aColor : PickColor();
 	var particle = new THREE.Particle( new THREE.ParticleCanvasMaterial( { color: strokeColor, program: programStroke, transparent:true } ) );
@@ -25,12 +26,50 @@ function ParticleCircleNavigate(position, aTargetObject, aColor)
 		lScaleCoeff = aTargetObject.scale;
 	}
 
-	var infoText = [];
-	infoText.push({string:this.name, size: 2});
+	var BuildInfoText = function(aName, aSubTitle)
+	{
+		var text = [];
+		text.push({string:aName, size: 2});
+		if(isdefined(aSubTitle) && String(aSubTitle).length > 0)
+		{
+			text.push({string:aSubTitle, size: 1.15});
+		}
+		return text;
+	}
+
+	var infoText = BuildInfoText(this.name, this.subTitle);
+
+	var DrawInfoText = function (context, text)
+	{
+		var totalHeight = 0;
+		var lineHeights = [];
+		for(var lineIndex = 0; lineIndex < text.length; lineIndex++)
+		{
+			if(!isdefined(text[lineIndex].size))
+			{
+				return;
+			}
+			lineHeights[lineIndex] = text[lineIndex].size * 1.6;
+			totalHeight += lineHeights[lineIndex];
+		}
+
+		context.fillStyle = "#000000";
+		context.textAlign = "left";
+		context.textBaseline = "middle";
+
+		var y = -totalHeight * 0.5;
+		for(var drawIndex = 0; drawIndex < text.length; drawIndex++)
+		{
+			y += lineHeights[drawIndex] * 0.5;
+			context.font = text[drawIndex].size + "pt TitleText";
+			context.fillText(text[drawIndex].string, 4, y);
+			y += lineHeights[drawIndex] * 0.5;
+		}
+	}
 
 	var programText = function ( context ) 
 	{
-		SetTextInCanvas(infoText, context.canvas)
+		DrawInfoText(context, infoText);
 	}
 
 	var infoColor = isdefined(aColor) ? aColor : PickColor();
@@ -57,10 +96,9 @@ function ParticleCircleNavigate(position, aTargetObject, aColor)
 		particle.TargetObject.info.position = aPosition;
 	};
 
-	particle.SetName = function(aName)
+	particle.SetName = function(aName, aSubTitle)
 	{
-		infoText = [];
-		infoText.push({string:aName, size: 2});
+		infoText = BuildInfoText(aName, aSubTitle);
 	}
 
 	particle.SetAutonomous = function(aValue)
