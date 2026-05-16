@@ -109,6 +109,14 @@ function ParticleAboutMe_findParticleRecord(records, entry) {
 	return null;
 }
 
+function ParticleAboutMe_orbitalRadiusFromAngularSpeed(angularSpeed, referenceAngularSpeed, referenceRadius, minimumRadius) {
+	var safeAngularSpeed = Math.max(Math.abs(angularSpeed), 0.000001);
+	var safeReferenceSpeed = Math.max(Math.abs(referenceAngularSpeed), 0.000001);
+	var visualGravity = Math.pow(referenceRadius, 3) * Math.pow(safeReferenceSpeed, 2);
+	var orbitalRadius = Math.pow(visualGravity / Math.pow(safeAngularSpeed, 2), 1 / 3);
+	return Math.max(orbitalRadius, minimumRadius);
+}
+
 function ParticleAboutMe_updateSatteliteResumeOrbit(group) {
 	var orbitParticles = group.resumeSatteliteOrbitParticles;
 	if (!orbitParticles || orbitParticles.length === 0) {
@@ -119,11 +127,18 @@ function ParticleAboutMe_updateSatteliteResumeOrbit(group) {
 	for (var i = 0; i < orbitParticles.length; i++) {
 		var orbit = orbitParticles[i];
 		var parentPosition = orbit.parent.position;
+		var angularSpeed = group.resumeSatteliteOrbitSpeed * orbit.speedScale;
+		var radius = ParticleAboutMe_orbitalRadiusFromAngularSpeed(
+			angularSpeed,
+			orbit.referenceAngularSpeed,
+			orbit.referenceRadius,
+			orbit.minimumRadius
+		);
 		var angle = group.resumeSatteliteOrbitAngle * orbit.speedScale + orbit.phase;
 		var position = new THREE.Vector3(
-			parentPosition.x + Math.cos(angle) * orbit.radius,
-			parentPosition.y + Math.sin(angle) * orbit.radius * 0.3,
-			parentPosition.z + Math.sin(angle) * orbit.radius  * 0.5,
+			parentPosition.x + Math.cos(angle) * radius,
+			parentPosition.y + Math.sin(angle) * radius * 0.3,
+			parentPosition.z + Math.sin(angle) * radius * 0.5
 		);
 		orbit.particle.SetPosition(position);
 	}
@@ -261,22 +276,30 @@ function ParticleGroupAboutMe(positionCenter, name)
 				parentParticle.position.z
 			);
 			var satteliteParticle = ParticleAboutMe_createResumeParticle(initialPosition, sattelites[satIndex].entry, parentParticle.position);
-			var radius = Math.max(
-				resumePathScale * 0.18,
-				parentParticle.scale.x * 0.78 + satteliteParticle.scale.x * 1.18
+			var speedScale = 0.5 + (satIndex % 3) * 0.22;
+			var minimumRadius = parentParticle.scale.x * 0.78 + satteliteParticle.scale.x * 1.18;
+			var referenceRadius = Math.max(resumePathScale * 0.23, minimumRadius * 1.18);
+			var referenceAngularSpeed = this.resumeSatteliteOrbitSpeed * 0.5;
+			var radius = ParticleAboutMe_orbitalRadiusFromAngularSpeed(
+				this.resumeSatteliteOrbitSpeed * speedScale,
+				referenceAngularSpeed,
+				referenceRadius,
+				minimumRadius
 			);
 			satteliteParticle.SetPosition(new THREE.Vector3(
 				parentParticle.position.x + Math.cos(phase) * radius,
-				parentParticle.position.y + Math.sin(phase) * radius,
-				parentParticle.position.z + Math.sin(phase) * radius,
+				parentParticle.position.y + Math.sin(phase * 1.3) * radius * 0.3,
+				parentParticle.position.z + Math.sin(phase) * radius * 0.7
 			));
 			this.particles.push(satteliteParticle);
 			this.resumeSatteliteOrbitParticles.push({
 				particle: satteliteParticle,
 				parent: parentParticle,
 				phase: phase,
-				radius: radius,
-				speedScale: 0.5 + (satIndex % 3) * 0.12,
+				speedScale: speedScale,
+				referenceAngularSpeed: referenceAngularSpeed,
+				referenceRadius: referenceRadius,
+				minimumRadius: minimumRadius,
 			});
 		}
 	}
