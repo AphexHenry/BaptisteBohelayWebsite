@@ -57,69 +57,119 @@ function ParticleAboutMe_composeProgramWithStudentHat(baseProgram, particle) {
 }
 
 function ParticleAboutMe_particleStrokeProgram(targetObject) {
-	return targetObject.resumeProgramsWithHat ? targetObject.resumeProgramsWithHat.stroke : programStroke;
+	var resumePrograms = targetObject.resumePrograms || targetObject.resumeProgramsWithHat;
+	return resumePrograms ? resumePrograms.stroke : programStroke;
 }
 
 function ParticleAboutMe_particleFillProgram(targetObject) {
-	return targetObject.resumeProgramsWithHat ? targetObject.resumeProgramsWithHat.fill : programFill;
+	var resumePrograms = targetObject.resumePrograms || targetObject.resumeProgramsWithHat;
+	return resumePrograms ? resumePrograms.fill : programFill;
 }
 
 function ParticleAboutMe_particleTriangleProgram(targetObject) {
-	return targetObject.resumeProgramsWithHat ? targetObject.resumeProgramsWithHat.triangle : programTriangle;
+	var resumePrograms = targetObject.resumePrograms || targetObject.resumeProgramsWithHat;
+	return resumePrograms ? resumePrograms.triangle : programTriangle;
 }
 
-function ParticleAboutMe_isSharedOrbitResumeEntry(entry) {
-	return entry && (entry.company === "OrchPlayMusic" || entry.company === "McGill University");
+function ParticleAboutMe_createResumeParticle(position, entry, labelCenter) {
+	var flyerResume = ParticleResume.toFlyer(entry);
+	var particleResume =
+		typeof ParticleResumeLowImportanceEntry !== "undefined" && ParticleResume.isLowImportance(entry)
+			? new ParticleResumeLowImportanceEntry(position, entry, undefined, labelCenter)
+			: new ParticleCircleNavigate(position, flyerResume, undefined);
+	flyerResume = particleResume.TargetObject;
+	if (entry.type === "study") {
+		flyerResume.resumeProgramsWithHat = {
+			stroke: ParticleAboutMe_composeProgramWithStudentHat(programStrokeLimited, particleResume),
+			fill: ParticleAboutMe_composeProgramWithStudentHat(programStrokeLimited, particleResume),
+			triangle: ParticleAboutMe_composeProgramWithStudentHat(programTriangle, particleResume),
+		};
+		particleResume.material.program = flyerResume.resumeProgramsWithHat.stroke;
+	}
+	else if (entry.type === "art" && typeof ParticleResume.wavyCirclePrograms !== "undefined") {
+		flyerResume.resumePrograms = ParticleResume.wavyCirclePrograms(entry);
+		particleResume.material.program = flyerResume.resumePrograms.stroke;
+	}
+	else if (ParticleResume.isTangibleInteraction(entry)) {
+		flyerResume.resumeProgramsWithHat = ParticleResume.tangibleInteractionPrograms(particleResume);
+		particleResume.material.program = flyerResume.resumeProgramsWithHat.stroke;
+	}
+	if (typeof particleResume.SetResumeCalloutActive === "undefined") {
+		particleResume.TargetObject.info.material.opacity = 0.5;
+	}
+	return particleResume;
 }
 
-function ParticleAboutMe_configureSharedResumeOrbit(group) {
-	var orbitParticles = group.resumeSharedOrbitParticles;
-	if (!orbitParticles || orbitParticles.length < 2) {
-		return;
-	}
-
-	var center = new THREE.Vector3(0, 0, 0);
-	for (var i = 0; i < orbitParticles.length; i++) {
-		center.x += orbitParticles[i].anchor.x;
-		center.y += orbitParticles[i].anchor.y;
-		center.z += orbitParticles[i].anchor.z;
-	}
-	center.multiplyScalar(1 / orbitParticles.length);
-
-	var radius = 0;
-	for (var j = 0; j < orbitParticles.length; j++) {
-		var dx = orbitParticles[j].anchor.x - center.x;
-		var dy = orbitParticles[j].anchor.y - center.y;
-		var angle = Math.atan2(dy, dx);
-		if (!isFinite(angle)) {
-			angle = (j / orbitParticles.length) * Math.PI * 2;
+function ParticleAboutMe_findParticleRecord(records, entry) {
+	for (var i = 0; i < records.length; i++) {
+		if (records[i].entry === entry) {
+			return records[i];
 		}
-		orbitParticles[j].phase = angle;
-		radius = Math.max(radius, Math.sqrt(dx * dx + dy * dy));
 	}
-
-	group.resumeSharedOrbitCenter = center;
-	group.resumeSharedOrbitRadius = Math.max(radius, window.innerWidth * 0.035);
+	return null;
 }
 
-function ParticleAboutMe_updateSharedResumeOrbit(group) {
-	var orbitParticles = group.resumeSharedOrbitParticles;
-	if (!orbitParticles || !group.resumeSharedOrbitCenter) {
+function ParticleAboutMe_updateSatteliteResumeOrbit(group) {
+	var orbitParticles = group.resumeSatteliteOrbitParticles;
+	if (!orbitParticles || orbitParticles.length === 0) {
 		return;
 	}
 
-	group.resumeSharedOrbitAngle += group.resumeSharedOrbitSpeed;
-	// for (var i = 0; i < orbitParticles.length; i++) {
-	// 	var angle = group.resumeSharedOrbitAngle + orbitParticles[i].phase;
-	// 	var radius = group.resumeSharedOrbitRadius;
-	// 	var center = group.resumeSharedOrbitCenter;
-	// 	var position = new THREE.Vector3(
-	// 		center.x + Math.cos(angle) * radius,
-	// 		center.y + Math.sin(angle) * radius,
-	// 		center.z + Math.sin(angle) * radius
-	// 	);
-	// 	orbitParticles[i].particle.SetPosition(position);
-	// }
+	group.resumeSatteliteOrbitAngle += group.resumeSatteliteOrbitSpeed;
+	for (var i = 0; i < orbitParticles.length; i++) {
+		var orbit = orbitParticles[i];
+		var parentPosition = orbit.parent.position;
+		var angle = group.resumeSatteliteOrbitAngle * orbit.speedScale + orbit.phase;
+		var position = new THREE.Vector3(
+			parentPosition.x + Math.cos(angle) * orbit.radius,
+			parentPosition.y + Math.sin(angle) * orbit.radius * 0.3,
+			parentPosition.z + Math.sin(angle) * orbit.radius  * 0.5,
+		);
+		orbit.particle.SetPosition(position);
+	}
+}
+
+function ParticleAboutMe_setHoverState(particle, active) {
+	if (particle && typeof particle.SetResumeCalloutActive !== "undefined") {
+		particle.SetResumeCalloutActive(active);
+	}
+}
+
+function ParticleAboutMe_updateHoverAnimations(group) {
+	for (var i = 0; i < group.particles.length; i++) {
+		if (typeof group.particles[i].UpdateResumeCallout !== "undefined") {
+			group.particles[i].UpdateResumeCallout();
+		}
+	}
+}
+
+function ParticleAboutMe_fadeInfoIn(particle) {
+	if (!particle || !particle.TargetObject || !particle.TargetObject.info) {
+		return;
+	}
+	if (typeof particle.SetResumeCalloutActive !== "undefined") {
+		return;
+	}
+	particle.TargetObject.info.material.opacity += (1. - particle.TargetObject.info.material.opacity) * 2. * 0.02;
+}
+
+function ParticleAboutMe_resetInfo(particle) {
+	if (!particle || !particle.TargetObject || !particle.TargetObject.info) {
+		return;
+	}
+	if (typeof particle.SetResumeCalloutActive !== "undefined") {
+		particle.SetResumeCalloutActive(false);
+		return;
+	}
+	particle.TargetObject.info.material.opacity = 0.5;
+}
+
+function ParticleAboutMe_hideHoverAnimations(group) {
+	for (var i = 0; i < group.particles.length; i++) {
+		if (typeof group.particles[i].HideResumeCallout !== "undefined") {
+			group.particles[i].HideResumeCallout();
+		}
+	}
 }
 
 function ParticleGroupAboutMe(positionCenter, name) 
@@ -127,11 +177,9 @@ function ParticleGroupAboutMe(positionCenter, name)
 	this.name = name;
 	this.htmlDisplayed = false;
 	this.particles = [];
-	this.resumeSharedOrbitParticles = [];
-	this.resumeSharedOrbitCenter = null;
-	this.resumeSharedOrbitRadius = 0;
-	this.resumeSharedOrbitAngle = 0;
-	this.resumeSharedOrbitSpeed = 0.01;
+	this.resumeSatteliteOrbitParticles = [];
+	this.resumeSatteliteOrbitAngle = 0;
+	this.resumeSatteliteOrbitSpeed = 0.004;
 	this.resumePath = null;
 	// var baseFlyers = [];
 	// baseFlyers.push({name:"classic resume", targetURL:"resume.html", size:0.6});
@@ -140,12 +188,16 @@ function ParticleGroupAboutMe(positionCenter, name)
 	var width = window.innerWidth * 0.12;
 	var resumePathScale = window.innerWidth * 0.22;
 	var chronological = typeof ParticleResume !== "undefined" ? ParticleResume.getChronological() : [];
+	var stackEntries =
+		typeof ParticleResume.getStackEntries !== "undefined"
+			? ParticleResume.getStackEntries(chronological)
+			: chronological;
 
 	this.cameraDistance = Math.max(width * 1.7, resumePathScale * 1.55);
 	this.cameraDistanceOrigine = this.cameraDistance;
 	this.positionCenter = positionCenter;
-	this.mVerticalAngleAmplitude = Math.PI / 27.;
-	this.mAngleAmplitude = Math.PI / 9.;
+	this.mVerticalAngleAmplitude = Math.PI / 37.;
+	this.mAngleAmplitude = Math.PI / 16.;
 	// var angleDecay = 2 * Math.PI / (baseFlyers.length + 1.) + Math.random() * 0.2;
 
 	// for ( var i = 0; i < baseFlyers.length; i ++ ) 
@@ -163,49 +215,80 @@ function ParticleGroupAboutMe(positionCenter, name)
 
 	var resumePositions =
 		typeof ParticleResume.layoutResumeParticlePositions !== "undefined"
-			? ParticleResume.layoutResumeParticlePositions(chronological, positionCenter, resumePathScale)
+			? ParticleResume.layoutResumeParticlePositions(stackEntries, positionCenter, resumePathScale)
 			: [];
+	var particleRecords = [];
 
-	for (var r = 0; r < chronological.length; r++)
+	for (var r = 0; r < stackEntries.length; r++)
 	{
-		var flyerResume = ParticleResume.toFlyer(chronological[r]);
 		var posResume =
-			resumePositions.length === chronological.length
+			resumePositions.length === stackEntries.length
 				? resumePositions[r]
-				: ParticleResume.pathPosition(r, chronological.length, positionCenter, resumePathScale, chronological[r]);
-		var particleResume = new ParticleCircleNavigate(posResume, flyerResume, undefined);
-		if (chronological[r].type === "study") {
-			flyerResume.resumeProgramsWithHat = {
-				stroke: ParticleAboutMe_composeProgramWithStudentHat(programStrokeLimited, particleResume),
-				fill: ParticleAboutMe_composeProgramWithStudentHat(programStrokeLimited, particleResume),
-				triangle: ParticleAboutMe_composeProgramWithStudentHat(programTriangle, particleResume),
-			};
-			particleResume.material.program = flyerResume.resumeProgramsWithHat.stroke;
-		}
-		// else if (ParticleResume.isTangibleInteraction(chronological[r])) {
-		// 	flyerResume.resumeProgramsWithHat = ParticleResume.tangibleInteractionPrograms(particleResume);
-		// 	particleResume.material.program = flyerResume.resumeProgramsWithHat.stroke;
-		// }
+				: ParticleResume.pathPosition(r, stackEntries.length, positionCenter, resumePathScale, stackEntries[r]);
+		var particleResume = ParticleAboutMe_createResumeParticle(posResume, stackEntries[r], positionCenter);
 		this.particles.push(particleResume);
-		particleResume.TargetObject.info.material.opacity = 0.5;
-		if (ParticleAboutMe_isSharedOrbitResumeEntry(chronological[r])) {
-			this.resumeSharedOrbitParticles.push({
-				particle: particleResume,
-				anchor: posResume.clone(),
-				phase: 0,
+		particleRecords.push({ entry: stackEntries[r], particle: particleResume });
+	}
+
+	var satteliteGroups = {};
+	for (var s = 0; s < chronological.length; s++) {
+		var parentEntry = ParticleResume.findSatteliteParent(chronological[s], chronological);
+		if (!parentEntry) {
+			continue;
+		}
+		var parentName = ParticleResume.satteliteParentName(chronological[s]);
+		if (!satteliteGroups[parentName]) {
+			satteliteGroups[parentName] = [];
+		}
+		satteliteGroups[parentName].push({ entry: chronological[s], parentEntry: parentEntry });
+	}
+
+	for (var groupName in satteliteGroups) {
+		if (!satteliteGroups.hasOwnProperty(groupName)) {
+			continue;
+		}
+		var sattelites = satteliteGroups[groupName];
+		for (var satIndex = 0; satIndex < sattelites.length; satIndex++) {
+			var parentRecord = ParticleAboutMe_findParticleRecord(particleRecords, sattelites[satIndex].parentEntry);
+			if (!parentRecord) {
+				continue;
+			}
+			var parentParticle = parentRecord.particle;
+			var phase = (satIndex / sattelites.length) * Math.PI * 2;
+			var initialPosition = new THREE.Vector3(
+				parentParticle.position.x + Math.cos(phase) * resumePathScale * 0.18,
+				parentParticle.position.y + Math.sin(phase) * resumePathScale * 0.18,
+				parentParticle.position.z
+			);
+			var satteliteParticle = ParticleAboutMe_createResumeParticle(initialPosition, sattelites[satIndex].entry, parentParticle.position);
+			var radius = Math.max(
+				resumePathScale * 0.18,
+				parentParticle.scale.x * 0.78 + satteliteParticle.scale.x * 1.18
+			);
+			satteliteParticle.SetPosition(new THREE.Vector3(
+				parentParticle.position.x + Math.cos(phase) * radius,
+				parentParticle.position.y + Math.sin(phase) * radius,
+				parentParticle.position.z + Math.sin(phase) * radius,
+			));
+			this.particles.push(satteliteParticle);
+			this.resumeSatteliteOrbitParticles.push({
+				particle: satteliteParticle,
+				parent: parentParticle,
+				phase: phase,
+				radius: radius,
+				speedScale: 0.5 + (satIndex % 3) * 0.12,
 			});
 		}
 	}
 	if (typeof ParticleResume.createDecorativeDashedPath !== "undefined") {
 		this.resumePath = ParticleResume.createDecorativeDashedPath(
-			chronological,
+			stackEntries,
 			positionCenter,
 			resumePathScale,
-			resumePositions.length === chronological.length ? resumePositions : null
+			resumePositions.length === stackEntries.length ? resumePositions : null
 		);
 		scene.add(this.resumePath);
 	}
-	ParticleAboutMe_configureSharedResumeOrbit(this);
 }
 
 ParticleGroupAboutMe.prototype.Init = function()
@@ -267,7 +350,8 @@ ParticleGroupAboutMe.prototype.Update = function()
 {
 
 	controlAuto = sTools.CameraControlType.MOUSE_MOVE;
-	ParticleAboutMe_updateSharedResumeOrbit(this);
+	ParticleAboutMe_updateSatteliteResumeOrbit(this);
+	ParticleAboutMe_updateHoverAnimations(this);
 	var vector = new THREE.Vector3( mouse.x, mouse.y, 0.5 );
 	projector.unprojectVector( vector, camera );
 
@@ -279,9 +363,13 @@ ParticleGroupAboutMe.prototype.Update = function()
 	{
 		if ( INTERSECTED != intersects[ 0 ].object ) {
 
-			if ( INTERSECTED ) INTERSECTED.material.program = ParticleAboutMe_particleStrokeProgram(INTERSECTED.TargetObject);
+			if ( INTERSECTED ) {
+				INTERSECTED.material.program = ParticleAboutMe_particleStrokeProgram(INTERSECTED.TargetObject);
+				ParticleAboutMe_setHoverState(INTERSECTED, false);
+			}
 
 			INTERSECTED = intersects[ 0 ].object;
+			ParticleAboutMe_setHoverState(INTERSECTED, true);
 
 			if(INTERSECTED === SELECTED)
 			{
@@ -293,14 +381,14 @@ ParticleGroupAboutMe.prototype.Update = function()
 			}
 		}
 
-		INTERSECTED.TargetObject.info.material.opacity += (1. - INTERSECTED.TargetObject.info.material.opacity) * 2. * 0.02;
+		ParticleAboutMe_fadeInfoIn(INTERSECTED);
 	} 
 	else 
 	{
 		if ( INTERSECTED ) 
 		{
 			INTERSECTED.material.program = ParticleAboutMe_particleStrokeProgram(INTERSECTED.TargetObject);
-			INTERSECTED.TargetObject.info.material.opacity = 0.5;
+			ParticleAboutMe_resetInfo(INTERSECTED);
 		}
 		INTERSECTED = null;
 	}
@@ -309,6 +397,7 @@ ParticleGroupAboutMe.prototype.Update = function()
 ParticleGroupAboutMe.prototype.Terminate = function()
 {
 	this.htmlDisplayed = false;
+	ParticleAboutMe_hideHoverAnimations(this);
 	$("#roundCorner").slideUp(400);
 	if (typeof sTextDescriptionDOMController !== "undefined")
 	{

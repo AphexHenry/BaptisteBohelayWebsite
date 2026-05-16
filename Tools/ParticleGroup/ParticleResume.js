@@ -1,6 +1,6 @@
 /**
  * Resume landmarks for the About Me particle scene.
- * Each entry: company, title, years, place, description, importance (number, e.g. 1 = big, 0.4 = small), type, yearStart (for chronological path), xOffset (optional, relative to path scale).
+ * Each entry: company, title, years, place, description, importance (number, e.g. 1 = big, 0.4 = small), type, yearStart (for chronological path), xOffset (optional, relative to path scale), calloutAngle (optional degrees for small-entry hover label).
  */
 
 var ParticleResume = {};
@@ -21,7 +21,7 @@ ParticleResume.ENTRIES = [
 	{
 		company: "Dancing Dots",
 		displayShort: "Dancing Dots - Audio Dev",
-		title: "Video Game Audio Dev",
+		title: "Video Game Audio",
 		years: "2008",
 		place: "Paris, France",
 		description:
@@ -30,7 +30,8 @@ ParticleResume.ENTRIES = [
 		type: "pro",
 		yearStart: 2008,
 		sortOrder: 1,
-		xOffset: 0.66,
+		xOffset: 0.5,
+		calloutAngle: -0.8,
 	},
 	{
 		company: "IRCAM",
@@ -46,8 +47,8 @@ ParticleResume.ENTRIES = [
 		xOffset: -0.2,
 	},
 	{
-		company: "Lulu Game",
-		title: "Game Developer",
+		company: "Lulu's Exploration",
+		title: "Video Game",
 		displayShort: "Lulu's Unreal Exploration",
 		years: "2009-2013",
 		place: "France - Canada",
@@ -72,7 +73,7 @@ ParticleResume.ENTRIES = [
 	},
 	{
 		company: "Le Cube",
-		title: "Developer for Interactive Installation",
+		title: "Interactive Installation Dev",
 		displayShort: "Le Cube",
 		years: "2011",
 		place: "Issy-les-Moulineaux, France",
@@ -81,6 +82,7 @@ ParticleResume.ENTRIES = [
 		type: "pro",
 		yearStart: 2011,
 		xOffset: 0.8,
+		calloutAngle: -2,
 	},
 	{
 		company: "Tangible Interaction",
@@ -90,10 +92,80 @@ ParticleResume.ENTRIES = [
 		place: "Vancouver",
 		description:
 			"Tangible Interaction blends art, design and technology for interactive experiences shown worldwide.\n\nDeveloped autonomously most of their recent applications: Cortex (control lights/motors with interaction); Mozza (Twitter/Instagram/Vine visualizer with 360° projection); driver for an innovative Graffiti Wall sensor.\n\nRobust, long-running installs presented at SXSW (Austin), Eyeo Festival (Minneapolis), Purity Ring concerts (Pitchfork), MTV Spring Break, Osheaga (Montreal).\n\nStack: C++, JavaScript, HTML, CSS, Max/MSP, Cinder, OpenFrameworks, WebGL, TUIO.",
-		importance: 1.3,
+		importance: 1.4,
 		type: "pro",
 		yearStart: 2012,
-		xOffset: -0.2,
+		xOffset: -0.4,
+	},
+	{
+		company: "Social Mosa",
+		displayShort: "Social Mosa",
+		title: "Instagram Visualizer for Events",
+		years: "2012 – 2015",
+		place: "Vancouver",
+		description:
+			"Development of Social Mozaic, a Twitter/Instagram/Vine visualizer with 360° projection.",
+		importance: 0.3,
+		type: "pro",
+		yearStart: 2012,
+		xOffset: -0.4,
+		satteliteOf:"Tangible Interaction"
+	},
+	{
+		company: "Halo",
+		displayShort: "Halo",
+		title: "Light Installation",
+		years: "2012 – 2015",
+		place: "Vancouver",
+		description:
+			"Halo is a light installation that reacts to the movement of the audience.",
+		importance: 0.3,
+		type: "pro",
+		yearStart: 2012,
+		xOffset: -0.4,
+		satteliteOf:"Tangible Interaction"
+	},
+	{
+		company: "Cortex",
+		displayShort: "Halo",
+		title: "Light Control Software",
+		years: "2012 – 2015",
+		place: "Vancouver",
+		description:
+			"Cortex is a software for controlling lights and motors with interaction.",
+		importance: 0.3,
+		type: "pro",
+		yearStart: 2012,
+		xOffset: -0.4,
+		satteliteOf:"Tangible Interaction"
+	},
+	{
+		company: "Graffiti Wall",
+		displayShort: "Halo",
+		title: "Digital Graffiti Wall",
+		years: "2012 – 2015",
+		place: "Vancouver",
+		description:
+			"Cortex is a software for controlling lights and motors with interaction.",
+		importance: 0.3,
+		type: "pro",
+		yearStart: 2012,
+		xOffset: -0.4,
+		satteliteOf:"Tangible Interaction"
+	},
+	{
+		company: "Visitor",
+		displayShort: "Halo",
+		title: "Light Scrulpture",
+		years: "2012 – 2015",
+		place: "Vancouver",
+		description:
+			"Visitor is a 3D light sculpture that reacts to the touch.",
+		importance: 0.3,
+		type: "pro",
+		yearStart: 2015,
+		xOffset: -0.4,
+		satteliteOf:"Tangible Interaction"
 	},
 	{
 		company: "Musical Box",
@@ -105,7 +177,8 @@ ParticleResume.ENTRIES = [
 		importance: 0.45,
 		type: "art",
 		yearStart: 2016,
-		xOffset: -0.5,
+		xOffset: -0.3,
+		calloutAngle: -2,
 	},
 	{
 		company: "Onde de Choc",
@@ -118,11 +191,11 @@ ParticleResume.ENTRIES = [
 		importance: 0.4,
 		type: "art",
 		yearStart: 2013,
-		xOffset: 0.2,
+		xOffset: -0.2,
 	},
 	{
-		company: "Fête des Lumières",
-		title: "Cocoons — Artist / Developer",
+		company: "Cocoons - Fête des Lumières",
+		title: "Light and Sound Interactive Installation",
 		years: "2015",
 		place: "Lyon, France",
 		description:
@@ -134,7 +207,7 @@ ParticleResume.ENTRIES = [
 	},
 	{
 		company: "Projection Intérieure Projection",
-		title: "Artist / Developer",
+		title: "Interactive Video Installation",
 		years: "",
 		place: "",
 		description:
@@ -142,18 +215,19 @@ ParticleResume.ENTRIES = [
 		importance: 0.45,
 		type: "art",
 		yearStart: 2014,
-		xOffset: 0.0,
+		xOffset: 0.2,
 	},
 	{
-		company: "",
-		title: "Womb",
+		company: "Womb",
+		title: "360 InteractiveVideo",
 		years: "2015",
 		place: "",
 		description: "Interactive audiovisual experience in a dome.",
 		importance: 0.4,
 		type: "art",
 		yearStart: 2016,
-		xOffset: 1.1,
+		xOffset: 0.6,
+		calloutAngle: -0.4,
 	},
 	{
 		company: "Triber",
@@ -166,19 +240,21 @@ ParticleResume.ENTRIES = [
 		type: "pro",
 		yearStart: 2015,
 		xOffset: 0.4,
+		calloutAngle: 0.4,
 	},
-	// {
-	// 	company: "OrchPlay",
-	// 	title: "Software Developer",
-	// 	years: "2016 – 2025",
-	// 	place: "Montreal · Remote",
-	// 	description:
-	// 		"Development of OrchPlay, educational musical software playing very high-quality orchestral material using a custom format. Control each instrument independently; educational visualizations; library download and management. Client in C++ (JUCE); server in Rails.\n\nOrchPlayMusic builds technologies for musical education and appreciation linked to the OrchPlay Library of multitrack excerpts (~100 works).",
-	// 	importance: 1.2,
-	// 	type: "pro",
-	// 	yearStart: 2016,
-	// 	xOffset: 0.9,
-	// },
+	{
+		company: "Шагни через границу",
+		title: "Comics Exhibition - Bishkek",
+		years: "2019",
+		place: "Bishkek, Kyrgyzstan",
+		description:
+			"Development of OrchPlay, educational musical software playing very high-quality orchestral material using a custom format. Control each instrument independently; educational visualizations; library download and management. Client in C++ (JUCE); server in Rails.\n\nOrchPlayMusic builds technologies for musical education and appreciation linked to the OrchPlay Library of multitrack excerpts (~100 works).",
+		importance: 0.45,
+		type: "art",
+		yearStart: 2019,
+		xOffset: 0.9,
+		calloutAngle: -0.4,
+	},
 	{
 		company: "McGill University",
 		title: "Orchview / Orchplay",
@@ -189,7 +265,7 @@ ParticleResume.ENTRIES = [
 		importance: 1.3,
 		type: "pro",
 		yearStart: 2016,
-		xOffset: 0.4,
+		xOffset: -0.1,
 		
 	},
 	{
@@ -238,8 +314,227 @@ ParticleResume.toFlyer = function (entry) {
 	};
 };
 
+ParticleResume.isLowImportance = function (entry) {
+	return entry && typeof entry.importance === "number" && entry.importance < 0.5;
+};
+
+ParticleResume.lowImportanceName = function (entry) {
+	if (entry.company && String(entry.company).length > 0) {
+		return entry.company;
+	}
+	return ParticleResume.shortLabel(entry);
+};
+
+ParticleResume.lowImportanceSubTitle = function (entry) {
+	if (entry.company && String(entry.company).length > 0 && entry.title && String(entry.title).length > 0) {
+		return entry.title;
+	}
+	if (entry.years && String(entry.years).length > 0) {
+		return entry.years;
+	}
+	return entry.place || "";
+};
+
+ParticleResume.lowImportanceCalloutAngle = function (entry, side) {
+	if (entry && typeof entry.calloutAngle === "number" && isFinite(entry.calloutAngle)) {
+		return entry.calloutAngle;
+	}
+	return Math.atan2(-1.35, side * (7.1 - 2.45));
+};
+
+ParticleResume.drawWavyCircle = function (context, phase, entry) {
+	var radius = 0.6;
+	var waveCount = 34 * entry.importance * 2.2;
+	var steps = 120;
+	var amplitude = 0.47;
+	// context.lineWidth = 0.008;
+	context.beginPath();
+	for (var i = 0; i <= steps; i++) {
+		var angle = (i / steps) * PI2;
+		var waveRadius = radius + Math.sin(angle * waveCount + phase) * amplitude;
+		var x = Math.cos(angle) * waveRadius;
+		var y = Math.sin(angle) * waveRadius;
+		if (i === 0) {
+			context.moveTo(x, y);
+		} else {
+			context.lineTo(x, y);
+		}
+	}
+	context.closePath();
+};
+
+ParticleResume.wavyCirclePhase = function (entry) {
+	return ParticleResume._deterministicPhase(entry, 0);
+};
+
+ParticleResume.wavyCircleStrokeProgram = function (entry) {
+	var phase = ParticleResume.wavyCirclePhase(entry);
+	return function (context) {
+		context.lineWidth = 0.008;
+		ParticleResume.drawWavyCircle(context, phase, entry);
+		context.stroke();
+	};
+};
+
+ParticleResume.wavyCircleFillProgram = function (entry) {
+	var phase = ParticleResume.wavyCirclePhase(entry);
+	return function (context) {
+		context.lineWidth = 0.012;
+		ParticleResume.drawWavyCircle(context, phase, entry);
+		context.stroke();
+	};
+};
+
+ParticleResume.wavyCircleTriangleProgram = function (entry) {
+	var fillProgram = ParticleResume.wavyCircleFillProgram(entry);
+	return function (context) {
+		fillProgram(context);
+		context.fillStyle = "#000000";
+		context.beginPath();
+		context.moveTo(-0.5 + 0.2, 0.5);
+		context.lineTo(0.5 + 0.2, 0);
+		context.lineTo(-0.5 + 0.2, -0.5);
+		context.fill();
+		context.fillStyle = "#ffffff";
+	};
+};
+
+ParticleResume.wavyCirclePrograms = function (entry) {
+	return {
+		stroke: ParticleResume.wavyCircleStrokeProgram(entry),
+		fill: ParticleResume.wavyCircleFillProgram(entry),
+		triangle: ParticleResume.wavyCircleTriangleProgram(entry),
+	};
+};
+
+function ParticleResumeLowImportanceEntry(position, entry, aColor, labelCenter) {
+	var flyer = ParticleResume.toFlyer(entry);
+	var particle = new ParticleCircleNavigate(position, flyer, aColor);
+	var baseInfo = particle.TargetObject.info;
+	var defaultSide = labelCenter && position.x > labelCenter.x ? -1 : 1;
+	var calloutState = {
+		progress: 0,
+		target: 0,
+		name: ParticleResume.lowImportanceName(entry),
+		subTitle: ParticleResume.lowImportanceSubTitle(entry),
+		angle: ParticleResume.lowImportanceCalloutAngle(entry, defaultSide),
+	};
+
+	var clamp01 = function (value) {
+		return Math.max(0, Math.min(1, value));
+	};
+
+	var visibleText = function (text, progress) {
+		if (!text || text.length === 0) {
+			return "";
+		}
+		return text.substring(0, Math.floor(text.length * clamp01(progress)));
+	};
+
+	var programCallout = function (context) {
+		var progress = calloutState.progress;
+		if (progress <= 0.001) {
+			return;
+		}
+
+		var lineProgress = clamp01(progress / 0.42);
+		var nameProgress = clamp01((progress - 0.28) / 0.44);
+		var subTitleProgress = clamp01((progress - 0.48) / 0.42);
+		var directionX = Math.cos(calloutState.angle);
+		var directionY = Math.sin(calloutState.angle);
+		var side = directionX < 0 ? -1 : 1;
+		var startX = directionX * 2.45;
+		var startY = directionY * 2.45;
+		var endX = directionX * 7.25;
+		var endY = directionY * 7.25;
+		var drawEndX = startX + (endX - startX) * lineProgress;
+		var drawEndY = startY + (endY - startY) * lineProgress;
+		var textX = endX + side * 0.5;
+
+		context.save();
+		context.strokeStyle = "#555555";
+		context.fillStyle = "#555555";
+		context.lineWidth = 0.08;
+		context.lineCap = "round";
+		context.textAlign = side > 0 ? "left" : "right";
+		context.textBaseline = "middle";
+
+		context.beginPath();
+		context.moveTo(startX, startY);
+		context.lineTo(drawEndX, drawEndY);
+		context.stroke();
+
+		if (nameProgress > 0) {
+			context.font = "2.25pt TitleText";
+			context.fillText(visibleText(calloutState.name, nameProgress), textX, endY - 1);
+		}
+		if (subTitleProgress > 0 && calloutState.subTitle && calloutState.subTitle.length > 0) {
+			context.font = "1.45pt TitleText";
+			context.fillText(visibleText(calloutState.subTitle, subTitleProgress), textX, endY + 1.2);
+		}
+
+		context.restore();
+	};
+
+	var callout = new THREE.Particle(
+		new THREE.ParticleCanvasMaterial({
+			color: isdefined(aColor) ? aColor : 0x000000,
+			program: programCallout,
+			transparent: true,
+			opacity: 0,
+		})
+	);
+	callout.position = particle.position;
+	callout.scale.x = particle.scale.x * 0.34;
+	callout.scale.y = -callout.scale.x;
+	callout.visible = false;
+	scene.add(callout);
+
+	if (baseInfo) {
+		scene.remove(baseInfo);
+	}
+	particle.TargetObject.info = callout;
+	particle.TargetObject.resumeLowImportanceCallout = calloutState;
+
+	particle.SetResumeCalloutActive = function (active) {
+		calloutState.target = active ? 1 : 0;
+		if (active) {
+			callout.visible = true;
+		}
+	};
+
+	particle.UpdateResumeCallout = function () {
+		var speed = calloutState.target > calloutState.progress ? 0.14 : 0.2;
+		calloutState.progress += (calloutState.target - calloutState.progress) * speed;
+		if (Math.abs(calloutState.target - calloutState.progress) < 0.002) {
+			calloutState.progress = calloutState.target;
+		}
+		callout.material.opacity = calloutState.progress;
+		callout.visible = calloutState.progress > 0.001 || calloutState.target > 0;
+	};
+
+	particle.HideResumeCallout = function () {
+		calloutState.target = 0;
+		calloutState.progress = 0;
+		callout.material.opacity = 0;
+		callout.visible = false;
+	};
+
+	return particle;
+}
+
 ParticleResume.isTangibleInteraction = function (entry) {
 	return entry && entry.company === "Tangible Interaction";
+};
+
+ParticleResume.drawTangibleInteractionBackground = function (context) {
+	context.save();
+	context.fillStyle = "#f0f0f0";
+	context.beginPath();
+	context.arc(0, 0, 0.99, 0, PI2, true);
+	context.closePath();
+	context.fill();
+	context.restore();
 };
 
 ParticleResume.drawTangibleInteractionLogo = function (context, colorStyle) {
@@ -271,9 +566,10 @@ ParticleResume.drawTangibleInteractionLogo = function (context, colorStyle) {
 
 ParticleResume.composeProgramWithTangibleInteractionLogo = function (baseProgram, particle, logoColorStyle) {
 	return function (context) {
+		ParticleResume.drawTangibleInteractionBackground(context);
 		baseProgram(context);
-		var colorStyle = logoColorStyle || particle.material.color.getContextStyle();
-		ParticleResume.drawTangibleInteractionLogo(context, colorStyle);
+		// var colorStyle = logoColorStyle || particle.material.color.getContextStyle();
+		// ParticleResume.drawTangibleInteractionLogo(context, colorStyle);
 	};
 };
 
@@ -299,6 +595,47 @@ ParticleResume.getChronological = function () {
 		return ta.localeCompare(tb);
 	});
 	return list;
+};
+
+ParticleResume.satteliteParentName = function (entry) {
+	if (!entry) {
+		return "";
+	}
+	if (typeof entry.satteliteOf === "string" && entry.satteliteOf.length > 0) {
+		return entry.satteliteOf;
+	}
+	if (typeof entry.satelliteOf === "string" && entry.satelliteOf.length > 0) {
+		return entry.satelliteOf;
+	}
+	return "";
+};
+
+ParticleResume.findSatteliteParent = function (entry, entries) {
+	var parentName = ParticleResume.satteliteParentName(entry);
+	if (!parentName || !entries) {
+		return null;
+	}
+	for (var i = 0; i < entries.length; i++) {
+		if (entries[i] !== entry && entries[i].company === parentName) {
+			return entries[i];
+		}
+	}
+	return null;
+};
+
+ParticleResume.isSatteliteEntry = function (entry, entries) {
+	return !!ParticleResume.findSatteliteParent(entry, entries || ParticleResume.ENTRIES);
+};
+
+ParticleResume.getStackEntries = function (entries) {
+	var source = entries || [];
+	var stackEntries = [];
+	for (var i = 0; i < source.length; i++) {
+		if (!ParticleResume.isSatteliteEntry(source[i], source)) {
+			stackEntries.push(source[i]);
+		}
+	}
+	return stackEntries;
 };
 
 /**
@@ -335,8 +672,8 @@ ParticleResume.pathPosition = function (index, total, center, pathScale, entry) 
 	}
 	var GOLDEN = 2.39996322972865332;
 	var lateralScale = pathScale * 0.17;
-	var phase = ParticleResume._deterministicPhase(entry, index);
-	var lateral = lateralScale * Math.sin(index * GOLDEN + phase);
+	// var phase = ParticleResume._deterministicPhase(entry, index);
+	var lateral = lateralScale * Math.sin(index * GOLDEN);
 	return new THREE.Vector3(x + lateral, y, center.z);
 };
 
