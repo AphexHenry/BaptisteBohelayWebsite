@@ -78,11 +78,11 @@
 
 		var lMenu = new ParticleGroupIntro(new THREE.Vector3(1000, 2000, 2000), flyer, "home", sTools.ParticleGroup.PART_CREA_LULU);
 
-		var randomMonster = new MonsterRandom(new THREE.Vector3(lMenu.positionCenter.x + -sWIDTH * 1.5, lMenu.positionCenter.y - sWIDTH / getRatio() * 0.4, lMenu.positionCenter.z), window.innerWidth * 0.06);
+		// var randomMonster = new MonsterRandom(new THREE.Vector3(lMenu.positionCenter.x + -sWIDTH * 1.5, lMenu.positionCenter.y - sWIDTH / getRatio() * 0.4, lMenu.positionCenter.z), window.innerWidth * 0.06);
 		var randomLastProject = new MonsterTournicoti(new THREE.Vector3(lMenu.positionCenter.x + sWIDTH * 1., lMenu.positionCenter.y - 1. * sWIDTH / getRatio(), lMenu.positionCenter.z + sWIDTH * 0.3), window.innerWidth * 0.06, sProjectsLast, 1);
 		var funkyCreation = new MonsterTournicoti(lMenu.positionCenter, window.innerWidth * 0.1, { name: "creations", target: sTools.ParticleGroup.PART_FUNKY_CREATION, size: 1.5 }, -1, false, 0xf97316);
 		lMenu.AddParticle(funkyCreation);
-		lMenu.AddParticle(randomMonster);
+		// lMenu.AddParticle(randomMonster);
 		lMenu.AddParticle(randomLastProject);
 
 		// creations type

@@ -253,8 +253,8 @@ function ParticleGroupAboutMe(positionCenter, name)
 	this.cameraDistance = Math.max(width * 1.7, resumePathScale * 1.55);
 	this.cameraDistanceOrigine = this.cameraDistance;
 	this.positionCenter = positionCenter;
-	this.mVerticalAngleAmplitude = Math.PI / 37.;
-	this.mAngleAmplitude = Math.PI / 16.;
+	this.mVerticalAngleAmplitude = Math.PI / 70.;
+	this.mAngleAmplitude = Math.PI / 70.;
 	// var angleDecay = 2 * Math.PI / (baseFlyers.length + 1.) + Math.random() * 0.2;
 
 	// for ( var i = 0; i < baseFlyers.length; i ++ ) 
