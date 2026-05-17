@@ -2,13 +2,6 @@
 <html lang="en">
 
 <head>
-
-	<!--[if IE]>
-<script type="text/javascript">
-    document.location.href = "./sorryIE.html";
- </script>
-<![endif]-->
-
 	<title>Baptiste Bohelay - developer & designer</title>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
@@ -30,7 +23,6 @@
 		if (/Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent)) {
 			IS_PHONE = true;
 			document.getElementById("info").innerHTML = "<CENTER><H2> <strong>loading...</strong><P><H4>for a better experience use your device horizontaly<br><br><img src='textures/GUI/smartphone-icon.png' style='width:50%;'>";
-			// document.location.href = "./sorry.html";
 		}
 		else {
 			document.getElementById("info").innerHTML = "<CENTER><H2> <br><br><br><strong>loading</strong><P>";
@@ -138,22 +130,6 @@
 	<script defer src='Tools/soundPlayer/ParticleSound.js'></script>
 	<script defer src='Tools/THREEx.WindowResize.js'></script>
 	<script defer src='Tools/AppMain.js'></script>
-
-	<!-- Piwik -->
-	<script type="text/javascript">
-		// var _paq = _paq || [];
-		// _paq.push(["trackPageView"]);
-		// _paq.push(["enableLinkTracking"]);
-
-		// (function() {
-		//   var u=(("https:" == document.location.protocol) ? "https" : "http") + "://piwik.moumne.com/";
-		//   _paq.push(["setTrackerUrl", u+"piwik.php"]);
-		//   _paq.push(["setSiteId", "9"]);
-		//   var d=document, g=d.createElement("script"), s=d.getElementsByTagName("script")[0]; g.type="text/javascript";
-		//   g.defer=true; g.async=true; g.src=u+"piwik.js"; s.parentNode.insertBefore(g,s);
-		// })();
-	</script>
-	<!-- End Piwik Code -->
 
 </body>
 
