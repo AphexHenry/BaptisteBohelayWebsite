@@ -75,17 +75,17 @@
 
 		soundManager.setup({
 			flashVersion: 9,
-			preferFlash: true, // for visualization effects
-			useHighPerformance: true, // keep flash on screen, boost performance
-			wmode: 'transparent', // transparent SWF, if possible
+			/* Waveform / peaks now use Web Audio (Tools/soundPlayer/ParticleSound.js); Flash is optional. */
+			preferFlash: false,
+			useHighPerformance: true,
+			wmode: 'transparent',
 			url: 'soundmanager/swf/'
 		});
 
 		soundManager.useFlashBlock = true;
 		sSoundManagerReady = false;
 
-		// even if HTML5 supports MP3, prefer flash so the visualization features can be used.
-		soundManager.preferFlash = true;
+		soundManager.preferFlash = false;
 
 		var sAutomatedFadeIn = false;
 	</script>

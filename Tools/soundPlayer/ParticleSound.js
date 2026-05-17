@@ -1,6 +1,150 @@
 
 var sParticlesSound = [];
 var sWaveFormData = [];
+/** Peak-style levels for the monster legs (was SoundManager2's peakData object). */
+var sLengthLegsSound = { left: 0, right: 0 };
+
+function getSharedWebAudioContext() {
+	var AC = window.AudioContext || window.webkitAudioContext;
+	if (!AC) return null;
+	if (!window.__lebaptisteAudioContext) {
+		window.__lebaptisteAudioContext = new AC();
+	}
+	return window.__lebaptisteAudioContext;
+}
+
+/**
+ * Playback + visualization without Flash: HTMLMediaElement + AnalyserNode (replaces SM2 waveformData / peakData).
+ */
+function createWebAudioSound(options) {
+	var ctx = getSharedWebAudioContext();
+	var audio = new Audio(options.url);
+	/* Omit crossOrigin for same-origin files; set crossOrigin = 'anonymous' if URLs are on another origin with CORS. */
+	audio.preload = 'auto';
+	var vol = Math.min(1, Math.max(0, (options.volume * 120) / 100));
+	audio.volume = vol;
+
+	var analyser = null;
+	var mediaSource = null;
+	var graphConnected = false;
+	var rafId = null;
+	var playState = 0;
+	var stopFired = false;
+
+	function buildWaveformFromTimeData(dataArray, bufferLength) {
+		var out = [];
+		var leftAccum = 0;
+		var rightAccum = 0;
+		var useLeft = true;
+		var i;
+		for (i = 0; i < bufferLength; i += 2) {
+			var v = (dataArray[i] - 128) / 128;
+			out.push(v);
+			if (useLeft) {
+				leftAccum += Math.abs(v);
+			} else {
+				rightAccum += Math.abs(v);
+			}
+			useLeft = !useLeft;
+		}
+		var half = bufferLength / 2;
+		return {
+			waveform: out,
+			left: leftAccum / half,
+			right: rightAccum / half
+		};
+	}
+
+	function tickVisual() {
+		if (playState !== 1 || !analyser) {
+			return;
+		}
+		rafId = requestAnimationFrame(tickVisual);
+		var bufferLength = analyser.fftSize;
+		var dataArray = new Uint8Array(bufferLength);
+		analyser.getByteTimeDomainData(dataArray);
+
+		var nPeak = 0;
+		for (var j = 0; j < 32; j++) {
+			nPeak = Math.max(nPeak, Math.abs(dataArray[j] - 128) / 128);
+		}
+		sSoundAmplitude = 0.9 + nPeak * 0.1;
+
+		var packed = buildWaveformFromTimeData(dataArray, bufferLength);
+		sLengthLegsSound.left = sLengthLegsSound.left * 0.9 + packed.left * 0.1;
+		sLengthLegsSound.right = sLengthLegsSound.right * 0.9 + packed.right * 0.1;
+
+		var w0 = parseFloat(dataArray[0]);
+		var w10 = parseFloat(dataArray[10]);
+		var w3 = parseFloat(dataArray[3]);
+		if (Math.abs(w0 - 128) + Math.abs(w10 - 128) + Math.abs(w3 - 128) !== 0) {
+			sWaveFormData = packed.waveform;
+		}
+	}
+
+	function connectGraph() {
+		if (graphConnected || !ctx) return;
+		mediaSource = ctx.createMediaElementSource(audio);
+		analyser = ctx.createAnalyser();
+		analyser.fftSize = 512;
+		mediaSource.connect(analyser);
+		analyser.connect(ctx.destination);
+		graphConnected = true;
+	}
+
+	function cancelVisual() {
+		if (rafId != null) {
+			cancelAnimationFrame(rafId);
+			rafId = null;
+		}
+	}
+
+	function fireStopCallbacks() {
+		if (stopFired) return;
+		stopFired = true;
+		if (typeof options.onPlaybackEnd === 'function') {
+			options.onPlaybackEnd();
+		}
+	}
+
+	function onPlaybackEnded() {
+		playState = 0;
+		cancelVisual();
+		audio.removeEventListener('ended', onPlaybackEnded);
+		fireStopCallbacks();
+	}
+
+	var sound = {
+		play: function() {
+			stopFired = false;
+			playState = 1;
+			audio.addEventListener('ended', onPlaybackEnded);
+			if (ctx) {
+				connectGraph();
+				cancelVisual();
+				rafId = requestAnimationFrame(tickVisual);
+				ctx.resume().catch(function() {});
+			}
+			audio.play().catch(function() {});
+			return sound;
+		},
+		stop: function() {
+			audio.pause();
+			audio.currentTime = 0;
+			playState = 0;
+			cancelVisual();
+			audio.removeEventListener('ended', onPlaybackEnded);
+			fireStopCallbacks();
+			return sound;
+		}
+	};
+
+	Object.defineProperty(sound, 'playState', {
+		get: function() { return playState; }
+	});
+
+	return sound;
+}
 
 function ParticleSound(aPositionHome, volume, aTargetObject) 
 {
@@ -189,61 +333,14 @@ ParticleSound.prototype.Update = function(delta)
 
 var sSoundAmplitude = 0.;
 
-this.eventsSound = {
-
-    whileplaying: function() {
-	  	var nPeak = (this.peakData.left||this.peakData.right);
-	    // GIANT HACK: use EQ spectrum data for bass frequencies
-	    var eqSamples = 3;
-	    for (i=0; i<eqSamples; i++) 
-	    {
-	      nPeak = (nPeak||this.eqData[i]);
+ParticleSound.prototype.InitSound = function() {
+	this.sound = createWebAudioSound({
+		url: this.url,
+		volume: this.volume,
+		onPlaybackEnd: function() {
+			sFoodArraySoundWait.push(sPlayingSound.particle);
+			sFoodArraySound.splice(0, 1);
+			sMonsterSound.mParent.RemoveSound();
 		}
-		if((Math.abs(parseFloat(this.waveformData.left[0])) + Math.abs(parseFloat(this.waveformData.left[10])) + Math.abs(parseFloat(this.waveformData.left[3]))) != 0)
-			sWaveFormData = this.waveformData.left;
-	   	sSoundAmplitude = (0.9+(nPeak*0.1));
-	   	sLengthLegsSound.left = (sLengthLegsSound.left * 0.9 +(this.peakData.left*0.1));;
-	   	sLengthLegsSound.right = (sLengthLegsSound.right * 0.9 +(this.peakData.right*0.1));;
-    },
-
-    stop: function() 
-    {
-    	sFoodArraySoundWait.push(sPlayingSound.particle);
-		sFoodArraySound.splice(0,1);
-    	sMonsterSound.mParent.RemoveSound();
-    }
-  }; // events{}
-
-ParticleSound.prototype.InitSound = function()
-{
-	 soundManager.defaultOptions.usePeakData = true;
-	 soundManager.useFlashBlock = true;
-     // create sound
-  	this.sound = soundManager.createSound({
-   	id:'sound' + this.name,
-   	url:this.url,
-   	useWaveformData:true,
-   	useEQData:false,
-   	usePeakData:true,
-   	volume:this.volume * 120,
-   	whileplaying:self.eventsSound.whileplaying,
-   	onstop:self.eventsSound.stop,
-   	onfinish:self.eventsSound.stop,
-  });
-
-  	sLengthLegsSound = this.sound.peakData;
-
-
-  // 	soundManager.defaultOptions.whileplaying = function()
-  // 	{
-	 //  	var nPeak = (this.peakData.left||this.peakData.right);
-	 //    // GIANT HACK: use EQ spectrum data for bass frequencies
-	 //    var eqSamples = 3;
-	 //    for (i=0; i<eqSamples; i++) 
-	 //    {
-	 //      nPeak = (nPeak||this.eqData[i]);
-		// }
-	 //   	thisInstance.amplifier = (0.9+(nPeak*0.1));
-	 //   	soundManager._writeDebug('Peaks, L/R: '+this.peakData.left+'/'+this.peakData.right);
-  // 	}
-}
+	});
+};
