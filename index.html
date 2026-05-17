@@ -68,25 +68,7 @@
 		}
 	</script>
 
-	<!-- the core stuff -->
-	<script type="text/javascript" src="script/soundmanager2.js"></script>
-
 	<script type="text/javascript">
-
-		soundManager.setup({
-			flashVersion: 9,
-			/* Waveform / peaks now use Web Audio (Tools/soundPlayer/ParticleSound.js); Flash is optional. */
-			preferFlash: false,
-			useHighPerformance: true,
-			wmode: 'transparent',
-			url: 'soundmanager/swf/'
-		});
-
-		soundManager.useFlashBlock = true;
-		sSoundManagerReady = false;
-
-		soundManager.preferFlash = false;
-
 		var sAutomatedFadeIn = false;
 	</script>
 	<!-- <div id="framerate">framerate</div> -->
@@ -118,10 +100,6 @@
 
 	<a href="https://github.com/AphexHenry/BaptisteBohelayWebsite"><img title="contact me" id="contactButton"
 			src="textures/icons/contactCircle.png"></a>
-
-	<div id="sm2-container" style="z-index:-300;">
-		<!-- flash movie is added here -->
-	</div>
 
 	<script src='js/jquery.js'></script>
 	<script src='js/jquery.ba-hashchange.min.js'></script>
