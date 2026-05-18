@@ -58,7 +58,9 @@
 
 		// Let's get all the particles group initialized each group at a time.
 		// Monster
-		sTools.ParticleGroups[sTools.ParticleGroup.PART_INTRO] = new ParticleGroupMonster(new THREE.Vector3(-500, -1000, -1000), "");
+		var lIntro = new ParticleGroupMonster(new THREE.Vector3(-500, -1000, -1000), "home");
+		sTools.ParticleGroups[sTools.ParticleGroup.PART_INTRO] = lIntro;
+		sTools.ParticleGroups[sTools.ParticleGroup.PART_CREA_LULU] = lIntro;
 
 		var flyer = [];
 		flyer.push({ name: "musical baguette", targetHTML: "html/other/MusicalBaguette.html", size: 0.8 });
@@ -72,22 +74,21 @@
 		lBProjects.mAngleAmplitude = Math.PI * .4;
 
 		// Main choice
-		var flyer = [];
+		var lMenuPosition = lIntro.GetMenuPositionCenter();
 		// flyer.push({ name: "contact", targetHTML: "html/contact.html", size: 0.5, addRandom: false, position: new THREE.Vector3(100, 100, 0) });
-		flyer.push({ name: "about me", target: sTools.ParticleGroup.PART_ABOUT_ME, position: new THREE.Vector3(-0, 140, 10) });
-
-		var lMenu = new ParticleGroupIntro(new THREE.Vector3(1000, 2000, 2000), flyer, "home", sTools.ParticleGroup.PART_CREA_LULU);
-
-		// var randomMonster = new MonsterRandom(new THREE.Vector3(lMenu.positionCenter.x + -sWIDTH * 1.5, lMenu.positionCenter.y - sWIDTH / getRatio() * 0.4, lMenu.positionCenter.z), window.innerWidth * 0.06);
-		var randomLastProject = new MonsterTournicoti(new THREE.Vector3(lMenu.positionCenter.x + sWIDTH * 1., lMenu.positionCenter.y - 1. * sWIDTH / getRatio(), lMenu.positionCenter.z + sWIDTH * 0.3), window.innerWidth * 0.06, sProjectsLast, 1);
-		var funkyCreation = new MonsterTournicoti(lMenu.positionCenter, window.innerWidth * 0.1, { name: "creations", target: sTools.ParticleGroup.PART_FUNKY_CREATION, size: 1.5 }, -1, false, 0xf97316);
-		lMenu.AddParticle(funkyCreation);
-		// lMenu.AddParticle(randomMonster);
-		lMenu.AddParticle(randomLastProject);
+		var aboutMeTarget = { name: "about me", target: sTools.ParticleGroup.PART_ABOUT_ME, size: 0.9 };
+		var aboutMe = { target: aboutMeTarget, particle: new ParticleCircleNavigate(lMenuPosition.clone().addSelf(new THREE.Vector3(sWIDTH * 1.1, sWIDTH / getRatio() * 0.55, 0)), aboutMeTarget) };
+		var randomMonster = new MonsterRandom(new THREE.Vector3(lMenuPosition.x - sWIDTH * 1.1, lMenuPosition.y - sWIDTH / getRatio() * 0.35, lMenuPosition.z), window.innerWidth * 0.06);
+		var randomLastProject = new MonsterTournicoti(new THREE.Vector3(lMenuPosition.x + sWIDTH * 1., lMenuPosition.y - 1. * sWIDTH / getRatio(), lMenuPosition.z + sWIDTH * 0.3), window.innerWidth * 0.06, sProjectsLast, 1);
+		var funkyCreation = new MonsterTournicoti(lMenuPosition, window.innerWidth * 0.1, { name: "creations", target: sTools.ParticleGroup.PART_FUNKY_CREATION, size: 1.5 }, -1, false, 0xf97316);
+		lIntro.AddParticle(funkyCreation);
+		lIntro.AddParticle(randomMonster);
+		lIntro.AddParticle(randomLastProject);
+		lIntro.AddParticle(aboutMe);
 
 		// creations type
 		var flyer = [];
-		var lFunky = new ParticleGroupIntro(lMenu.positionCenter.clone().addSelf(new THREE.Vector3(600, 1300, -1700)), flyer, "funkyCreation", sTools.ParticleGroup.PART_FUNKY_CREATION);
+		var lFunky = new ParticleGroupIntro(lMenuPosition.clone().addSelf(new THREE.Vector3(600, 1300, -1700)), flyer, "funkyCreation", sTools.ParticleGroup.PART_FUNKY_CREATION);
 		var particleWebExp = { particle: new ParticleCircleNavigate(lFunky.positionCenter.clone().addSelf(new THREE.Vector3(sWIDTH * 1., sWIDTH * 0.5, 0.)), { name: "web exploration", target: sTools.ParticleGroup.PART_WEB }) };
 		var monsterNoise = new MonsterNoise(lFunky.positionCenter.clone().addSelf(new THREE.Vector3(-sWIDTH * 1.6, 0., 0.)), window.innerWidth * 0.06, { name: "sound monsters", target: sTools.ParticleGroup.PART_SOUND_MONSTER });
 		var monsterVideo = new MonsterVideo(lFunky.positionCenter.clone().addSelf(new THREE.Vector3(0, -sWIDTH * .3, sWIDTH * 1.6)), window.innerWidth * 0.06, { name: "videos", target: sTools.ParticleGroup.PART_VIDEOS });
