@@ -42,11 +42,11 @@ ParticleGroupMonster.prototype.InitSurface = function(width)
 			scene.add( this.plane );
 }
 
-ParticleGroupMonster.prototype.AddFood = function(aName, position, speed, size, aPositionTarget)
+ParticleGroupMonster.prototype.AddFood = function(aName, position, speed, size, aPositionTarget, aLetterColor)
 {
 	var lPosition = position.clone();
 	lPosition.z = this.positionCenter.z;
-	var particle = new ParticleLetter( lPosition, aName, aPositionTarget, size);
+	var particle = new ParticleLetter( lPosition, aName, aPositionTarget, size, aLetterColor);
 
 	particle.scaleInit = particle.scale.x;
 	particle.isMovable = true;
@@ -57,33 +57,33 @@ ParticleGroupMonster.prototype.AddFood = function(aName, position, speed, size, 
 	return particle;
 }
 
-ParticleGroupMonster.prototype.AddString = function(aText, aPosition)
+ParticleGroupMonster.prototype.AddString = function(aText, aPosition, aTextSize = 0.03, aTextColor = 0x000000)
 {
-	var size = window.innerWidth * 0.03;
+	var size = window.innerWidth * aTextSize;
 	var spaceInit = size * 1.9;
 	var position = aPosition.clone();
 	position.addSelf(this.positionCenter);
 	var width = window.innerWidth * 0.5;
 	var testCanvas = document.createElement('canvas');
 	var context = testCanvas.getContext('2d');
-        context.font = size + "pt Helvetica"
+        context.font = size + "pt TitleText";
         context.textAlign = "left";
     var etalon = context.measureText('a').width;
-    var space = spaceInit;
 	var thisSize = 0;
 	for(var i = 0; i < aText.length; i++)
 	{
-		thisSize = context.measureText(aText[i]).width / etalon;
+		var textMeasured = context.measureText(aText[i]);
+		thisSize = textMeasured.width / etalon;
 		position.x += spaceInit * thisSize * 0.5;
-		this.AddFood(aText[i], new THREE.Vector3(this.positionCenter.x + myRandom() * width, this.positionCenter.y + myRandom() * width * 0.6, 0), new THREE.Vector3(), size, position.clone());	
+		this.AddFood(aText[i], new THREE.Vector3(this.positionCenter.x + myRandom() * width, this.positionCenter.y + myRandom() * width * 0.6, 0), new THREE.Vector3(), size, position.clone(), aTextColor);	
 		position.x += spaceInit * thisSize * 0.5;
 	}
 }
 
 ParticleGroupMonster.prototype.InitFood = function(width)
 {
-	this.AddString("Baptiste Bohelay", new THREE.Vector3(-window.innerWidth * .7, window.innerHeight * 0.4, 0));
-	this.AddString("Developer & Designer", new THREE.Vector3(-window.innerWidth * 0.5, window.innerHeight * -0.3, 0));
+	this.AddString("Baptiste Bohelay", new THREE.Vector3(-window.innerWidth * .7, window.innerHeight * 0.5, 0));
+	this.AddString("Developer & Designer", new THREE.Vector3(-window.innerWidth * .7, window.innerHeight * 0.5 - window.innerWidth * 0.08, 0), 0.023, 0x666666);
 }
 
 ParticleGroupMonster.prototype.MouseUp = function()
@@ -97,7 +97,7 @@ ParticleGroupMonster.prototype.GetMenuPositionCenter = function()
 	// matching the apparent scale they had in the old PART_CREA_LULU group
 	// (which used cameraDistance = w*0.27, vs the intro's much larger (w+h)*0.45).
 	var zOffset = this.cameraDistance - window.innerWidth * 0.27;
-	return this.positionCenter.clone().addSelf(new THREE.Vector3(window.innerWidth * 0.1, window.innerHeight * 0.04, zOffset));
+	return this.positionCenter.clone().addSelf(new THREE.Vector3(window.innerWidth * 0.0, window.innerHeight * 0.0, zOffset));
 }
 
 ParticleGroupMonster.prototype.SetMenuParticleVisible = function(aParticle, aVisible)

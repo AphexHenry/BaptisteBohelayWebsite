@@ -1,5 +1,8 @@
-function ParticleLetter(position, aLetter, aPositionTarget, aSize) 
+function ParticleLetter(position, aLetter, aPositionTarget, aSize, aLetterColor) 
 {
+	if(!isdefined(aLetterColor))
+		aLetterColor = 0x000000;
+
 	var letter = aLetter;
 
 	var programText = function ( context ) 
@@ -9,7 +12,7 @@ function ParticleLetter(position, aLetter, aPositionTarget, aSize)
 	    context.fillText(letter, -1, 1);
 	}
 
-	var particle = new THREE.Particle( new THREE.ParticleCanvasMaterial( { color: 0x000000, program: programText, transparent:true, opacity:1. } ) );
+	var particle = new THREE.Particle( new THREE.ParticleCanvasMaterial( { color: aLetterColor, program: programText, transparent:true, opacity:1. } ) );
 
 	particle.position = position;
 	particle.scale.x = aSize;
