@@ -12,10 +12,13 @@ function ParticleGroupMonster(positionCenter, name)
 	this.width = (window.innerWidth + window.innerHeight) * 0.5 * 0.3;
 	this.cameraDistance = this.width * 3.;
 	this.positionCenter = positionCenter;
+	this.positionCenterInitial = positionCenter.clone();
 	this.name = name;
 	this.id = sTools.ParticleGroup.PART_INTRO;
 	// this.goAway = false;
 	this.speed = { x: 0, y: 0 };
+	this.cameraZRatio = 0.6;
+	this.cameraZTimer = 0.;
 	this.menuParticles = [];
 	this.menuParticlesToUpdate = [];
 	this.particles = [];
@@ -42,16 +45,22 @@ ParticleGroupMonster.prototype.InitSurface = function(width)
 			scene.add( this.plane );
 }
 
-ParticleGroupMonster.prototype.AddFood = function(aName, position, speed, size, aPositionTarget, aLetterColor)
+ParticleGroupMonster.prototype.AddFood = function(aName, position, speed, size, aPositionTarget, aLetterColor, setToFinalPosition = false)
 {
 	var lPosition = position.clone();
 	lPosition.z = this.positionCenter.z;
 	var particle = new ParticleLetter( lPosition, aName, aPositionTarget, size, aLetterColor);
 
 	particle.scaleInit = particle.scale.x;
-	particle.isMovable = true;
-	particle.isTarget = false;
+	particle.isMovable = !setToFinalPosition;
+	particle.isTarget = setToFinalPosition;
 	particle.mSpeed = speed.clone();
+	if(setToFinalPosition)
+	{
+		particle.position.x = aPositionTarget.x;
+		particle.position.y = aPositionTarget.y;
+		particle.position.z = aPositionTarget.z;
+	}
 	scene.add( particle );
 	sFoodArray.push(particle);
 	return particle;
@@ -75,15 +84,16 @@ ParticleGroupMonster.prototype.AddString = function(aText, aPosition, aTextSize 
 		var textMeasured = context.measureText(aText[i]);
 		thisSize = textMeasured.width / etalon;
 		position.x += spaceInit * thisSize * 0.5;
-		this.AddFood(aText[i], new THREE.Vector3(this.positionCenter.x + myRandom() * width, this.positionCenter.y + myRandom() * width * 0.6, 0), new THREE.Vector3(), size, position.clone(), aTextColor);	
+		var isFinalPosition = i % 7 == 0 || i % 5 == 0 || i % 3 == 0;
+		this.AddFood(aText[i], new THREE.Vector3(this.positionCenter.x + myRandom() * width * 0.7, this.positionCenter.y + (myRandom() - 0.4) * width * 0.6, 0), new THREE.Vector3(), size, position.clone(), aTextColor, isFinalPosition);	
 		position.x += spaceInit * thisSize * 0.5;
 	}
 }
 
 ParticleGroupMonster.prototype.InitFood = function(width)
 {
-	this.AddString("Baptiste Bohelay", new THREE.Vector3(-window.innerWidth * .7, window.innerHeight * 0.5, 0));
-	this.AddString("Developer & Designer", new THREE.Vector3(-window.innerWidth * .7, window.innerHeight * 0.5 - window.innerWidth * 0.08, 0), 0.023, 0x666666);
+	this.AddString("Baptiste Bohelay", new THREE.Vector3(-window.innerWidth * .4, window.innerHeight * 0.3, 0));
+	this.AddString("Developer & Designer", new THREE.Vector3(-window.innerWidth * .4, window.innerHeight * 0.3 - window.innerWidth * 0.08, 0), 0.023, 0x666666);
 }
 
 ParticleGroupMonster.prototype.MouseUp = function()
@@ -209,10 +219,25 @@ ParticleGroupMonster.prototype.MouseDown = function()
 
 ParticleGroupMonster.prototype.UpdateCamera = function(delta)
 {
+	this.cameraZTimer += delta;
+	var delay = 2.;
+	var t = Math.min(1., Math.max(0., this.cameraZTimer - delay));
+	t = t * t * (3. - 2. * t);
+	this.cameraZRatio = 0.6 + 0.4 * t;
+
 	cameraTarget = sTools.ParticleGroups[sTools.ParticleGroup.PART_INTRO].positionCenter;
-	cameraPosition.x = this.positionCenter.x;
-	cameraPosition.y = this.positionCenter.y;
-	cameraPosition.z = this.positionCenter.z + this.cameraDistance;
+	cameraPosition = this.GetCameraPosition();
+	this.positionCenter.x = this.positionCenterInitial.x + t * window.innerWidth * 0.3;
+	this.positionCenter.y = this.positionCenterInitial.y - t * window.innerHeight * 0.3;
+}
+
+ParticleGroupMonster.prototype.GetCameraPosition = function()
+{
+	return new THREE.Vector3(
+		this.positionCenter.x + this.cameraDistance * 0.0,
+		this.positionCenter.y,
+		this.positionCenter.z + this.cameraDistance * this.cameraZRatio
+	);
 }
 
 /*
@@ -226,9 +251,9 @@ ParticleGroupMonster.prototype.UpdateFood = function(delta)
 		lPart = sFoodArray[i];
 		if(lPart.isMovable && !lPart.isEaten)
 		{
-			lPart.mSpeed.x += myRandom() * window.innerHeight * 0.02;
+			// lPart.mSpeed.x += myRandom() * window.innerHeight * 0.02;
 			lPart.mSpeed.x += (this.positionCenter.x - lPart.position.x) * 0.003;
-			lPart.mSpeed.y += myRandom() * window.innerHeight * 0.02;
+			// lPart.mSpeed.y += myRandom() * window.innerHeight * 0.02;
 			lPart.mSpeed.y += (this.positionCenter.y - lPart.position.y) * 0.003;
 			lPart.position.x += lPart.mSpeed.x * delta;
 			lPart.position.y += lPart.mSpeed.y * delta;
@@ -248,12 +273,12 @@ ParticleGroupMonster.prototype.UpdateFood = function(delta)
 		// }
 	}
 
-	var lSpeedX = (this.positionCenter.x + window.innerWidth * 0.3 - sMonster.position.x - Math.cos(0.5 * sGeneralTimer) * window.innerWidth * 0.5);
-	var lSpeedY = (this.positionCenter.y + window.innerHeight * 0.3 - sMonster.position.y + Math.sin(sGeneralTimer * 0.7) * window.innerHeight * 0.5);
+	var lSpeedX = (this.positionCenter.x + window.innerWidth * 0.3 - sMonster.position.x + window.innerWidth * 0.3);
+	var lSpeedY = (this.positionCenter.y + window.innerHeight * 0.3 - sMonster.position.y - window.innerHeight * 0.2);
 	sMonster.speed = { x: lSpeedX, y: lSpeedY };
 
-	sMonster.position.x += lSpeedX * delta * 0.25;
-	sMonster.position.y += lSpeedY * delta * 0.25;
+	sMonster.position.x += lSpeedX * delta * 0.45;
+	sMonster.position.y += lSpeedY * delta * 0.45;
 }
 
 ParticleGroupMonster.prototype.SwitchNextState = function()

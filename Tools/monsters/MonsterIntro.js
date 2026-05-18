@@ -234,15 +234,15 @@ function Attack(part, indexLeg)
 
 function MonsterIntro(positionCenter, width)
 {
-	for(var i = 0; i < 9; i++)
+	for(var i = 0; i < 11; i++)
 	{
 		AddLeg();
 	}
 
 	this.particle = new THREE.Particle( new THREE.ParticleCanvasMaterial( { color: PickColor() * 0.3, program: this.programMonster, transparent:true } ) );
 
-	this.particle.position.x = positionCenter.x - 2. * window.innerWidth; 
-	this.particle.position.y = positionCenter.y - window.innerHeight * 1.; 
+	this.particle.position.x = positionCenter.x - 0.7 * window.innerWidth; 
+	this.particle.position.y = positionCenter.y - window.innerHeight * 0.3; 
 	this.particle.position.z = positionCenter.z;
 
 	var size = 1;

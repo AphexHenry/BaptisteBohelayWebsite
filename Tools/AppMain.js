@@ -133,14 +133,24 @@
 		}
 
 		cameraManager = new CameraManager(camera);
-		camera.position = sTools.ParticleGroups[lGroupToGo].positionCenter.clone();
-		cameraTargetCurrent = camera.position.clone();
-		cameraTarget = cameraTargetCurrent.clone();
-		cameraPosition = cameraTarget.clone();
-		cameraPosition.z += 300;
+		var lInitialGroup = sTools.ParticleGroups[lGroupToGo];
+		if (lGroupToGo === sTools.ParticleGroup.PART_INTRO && typeof lInitialGroup.GetCameraPosition === 'function') {
+			cameraTarget = lInitialGroup.positionCenter.clone();
+			cameraTargetCurrent = cameraTarget.clone();
+			cameraPosition = lInitialGroup.GetCameraPosition();
+		} else {
+			cameraTarget = lInitialGroup.positionCenter.clone();
+			cameraTargetCurrent = cameraTarget.clone();
+			cameraPosition = cameraTarget.clone();
+			cameraPosition.z += 300;
+		}
+		camera.position = cameraPosition.clone();
 		cameraManager.SetPositionPixel(cameraPosition);
 		cameraManager.LookAt(cameraTarget);
 		GoToIndex(lGroupToGo);
+		if (lGroupToGo === sTools.ParticleGroup.PART_INTRO) {
+			controlAuto = sTools.CameraControlType.NONE;
+		}
 
 		projector = new THREE.Projector();
 
