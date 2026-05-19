@@ -22,6 +22,11 @@ function ParticleGroupMonster(positionCenter, name)
 	this.menuParticles = [];
 	this.menuParticlesToUpdate = [];
 	this.particles = [];
+	this.NavigatorsCenter = null;
+	this.navigatorsAngleAmplitude = Math.PI / 4;
+	this.navigatorsVerticalAngleAmplitude = Math.PI / 16;
+	// this.particleRotate = new THREE.Vector3(0, 0, 0);
+	this.particleRotateSpeed = new THREE.Vector3(0, 0, 0);
 
 	this.monster = new MonsterIntro(positionCenter, this.width);
 	this.InitFood(this.width);
@@ -128,6 +133,10 @@ ParticleGroupMonster.prototype.AddParticle = function(aParticleObject)
 	var particle = aParticleObject.particle;
 	particle.positionTargetIntro = particle.position.clone();
 	particle.SetPosition(particle.positionTargetIntro.clone());
+	if(isdefined(this.NavigatorsCenter))
+	{
+		particle.navigatorOffset = particle.positionTargetIntro.clone().subSelf(this.NavigatorsCenter);
+	}
 	this.SetMenuParticleVisible(particle, true);
 	if(isdefined(particle.SetTextVisible))
 	{
@@ -151,6 +160,51 @@ ParticleGroupMonster.prototype.UpdateMenuParticles = function(delta)
 		{
 			this.menuParticlesToUpdate[j].Update(delta);
 		}
+	}
+}
+
+ParticleGroupMonster.prototype.UpdateNavigatorsRotation = function()
+{
+	if(!isdefined(this.NavigatorsCenter) || this.menuParticles.length === 0)
+		return;
+
+	var theta = -mouse.x * this.navigatorsAngleAmplitude;
+	var phi = mouse.y * this.navigatorsVerticalAngleAmplitude;
+
+	this.particleRotateSpeed.x += (phi - this.particleRotateSpeed.x) * 0.03;
+	this.particleRotateSpeed.y += (theta - this.particleRotateSpeed.y) * 0.03;
+
+	// this.particleRotate.x += this.particleRotateSpeed.x * 0.03;
+	// this.particleRotate.y += this.particleRotateSpeed.y * 0.03;
+
+	// this.particleRotateSpeed.x = this.particleRotateSpeed.x * 0.96;
+	// this.particleRotateSpeed.y = this.particleRotateSpeed.y * 0.96;
+
+	var cosT = Math.cos(this.particleRotateSpeed.y);
+	var sinT = Math.sin(this.particleRotateSpeed.y);
+	var cosP = Math.cos(this.particleRotateSpeed.x);
+	var sinP = Math.sin(this.particleRotateSpeed.x);
+	var cx = this.NavigatorsCenter.x;
+	var cy = this.NavigatorsCenter.y;
+	var cz = this.NavigatorsCenter.z;
+
+	for(var i = 0; i < this.menuParticles.length; i++)
+	{
+		var particle = this.menuParticles[i];
+		if(!isdefined(particle.navigatorOffset))
+			continue;
+
+		var ox = particle.navigatorOffset.x;
+		var oy = particle.navigatorOffset.y;
+		var oz = particle.navigatorOffset.z;
+		// Y axis (mouse.x), then X axis (mouse.y)
+		var x1 = ox * cosT + oz * sinT;
+		var y1 = oy;
+		var z1 = -ox * sinT + oz * cosT;
+		particle.position.x = cx + x1;
+		particle.position.y = cy + y1 * cosP - z1 * sinP;
+		particle.position.z = cz + y1 * sinP + z1 * cosP;
+		particle.SetPosition(particle.position);
 	}
 }
 
@@ -316,6 +370,7 @@ ParticleGroupMonster.prototype.Update = function(delta)
 
 	this.monster.Update(delta);
 	this.UpdateMenuParticles(delta);
+	this.UpdateNavigatorsRotation();
 
 	this.UpdateIntersectPlane();
 }

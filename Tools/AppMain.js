@@ -56,12 +56,6 @@
 		// init the back button.
 		new ButtonsBack();
 
-		// Let's get all the particles group initialized each group at a time.
-		// Monster
-		var lIntro = new ParticleGroupMonster(new THREE.Vector3(-500, -1000, -1000), "home");
-		sTools.ParticleGroups[sTools.ParticleGroup.PART_INTRO] = lIntro;
-		sTools.ParticleGroups[sTools.ParticleGroup.PART_CREA_LULU] = lIntro;
-
 		var flyer = [];
 		flyer.push({ name: "musical baguette", targetHTML: "html/other/MusicalBaguette.html", size: 0.8 });
 		flyer.push({ name: "Lulu - Iphone Game", targetHTML: "html/Lulu.html" });
@@ -73,6 +67,11 @@
 		var lBProjects = new ParticleGroupIntro(new THREE.Vector3(0, 2000, 2000), flyer, "projects", sTools.ParticleGroup.PART_OTHER);
 		lBProjects.mAngleAmplitude = Math.PI * .4;
 
+		// Let's get all the particles group initialized each group at a time.
+		// Monster
+		var lIntro = new ParticleGroupMonster(new THREE.Vector3(-500, -1000, -1000), "home");
+		sTools.ParticleGroups[sTools.ParticleGroup.PART_INTRO] = lIntro;
+		sTools.ParticleGroups[sTools.ParticleGroup.PART_CREA_LULU] = lIntro;
 		// This will define the position of those different particles relatively to the center.
 		var lMenuPosition = lIntro.GetMenuPositionCenter();
 		lMenuPosition.x += window.innerWidth * 0.25;
@@ -83,6 +82,7 @@
 		var randomMonster = new MonsterRandom(new THREE.Vector3(lMenuPosition.x - sWIDTH * 1.1, lMenuPosition.y - sWIDTH / getRatio() * 0.35, lMenuPosition.z), window.innerWidth * 0.06);
 		var randomLastProject = new MonsterTournicoti(new THREE.Vector3(lMenuPosition.x + sWIDTH * 1., lMenuPosition.y - 1. * sWIDTH / getRatio(), lMenuPosition.z + sWIDTH * 0.3), window.innerWidth * 0.06, sProjectsLast, 1);
 		var funkyCreation = new MonsterTournicoti(lMenuPosition, window.innerWidth * 0.1, { name: "creations", target: sTools.ParticleGroup.PART_FUNKY_CREATION, size: 1.5 }, -1, false, 0xf97316);
+		lIntro.NavigatorsCenter = funkyCreation.particle.position.clone();
 		lIntro.AddParticle(funkyCreation);
 		lIntro.AddParticle(randomMonster);
 		lIntro.AddParticle(randomLastProject);
