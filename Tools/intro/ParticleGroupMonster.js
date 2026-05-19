@@ -223,11 +223,11 @@ ParticleGroupMonster.prototype.UpdateCamera = function(delta)
 	var delay = 2.;
 	var t = Math.min(1., Math.max(0., this.cameraZTimer - delay));
 	t = t * t * (3. - 2. * t);
-	this.cameraZRatio = 0.6 + 0.4 * t;
+	this.cameraZRatio = 0.7 + 0.3 * t;
 
 	cameraTarget = sTools.ParticleGroups[sTools.ParticleGroup.PART_INTRO].positionCenter;
 	cameraPosition = this.GetCameraPosition();
-	this.positionCenter.x = this.positionCenterInitial.x + t * window.innerWidth * 0.3;
+	this.positionCenter.x = this.positionCenterInitial.x + t * window.innerWidth * 0.25;
 	this.positionCenter.y = this.positionCenterInitial.y - t * window.innerHeight * 0.3;
 }
 
@@ -273,7 +273,7 @@ ParticleGroupMonster.prototype.UpdateFood = function(delta)
 		// }
 	}
 
-	var lSpeedX = (this.positionCenter.x + window.innerWidth * 0.3 - sMonster.position.x + window.innerWidth * 0.3);
+	var lSpeedX = (this.positionCenter.x + window.innerWidth * 0.3 - sMonster.position.x + window.innerWidth * 0.6);
 	var lSpeedY = (this.positionCenter.y + window.innerHeight * 0.3 - sMonster.position.y - window.innerHeight * 0.2);
 	sMonster.speed = { x: lSpeedX, y: lSpeedY };
 

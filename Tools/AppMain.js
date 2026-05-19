@@ -73,8 +73,10 @@
 		var lBProjects = new ParticleGroupIntro(new THREE.Vector3(0, 2000, 2000), flyer, "projects", sTools.ParticleGroup.PART_OTHER);
 		lBProjects.mAngleAmplitude = Math.PI * .4;
 
-		// Main choice
+		// This will define the position of those different particles relatively to the center.
 		var lMenuPosition = lIntro.GetMenuPositionCenter();
+		lMenuPosition.x += window.innerWidth * 0.25;
+		lMenuPosition.y -= window.innerWidth * 0.2;
 		// flyer.push({ name: "contact", targetHTML: "html/contact.html", size: 0.5, addRandom: false, position: new THREE.Vector3(100, 100, 0) });
 		var aboutMeTarget = { name: "about me", target: sTools.ParticleGroup.PART_ABOUT_ME, size: 0.9 };
 		var aboutMe = { target: aboutMeTarget, particle: new ParticleCircleNavigate(lMenuPosition.clone().addSelf(new THREE.Vector3(sWIDTH * 1.1, sWIDTH / getRatio() * 0.55, 0)), aboutMeTarget) };
