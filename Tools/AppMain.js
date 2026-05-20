@@ -20,7 +20,6 @@
 	var sMinLoading = 1.;
 
 	var sProjectsToRandom = [];				// container for projects, used to get a random one.
-	var sRandomLastIndex = [];				// list of projects picked randomly to avoid to get one 2 times.
 	var sProjectsLast;						// last project added.
 
 	var infoDisplay;						// common text display in 3d.
@@ -79,7 +78,8 @@
 		// flyer.push({ name: "contact", targetHTML: "html/contact.html", size: 0.5, addRandom: false, position: new THREE.Vector3(100, 100, 0) });
 		var aboutMeTarget = { name: "about me", target: sTools.ParticleGroup.PART_ABOUT_ME, size: 0.9 };
 		var aboutMe = { target: aboutMeTarget, particle: new ParticleCircleNavigate(lMenuPosition.clone().addSelf(new THREE.Vector3(sWIDTH * 1.1, sWIDTH / getRatio() * 0.55, 0)), aboutMeTarget) };
-		var randomMonster = new MonsterRandom(new THREE.Vector3(lMenuPosition.x - sWIDTH * 1.1, lMenuPosition.y - sWIDTH / getRatio() * 0.35, lMenuPosition.z), window.innerWidth * 0.06);
+		var programmingTarget = { name: "programming", target: sTools.ParticleGroup.PART_PROGRAMMING, size: 0.9 };
+		var randomMonster = new MonsterRandom(new THREE.Vector3(lMenuPosition.x - sWIDTH * 1.1, lMenuPosition.y - sWIDTH / getRatio() * 0.35, lMenuPosition.z), window.innerWidth * 0.06, programmingTarget);
 		var randomLastProject = new MonsterTournicoti(new THREE.Vector3(lMenuPosition.x + sWIDTH * 1., lMenuPosition.y - 1. * sWIDTH / getRatio(), lMenuPosition.z + sWIDTH * 0.3), window.innerWidth * 0.06, sProjectsLast, 1);
 		var funkyCreation = new MonsterTournicoti(lMenuPosition, window.innerWidth * 0.1, { name: "creations", target: sTools.ParticleGroup.PART_FUNKY_CREATION, size: 1.5 }, -1, false, 0xf97316);
 		lIntro.NavigatorsCenter = funkyCreation.particle.position.clone();
@@ -112,6 +112,8 @@
 
 		//  // Lulu
 		sTools.ParticleGroups[sTools.ParticleGroup.PART_VIDEOS] = new ParticleGroupVideos(new THREE.Vector3(1000, 1000, -1000), "videos");
+
+		sTools.ParticleGroups[sTools.ParticleGroup.PART_PROGRAMMING] = new ParticleGroupProgramming(new THREE.Vector3(-1500, 2800, 500), "programming");
 
 		// add the sounds as they are not in html in the website.
 		sProjectsToRandom.push({ name: "sound monsters", targetHTML: "html/SoundMonsters.html", size: 1. });

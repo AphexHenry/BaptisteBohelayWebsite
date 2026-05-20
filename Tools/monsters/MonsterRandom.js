@@ -29,9 +29,7 @@ var programMonster3 = function(context)
 	}
 }
 
-var sCloseness = 0;
 var sDistanceTwo = 0.5;
-var positionClose = new THREE.Vector3();
 function drawOneArmThree(context, angle, evolution)
 {
 	context.lineWidth = 0.01;
@@ -42,7 +40,6 @@ function drawOneArmThree(context, angle, evolution)
 	var evolution2NoPi = evolution * evolution * evolution * evolution;
 	var evolution2 = evolution2NoPi * Math.PI;
 	evolution = evolution * Math.PI;
-	// context.setStrokeColor(0x0000f0);
 	context.beginPath();
 	var COS = Math.cos(angle + evolution + rotationThree);
 	var SIN = Math.sin(angle + evolution + rotationThree);
@@ -64,11 +61,11 @@ function drawOneArmThree(context, angle, evolution)
     context.stroke();
 }
 
-var sIsMouseOnRandom = false;
-var sIsPicking = false;
-function MonsterRandom(aPosition, aSize)
+function MonsterRandom(aPosition, aSize, aTarget)
 {
-	var aTarget = {name:"random"};
+	var that = this;
+	this.target = aTarget;
+
 	this.particle = new ParticleCircleNavigate(aPosition, aTarget);
 	this.particle.material.program = programMonster3;
 	this.particle.scale.x *= 3.;
@@ -76,21 +73,19 @@ function MonsterRandom(aPosition, aSize)
 
 	this.particle.TargetObject.isAutonomous = true;
 
-	this.particle.MyMouseOn = function(intersect)
+	this.particle.MyMouseOn = function()
 	{
-		sIsMouseOnRandom = true;
+		that.mouseOn = true;
 	}
 
-	this.particle.MyMouseOff = function(intersect)
+	this.particle.MyMouseOff = function()
 	{
-		sIsMouseOnRandom = false;
+		that.mouseOn = false;
 	}
 
 	this.particle.MyMouseDown = function()
 	{
-		// sCurrentRandomString = "click to pick";
-		sIsPicking = true;
-		// SELECTED = this;
+		that.isPicking = true;
 	}
 
 	this.particle.MyCameraDistance= function()
@@ -99,76 +94,29 @@ function MonsterRandom(aPosition, aSize)
 	}
 
 	this.info = this.particle.TargetObject.info;
-	this.touched = false;
+	this.mouseOn = false;
+	this.isPicking = false;
 }
 
-MonsterRandom.prototype.RunRandomProject = function()
+MonsterRandom.prototype.GoToTarget = function()
 {
-	var	index = Math.floor(Math.random() * sProjectsToRandom.length);
-	var lAlreadyIn = true;
-	var iterCount = 0;
-	while(lAlreadyIn)
+	if (isdefined(this.target.target))
 	{
-		iterCount++;
-		index++;
-		index = index % sProjectsToRandom.length;
-		lAlreadyIn = false;
-		for(var i = 0; i < sRandomLastIndex.length; i++)
-		{
-			if(index == sRandomLastIndex[i])
-			{
-				lAlreadyIn = true;
-			}
-		}
-		if(iterCount > sProjectsToRandom.length)
-		{
-			sRandomLastIndex = [];
-		}
-	}
-
-	var lProject = sProjectsToRandom[index];
-
-	if(sRandomLastIndex >= sProjectsToRandom.length - 1)
-	{
-		sRandomLastIndex = [];	
-	}
-	sRandomLastIndex.push(index);
-	console.log(lProject);
-	
-	if(typeof lProject.targetHTML != "undefined")
-	{
-		CirclesToHtml(lProject.targetHTML);
-	}
-	else if(typeof lProject.targetURL != "undefined")
-	{
-		ImageFrontCtx.fillStyle = '#ffffff';
-		var newURL = window.location.href.substring(0, window.location.href.indexOf('#')) + lProject.targetURL;
-		open_in_new_tab(newURL);
-		if(isdefined(ParticleGroups[sGroupCurrent].BackFromHTML))
-		{
-			ParticleGroups[sGroupCurrent].BackFromHTML();
-		}
-	}
-	else if(typeof lProject.targetHTMLOpen != "undefined")
-	{
-		open_in_new_tab(lProject.targetHTMLOpen);
+		GoToIndex(this.target.target);
 	}
 }
 
-/*
- * update.
- */
 MonsterRandom.prototype.Update = function(delta)
 {
-	if(sIsPicking)
+	if(this.isPicking)
     {
     	pickCircleRadius += 0.01;
     	if(pickCircleRadius > 0.75)
     	{
     		pickCircleRadius = 1.;
     		sDistanceTwo = pickCircleRadius;
-    		sIsPicking = false;
-    		this.RunRandomProject();
+    		this.isPicking = false;
+    		this.GoToTarget();
     	}
     }
     else
@@ -177,9 +125,9 @@ MonsterRandom.prototype.Update = function(delta)
     	pickCircleRadius = Math.max(0., pickCircleRadius);
     }
 
-	if(sIsMouseOnRandom || sIsPicking)
+	if(this.mouseOn || this.isPicking)
 	{
-		this.particle.SetName("click to pick");
+		this.particle.SetName(this.target.name);
 		sDistanceTwo += 0.03;
 		sDistanceTwo = Math.min(1., sDistanceTwo);
 		this.info.material.opacity += 0.01;
@@ -187,16 +135,10 @@ MonsterRandom.prototype.Update = function(delta)
 	}
 	else
 	{
-		this.particle.SetName("roulette");
+		this.particle.SetName(this.target.name);
 		sDistanceTwo -= 0.005;
 		sDistanceTwo = Math.max(0., sDistanceTwo);
 		this.info.material.opacity -= 0.01;
 		this.info.material.opacity = Math.max(OPACITY_INFO, this.info.material.opacity);
 	}
 }
-
-MonsterRandom.prototype.SetFood = function(foodArray)
-{
-	sFoodArray = foodArray;
-}
-

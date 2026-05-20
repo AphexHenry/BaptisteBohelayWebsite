@@ -62,6 +62,7 @@ function Tools()
         PART_FUNKY_CREATION : ParticleGroupID++,
         PART_MONSTER : ParticleGroupID++,
         PART_ABOUT_ME : ParticleGroupID++,
+        PART_PROGRAMMING : ParticleGroupID++,
     }
 }
 
