@@ -370,18 +370,16 @@ ParticleSound.prototype.Update = function (delta) {
 };
 
 ParticleSound.prototype.InitSound = function () {
-	var sFoodArraySoundWait = globalThis.sFoodArraySoundWait;
-	var sFoodArraySound = globalThis.sFoodArraySound;
-	var sPlayingSound = globalThis.sPlayingSound;
-	var sMonsterSound = globalThis.sMonsterSound;
-
 	this.sound = createWebAudioSound({
 		url: this.url,
 		volume: this.volume,
 		onPlaybackEnd: function () {
-			sFoodArraySoundWait.push(sPlayingSound.particle);
-			sFoodArraySound.splice(0, 1);
-			sMonsterSound.mParent.RemoveSound();
+			var playing = globalThis.sPlayingSound;
+			if (playing && playing.particle) {
+				globalThis.sFoodArraySoundWait.push(playing.particle);
+			}
+			globalThis.sFoodArraySound.splice(0, 1);
+			globalThis.sMonsterSound.mParent.RemoveSound();
 		},
 	});
 };
