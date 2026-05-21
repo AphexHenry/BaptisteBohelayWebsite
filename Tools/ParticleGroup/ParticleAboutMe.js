@@ -414,7 +414,7 @@ ParticleGroupAboutMe.prototype.MouseUp = function()
 ParticleGroupAboutMe.prototype.Update = function()
 {
 
-	controlAuto = sTools.CameraControlType.MOUSE_MOVE;
+	cameraManager.SetControlMode(sTools.CameraControlType.MOUSE_MOVE);
 	ParticleAboutMe_updateSatteliteResumeOrbit(this);
 	ParticleAboutMe_updateHoverAnimations(this);
 	var vector = new THREE.Vector3( mouse.x, mouse.y, 0.5 );

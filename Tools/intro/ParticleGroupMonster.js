@@ -363,7 +363,7 @@ ParticleGroupMonster.prototype.Update = function(delta)
 	{
 		delta *= 0.05;
 	}
-	controlAuto = sTools.CameraControlType.NONE;
+	cameraManager.SetControlMode(sTools.CameraControlType.NONE);
 	this.UpdateCamera(delta);
 
 	this.UpdateFood(delta);

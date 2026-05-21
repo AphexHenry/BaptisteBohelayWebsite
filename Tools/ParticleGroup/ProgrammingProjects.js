@@ -5,18 +5,18 @@
 var ProgrammingProjects = {};
 
 ProgrammingProjects.PROJECTS = [
-	{ name: "Slug Journey", description: "", assets: [] },
-	{ name: "Moving Mirror", description: "", assets: [] },
-	{ name: "3D Videos", description: "", assets: [] },
-	{ name: "Plane Forest", description: "", assets: [] },
-	{ name: "Sound Visu", description: "", assets: [] },
-	{ name: "Lulu", description: "", assets: [] },
-	{ name: "Musical Baguette", description: "", assets: [] },
-	{ name: "Musical Box", description: "", assets: [] },
-	{ name: "Cocoons", description: "", assets: [] },
-	{ name: "Interactive Dance", description: "", assets: [] },
-	{ name: "PIP", description: "", assets: [] },
-	{ name: "Sound Monsters", description: "", assets: [] },
+	{ name: "PES", description: "", assets: [] },
+	{ name: "Horse Life", description: "", assets: [] },
+	{ name: "Voice Changer", description: "", assets: [] },
+	{ name: "Lulu’s Unreal Exploration", description: "", assets: [] },
+	{ name: "Social Mosa", description: "", assets: [] },
+	{ name: "Cortex", description: "", assets: [] },
+	{ name: "Triber", description: "", assets: [] },
+	{ name: "Badly Drawn", description: "", assets: [] },
+	{ name: "Orchview", description: "", assets: [] },
+	{ name: "Orchplay", description: "", assets: [] },
+	{ name: "Pi-Schedule", description: "", assets: [] },
+	{ name: "Much More", description: "", assets: [] },
 ];
 
 ProgrammingProjects.shortDescription = function (description, maxLen)

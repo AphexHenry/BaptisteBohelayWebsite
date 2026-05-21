@@ -85,7 +85,7 @@ function MonsterRandom(aPosition, aSize, aTarget)
 
 	this.particle.MyMouseDown = function()
 	{
-		that.isPicking = true;
+		that.GoToTarget();
 	}
 
 	this.particle.MyCameraDistance= function()
@@ -110,14 +110,14 @@ MonsterRandom.prototype.Update = function(delta)
 {
 	if(this.isPicking)
     {
-    	pickCircleRadius += 0.01;
-    	if(pickCircleRadius > 0.75)
-    	{
-    		pickCircleRadius = 1.;
-    		sDistanceTwo = pickCircleRadius;
-    		this.isPicking = false;
-    		this.GoToTarget();
-    	}
+    	// pickCircleRadius += 0.01;
+    	// if(pickCircleRadius > 0.75)
+    	// {
+    		// pickCircleRadius = 1.;
+    		// sDistanceTwo = pickCircleRadius;
+    		// this.isPicking = false;
+    		// this.GoToTarget();
+    	// }
     }
     else
     {

@@ -7,7 +7,6 @@
 	var camera, scene, projector, renderer; // three.js components.
 	var sceneInfo; 							// scene to display static informations.
 	var cameraManager;						// camera manager.
-	var controlAuto = sTools.CameraControlType.SATTELITE; 				//define if the camera has an automatic control (rotation around a point) or a specific one. 
 
 	var mousePosition = new THREE.Vector3(); // position of the mouse.
 	var cameraTarget = new THREE.Vector3();	// where the camera needs to go in the end.
@@ -20,7 +19,7 @@
 	var sMinLoading = 1.;
 
 	var sProjectsToRandom = [];				// container for projects, used to get a random one.
-	var sProjectsLast;						// last project added.
+	// var sProjectsLast;						// last project added.
 
 	var infoDisplay;						// common text display in 3d.
 	var sDrawScene = true;
@@ -62,7 +61,7 @@
 		flyer.push({ name: "Cocoons - Fête des Lumières", targetHTML: "html/other/Cocoons.html" });
 		flyer.push({ name: "interactive dance", targetHTML: "html/other/InteractiveDance.html" });
 		flyer.push({ name: "PIP - interactive installation", targetHTML: "html/other/pip.html" });
-		sProjectsLast = { name: "last project", targetHTML: "html/other/Cocoons.html" };
+		// sProjectsLast = { name: "last project", targetHTML: "html/other/Cocoons.html" };
 		var lBProjects = new ParticleGroupIntro(new THREE.Vector3(0, 2000, 2000), flyer, "projects", sTools.ParticleGroup.PART_OTHER);
 		lBProjects.mAngleAmplitude = Math.PI * .4;
 
@@ -79,13 +78,13 @@
 		var aboutMeTarget = { name: "about me", target: sTools.ParticleGroup.PART_ABOUT_ME, size: 0.9 };
 		var aboutMe = { target: aboutMeTarget, particle: new ParticleCircleNavigate(lMenuPosition.clone().addSelf(new THREE.Vector3(sWIDTH * 1.1, sWIDTH / getRatio() * 0.55, 0)), aboutMeTarget) };
 		var programmingTarget = { name: "programming", target: sTools.ParticleGroup.PART_PROGRAMMING, size: 0.9 };
-		var randomMonster = new MonsterRandom(new THREE.Vector3(lMenuPosition.x - sWIDTH * 1.1, lMenuPosition.y - sWIDTH / getRatio() * 0.35, lMenuPosition.z), window.innerWidth * 0.06, programmingTarget);
-		var randomLastProject = new MonsterTournicoti(new THREE.Vector3(lMenuPosition.x + sWIDTH * 1., lMenuPosition.y - 1. * sWIDTH / getRatio(), lMenuPosition.z + sWIDTH * 0.3), window.innerWidth * 0.06, sProjectsLast, 1);
+		var programmingMonster = new MonsterRandom(new THREE.Vector3(lMenuPosition.x - sWIDTH * 1.1, lMenuPosition.y - sWIDTH / getRatio() * 0.35, lMenuPosition.z), window.innerWidth * 0.06, programmingTarget);
+		// var randomLastProject = new MonsterTournicoti(new THREE.Vector3(lMenuPosition.x + sWIDTH * 1., lMenuPosition.y - 1. * sWIDTH / getRatio(), lMenuPosition.z + sWIDTH * 0.3), window.innerWidth * 0.06, sProjectsLast, 1);
 		var funkyCreation = new MonsterTournicoti(lMenuPosition, window.innerWidth * 0.1, { name: "creations", target: sTools.ParticleGroup.PART_FUNKY_CREATION, size: 1.5 }, -1, false, 0xf97316);
 		lIntro.NavigatorsCenter = funkyCreation.particle.position.clone();
 		lIntro.AddParticle(funkyCreation);
-		lIntro.AddParticle(randomMonster);
-		lIntro.AddParticle(randomLastProject);
+		lIntro.AddParticle(programmingMonster);
+		// lIntro.AddParticle(randomLastProject);
 		lIntro.AddParticle(aboutMe);
 
 		// creations type
@@ -138,7 +137,7 @@
 
 		cameraManager = new CameraManager(camera);
 		var lInitialGroup = sTools.ParticleGroups[lGroupToGo];
-		if (lGroupToGo === sTools.ParticleGroup.PART_INTRO && typeof lInitialGroup.GetCameraPosition === 'function') {
+		if (typeof lInitialGroup.GetCameraPosition === 'function') {
 			cameraTarget = lInitialGroup.positionCenter.clone();
 			cameraTargetCurrent = cameraTarget.clone();
 			cameraPosition = lInitialGroup.GetCameraPosition();
@@ -152,8 +151,8 @@
 		cameraManager.SetPositionPixel(cameraPosition);
 		cameraManager.LookAt(cameraTarget);
 		GoToIndex(lGroupToGo);
-		if (lGroupToGo === sTools.ParticleGroup.PART_INTRO) {
-			controlAuto = sTools.CameraControlType.NONE;
+		if (lGroupToGo === sTools.ParticleGroup.PART_INTRO || lGroupToGo === sTools.ParticleGroup.PART_PROGRAMMING) {
+			cameraManager.SetControlMode(sTools.CameraControlType.NONE);
 		}
 
 		projector = new THREE.Projector();
@@ -309,40 +308,10 @@
 		cameraManager.Update(delta);
 
 		if (!SELECTED) {
-			if (controlAuto == sTools.CameraControlType.SATTELITE) {
-				cameraTarget = sTools.ParticleGroups[sGroupCurrent].positionCenter;
-				cameraPosition.x = sTools.ParticleGroups[sGroupCurrent].positionCenter.x + radius * Math.sin(sGeneralTimer * Math.PI / 40);
-				cameraPosition.y = sTools.ParticleGroups[sGroupCurrent].positionCenter.y + radius * 0.;//Math.sin( sGeneralTimer * Math.PI / 40 );
-				cameraPosition.z = sTools.ParticleGroups[sGroupCurrent].positionCenter.z + radius * Math.cos(sGeneralTimer * Math.PI / 40);
-				cameraManager.SetMovementType(cameraManager.movementTypeGroup.INTERPOLATION);
-			}
-			else if (controlAuto == sTools.CameraControlType.MOUSE_MOVE) {
-				var pg = sTools.ParticleGroups[sGroupCurrent];
-				cameraTarget = pg.positionCenter;
-				var lAngleAmp = isdefined(pg.mAngleAmplitude) ? pg.mAngleAmplitude : Math.PI / 2.;
-				var lVerticalAmp = isdefined(pg.mVerticalAngleAmplitude) ? pg.mVerticalAngleAmplitude : 0.;
-				var theta = mouse.x * lAngleAmp;
-				var phi = mouse.y * lVerticalAmp;
-				var phiClamp = Math.PI * 0.42;
-				if (phi > phiClamp) phi = phiClamp;
-				if (phi < -phiClamp) phi = -phiClamp;
-				var cp = Math.cos(phi);
-				cameraPosition.x = pg.positionCenter.x + radius * cp * Math.sin(theta);
-				cameraPosition.y = pg.positionCenter.y + radius * Math.sin(phi);
-				cameraPosition.z = pg.positionCenter.z + radius * cp * Math.cos(theta);
-
-				// if(cameraManager.mTarget.distanceTo(cameraManager.camera.position) > sWIDTH * 10)
-				// {
-				// 	cameraManager.SetMovementType(cameraManager.movementTypeGroup.INTERPOLATION);
-				// }
-				// else
-				// {
-				cameraManager.SetMovementType(cameraManager.movementTypeGroup.PHYSICS);
-				// }
-				// cameraPosition.y = sTools.ParticleGroups[sGroupCurrent].positionCenter.y + radius * 0.;//Math.sin( sGeneralTimer * Math.PI / 40 );
-				// cameraPosition.z = sTools.ParticleGroups[sGroupCurrent].positionCenter.z + radius * Math.cos( sGeneralTimer * Math.PI / 40 );
-			}
-
+			cameraManager.UpdateAutoControl(
+				sTools.ParticleGroups[sGroupCurrent], radius, sGeneralTimer, mouse,
+				cameraPosition, cameraTarget
+			);
 		}
 		if (isNaN(camera.position.x)) {
 			camera.position = new THREE.Vector3();

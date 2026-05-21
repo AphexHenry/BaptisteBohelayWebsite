@@ -6,7 +6,7 @@
 			return;
 		}
 
-		controlAuto = sTools.CameraControlType.SATTELITE;;
+		cameraManager.SetControlMode(sTools.CameraControlType.SATTELITE);
 		if(index != sGroupCurrent)
 		{
 			if(sGroupCurrent >= 0)

@@ -324,7 +324,7 @@ ParticleGroupIntro.prototype.Terminate = function()
 
 ParticleGroupIntro.prototype.Update = function()
 {
-	controlAuto = sTools.CameraControlType.MOUSE_MOVE;
+	cameraManager.SetControlMode(sTools.CameraControlType.MOUSE_MOVE);
 
 	for(var i = 0; i < this.particlesToUpdate.length; i++)
 	{

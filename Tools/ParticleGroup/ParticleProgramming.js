@@ -11,17 +11,20 @@ function ParticleGroupProgramming(positionCenter, name)
 	var gridHeight = (rows - 1) * cellSize;
 	var count = Math.min(this.projects.length, cols * rows);
 
-	this.cameraDistance = Math.max(gridWidth, gridHeight) * 1.4;
+	this.cameraDistance = Math.max(gridWidth, gridHeight) * 1.;
 	this.positionCenter = positionCenter;
+	// Grid lies in the XY plane; camera sits on +Z and looks at positionCenter (see GetCameraPosition).
+	this.gridRight = new THREE.Vector3(1, 0, 0);
+	this.gridUp = new THREE.Vector3(0, 1, 0);
 
 	for (var index = 0; index < count; index++)
 	{
 		var row = Math.floor(index / cols);
 		var col = index % cols;
 		var lPosition = new THREE.Vector3();
-		lPosition.x = positionCenter.x + col * cellSize - gridWidth * 0.5;
-		lPosition.y = positionCenter.y + row * cellSize - gridHeight * 0.5;
-		lPosition.z = positionCenter.z;
+		var offset = this.gridRight.clone().multiplyScalar(col * cellSize - gridWidth * 0.5);
+		offset.addSelf(this.gridUp.clone().multiplyScalar(row * cellSize - gridHeight * 0.5));
+		lPosition.copy(positionCenter).addSelf(offset);
 
 		var flyer = ProgrammingProjects.toFlyer(this.projects[index]);
 		var particle = new ParticleCircleNavigate(lPosition, flyer);
@@ -29,7 +32,27 @@ function ParticleGroupProgramming(positionCenter, name)
 	}
 }
 
-ParticleGroupProgramming.prototype.Init = function() {};
+ParticleGroupProgramming.prototype.GetCameraPosition = function()
+{
+	return new THREE.Vector3(
+		this.positionCenter.x,
+		this.positionCenter.y,
+		this.positionCenter.z + this.cameraDistance
+	);
+};
+
+ParticleGroupProgramming.prototype.syncCameraToGrid = function()
+{
+	cameraTarget = this.positionCenter.clone();
+	cameraPosition = this.GetCameraPosition();
+	cameraManager.SetControlMode(sTools.CameraControlType.NONE);
+};
+
+ParticleGroupProgramming.prototype.Init = function()
+{
+	this.syncCameraToGrid();
+};
+
 ParticleGroupProgramming.prototype.MouseUp = function() {};
 ParticleGroupProgramming.prototype.Terminate = function() {};
 
@@ -62,7 +85,7 @@ ParticleGroupProgramming.prototype.MouseDown = function()
 
 ParticleGroupProgramming.prototype.Update = function()
 {
-	controlAuto = sTools.CameraControlType.NONE;
+	this.syncCameraToGrid();
 	var vector = new THREE.Vector3(mouse.x, mouse.y, 0.5);
 	projector.unprojectVector(vector, camera);
 

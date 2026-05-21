@@ -35,6 +35,8 @@ function CameraManager(a_camera)
 	};
 	this.movementType = this.movementTypeGroup.INTERPOLATION;
 	this.movementTypeCoeff = 0.;
+
+	this.controlMode = sTools.CameraControlType.SATTELITE;
 }
 
 /*
@@ -165,4 +167,41 @@ CameraManager.prototype.SetPositionPixel = function(position)
 CameraManager.prototype.SetMovementType = function(aType)
 {
 	this.movementType = aType;
+}
+
+CameraManager.prototype.SetControlMode = function(aMode)
+{
+	this.controlMode = aMode;
+}
+
+CameraManager.prototype.UpdateAutoControl = function(particleGroup, radius, generalTimer, mouse, cameraPosition, cameraTarget)
+{
+	if (this.controlMode === sTools.CameraControlType.NONE) {
+		return;
+	}
+
+	var center = particleGroup.positionCenter;
+
+	if (this.controlMode === sTools.CameraControlType.SATTELITE) {
+		cameraTarget.copy(center);
+		cameraPosition.x = center.x + radius * Math.sin(generalTimer * Math.PI / 40);
+		cameraPosition.y = center.y + radius * 0.;
+		cameraPosition.z = center.z + radius * Math.cos(generalTimer * Math.PI / 40);
+		this.SetMovementType(this.movementTypeGroup.INTERPOLATION);
+	}
+	else if (this.controlMode === sTools.CameraControlType.MOUSE_MOVE) {
+		cameraTarget.copy(center);
+		var lAngleAmp = isdefined(particleGroup.mAngleAmplitude) ? particleGroup.mAngleAmplitude : Math.PI / 2.;
+		var lVerticalAmp = isdefined(particleGroup.mVerticalAngleAmplitude) ? particleGroup.mVerticalAngleAmplitude : 0.;
+		var theta = mouse.x * lAngleAmp;
+		var phi = mouse.y * lVerticalAmp;
+		var phiClamp = Math.PI * 0.42;
+		if (phi > phiClamp) phi = phiClamp;
+		if (phi < -phiClamp) phi = -phiClamp;
+		var cp = Math.cos(phi);
+		cameraPosition.x = center.x + radius * cp * Math.sin(theta);
+		cameraPosition.y = center.y + radius * Math.sin(phi);
+		cameraPosition.z = center.z + radius * cp * Math.cos(theta);
+		this.SetMovementType(this.movementTypeGroup.PHYSICS);
+	}
 }
