@@ -291,7 +291,7 @@ MonsterIntro.prototype.Update = function(delta)
 		infoDisplay.SetSize(1.3);
 		// infoDisplay.SetText([{string:"enter", size: 2}]);
 		infoDisplay.FadeIn();	
-		// sEnd = true;
+		sEnd = true;
 	}
 	infoDisplay.SetPosition(sMonster.position, true);
 }

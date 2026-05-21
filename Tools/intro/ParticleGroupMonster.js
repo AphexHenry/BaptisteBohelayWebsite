@@ -29,6 +29,8 @@ function ParticleGroupMonster(positionCenter, name)
 	this.particleRotateSpeed = new THREE.Vector3(0, 0, 0);
 
 	this.monster = new MonsterIntro(positionCenter, this.width);
+	this.monsterEndPosition = null;
+	this.monsterEndScale = null;
 	this.InitFood(this.width);
 	this.InitSurface(this.width);
 }
@@ -50,7 +52,7 @@ ParticleGroupMonster.prototype.InitSurface = function(width)
 			scene.add( this.plane );
 }
 
-ParticleGroupMonster.prototype.AddFood = function(aName, position, speed, size, aPositionTarget, aLetterColor, setToFinalPosition = false)
+ParticleGroupMonster.prototype.AddFood = function(aName, position, speed, size, aPositionTarget, aLetterColor, setToFinalPosition = false, isMonsterEndTarget = false)
 {
 	var lPosition = position.clone();
 	lPosition.z = this.positionCenter.z;
@@ -65,6 +67,16 @@ ParticleGroupMonster.prototype.AddFood = function(aName, position, speed, size, 
 		particle.position.x = aPositionTarget.x;
 		particle.position.y = aPositionTarget.y;
 		particle.position.z = aPositionTarget.z;
+	}
+	if(isMonsterEndTarget)
+	{
+		this.monsterEndPosition = particle.TargetObject.positionTarget.clone();
+		// ParticleLetter draws the glyph at local canvas (-1, 1), not at (0, 0).
+		// Apply the same scale transform to get the actual world position of the glyph.
+		// scale.x = aSize, scale.y = -aSize, so:  Δx = -1*aSize (left),  Δy = 1*(-aSize) (down).
+		this.monsterEndPosition.x += -1 * particle.scale.x;
+		this.monsterEndPosition.y += 0.5 * particle.scale.y;
+		this.monsterEndScale = new THREE.Vector3(particle.scale.x, Math.abs(particle.scale.y), particle.scale.z);
 	}
 	scene.add( particle );
 	sFoodArray.push(particle);
@@ -90,7 +102,8 @@ ParticleGroupMonster.prototype.AddString = function(aText, aPosition, aTextSize 
 		thisSize = textMeasured.width / etalon;
 		position.x += spaceInit * thisSize * 0.5;
 		var isFinalPosition = i % 7 == 0 || i % 5 == 0 || i % 3 == 0;
-		this.AddFood(aText[i], new THREE.Vector3(this.positionCenter.x + myRandom() * width * 0.7, this.positionCenter.y + (myRandom() - 0.4) * width * 0.6, 0), new THREE.Vector3(), size, position.clone(), aTextColor, isFinalPosition);	
+		var isMonsterEndTarget = aText == "Baptiste Bohelay" && aText[i] == "o";
+		this.AddFood(aText[i], new THREE.Vector3(this.positionCenter.x + myRandom() * width * 0.7, this.positionCenter.y + (myRandom() - 0.4) * width * 0.6, 0), new THREE.Vector3(), size, position.clone(), aTextColor, isFinalPosition, isMonsterEndTarget);	
 		position.x += spaceInit * thisSize * 0.5;
 	}
 }
@@ -338,12 +351,31 @@ ParticleGroupMonster.prototype.UpdateFood = function(delta)
 		// }
 	}
 
-	var lSpeedX = (this.positionCenter.x + window.innerWidth * 0.3 - sMonster.position.x + window.innerWidth * 0.6);
-	var lSpeedY = (this.positionCenter.y + window.innerHeight * 0.3 - sMonster.position.y - window.innerHeight * 0.2);
+	var monsterTargetPosition = new THREE.Vector3(
+		this.positionCenter.x + window.innerWidth * 0.9,
+		this.positionCenter.y + window.innerHeight * 0.1,
+		sMonster.position.z
+	);
+	if(sEnd && isdefined(this.monsterEndPosition))
+	{
+		monsterTargetPosition = this.monsterEndPosition;
+	}
+
+	var lSpeedX = monsterTargetPosition.x - sMonster.position.x;
+	var lSpeedY = monsterTargetPosition.y - sMonster.position.y;
 	sMonster.speed = { x: lSpeedX, y: lSpeedY };
 
 	sMonster.position.x += lSpeedX * delta * 0.45;
 	sMonster.position.y += lSpeedY * delta * 0.45;
+	sMonster.position.z += (monsterTargetPosition.z - sMonster.position.z) * delta * 0.45;
+
+	if(sEnd && isdefined(this.monsterEndScale))
+	{
+		var scaleSpeed = delta * 0.45;
+		sMonster.scale.x += (this.monsterEndScale.x * 2 - sMonster.scale.x) * scaleSpeed;
+		sMonster.scale.y += (this.monsterEndScale.y * 2 - sMonster.scale.y) * scaleSpeed;
+		// sMonster.scale.z += (this.monsterEndScale.z - sMonster.scale.z) * scaleSpeed;
+	}
 }
 
 ParticleGroupMonster.prototype.SwitchNextState = function()
