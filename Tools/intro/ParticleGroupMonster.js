@@ -152,6 +152,17 @@ ParticleGroupMonster.prototype.AddParticle = function(aParticleObject)
 	}
 }
 
+ParticleGroupMonster.prototype.GetParticleThatLeadTo = function(aTarget)
+{
+	for(var i = 0; i < this.particles.length; i++)
+	{
+		if(this.particles[i].TargetObject.target == aTarget)
+		{
+			return this.particles[i];
+		}
+	}
+}
+
 ParticleGroupMonster.prototype.UpdateMenuParticles = function(delta)
 {
 	for(var j = 0; j < this.menuParticlesToUpdate.length; j++)

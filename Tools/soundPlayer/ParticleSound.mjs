@@ -1,15 +1,34 @@
 /**
  * Sound particle: Web Audio playback + canvas visualization (replaces SoundManager2).
  *
- * Classic script for experiment pages and any HTML that loads only synchronous/deferred scripts.
- * Main site uses ./registerParticleSoundGlobals.mjs + ./ParticleSound.mjs instead.
- * For new ES modules, import from ./ParticleSound.mjs.
+ * Import named exports from this file in ES modules. For legacy pages that load classic
+ * scripts in order, use registerParticleSoundGlobals.mjs (main site) or ParticleSound.classic.js.
  */
+import {
+	programDoNothing,
+	programPauseStroke,
+	programStroke,
+	programTriangle,
+	programTriangleStroke,
+} from '../Template.mjs';
 
-var sParticlesSound = [];
-var sWaveFormData = [];
-/** Peak-style levels for the monster legs (was SoundManager2's peakData object). */
-var sLengthLegsSound = { left: 0, right: 0 };
+function ensureParticleSoundState() {
+	if (!globalThis.sParticlesSound) globalThis.sParticlesSound = [];
+	if (!globalThis.sWaveFormData) globalThis.sWaveFormData = [];
+	if (!globalThis.sLengthLegsSound) globalThis.sLengthLegsSound = { left: 0, right: 0 };
+	if (globalThis.sSoundAmplitude === undefined) globalThis.sSoundAmplitude = 0.;
+}
+
+ensureParticleSoundState();
+
+export function getParticleSoundState() {
+	return {
+		sParticlesSound: globalThis.sParticlesSound,
+		sWaveFormData: globalThis.sWaveFormData,
+		sLengthLegsSound: globalThis.sLengthLegsSound,
+		sSoundAmplitude: globalThis.sSoundAmplitude,
+	};
+}
 
 function getSharedWebAudioContext() {
 	var AC = window.AudioContext || window.webkitAudioContext;
@@ -58,7 +77,7 @@ function createWebAudioSound(options) {
 		return {
 			waveform: out,
 			left: leftAccum / half,
-			right: rightAccum / half
+			right: rightAccum / half,
 		};
 	}
 
@@ -75,17 +94,17 @@ function createWebAudioSound(options) {
 		for (var j = 0; j < 32; j++) {
 			nPeak = Math.max(nPeak, Math.abs(dataArray[j] - 128) / 128);
 		}
-		sSoundAmplitude = 0.9 + nPeak * 0.1;
+		globalThis.sSoundAmplitude = 0.9 + nPeak * 0.1;
 
 		var packed = buildWaveformFromTimeData(dataArray, bufferLength);
-		sLengthLegsSound.left = sLengthLegsSound.left * 0.9 + packed.left * 0.1;
-		sLengthLegsSound.right = sLengthLegsSound.right * 0.9 + packed.right * 0.1;
+		globalThis.sLengthLegsSound.left = globalThis.sLengthLegsSound.left * 0.9 + packed.left * 0.1;
+		globalThis.sLengthLegsSound.right = globalThis.sLengthLegsSound.right * 0.9 + packed.right * 0.1;
 
 		var w0 = parseFloat(dataArray[0]);
 		var w10 = parseFloat(dataArray[10]);
 		var w3 = parseFloat(dataArray[3]);
 		if (Math.abs(w0 - 128) + Math.abs(w10 - 128) + Math.abs(w3 - 128) !== 0) {
-			sWaveFormData = packed.waveform;
+			globalThis.sWaveFormData = packed.waveform;
 		}
 	}
 
@@ -122,7 +141,7 @@ function createWebAudioSound(options) {
 	}
 
 	var sound = {
-		play: function() {
+		play: function () {
 			stopFired = false;
 			playState = 1;
 			audio.addEventListener('ended', onPlaybackEnded);
@@ -130,12 +149,12 @@ function createWebAudioSound(options) {
 				connectGraph();
 				cancelVisual();
 				rafId = requestAnimationFrame(tickVisual);
-				ctx.resume().catch(function() {});
+				ctx.resume().catch(function () {});
 			}
-			audio.play().catch(function() {});
+			audio.play().catch(function () {});
 			return sound;
 		},
-		stop: function() {
+		stop: function () {
 			audio.pause();
 			audio.currentTime = 0;
 			playState = 0;
@@ -143,22 +162,33 @@ function createWebAudioSound(options) {
 			audio.removeEventListener('ended', onPlaybackEnded);
 			fireStopCallbacks();
 			return sound;
-		}
+		},
 	};
 
 	Object.defineProperty(sound, 'playState', {
-		get: function() { return playState; }
+		get: function () {
+			return playState;
+		},
 	});
 
 	return sound;
 }
 
-function ParticleSound(aPositionHome, volume, aTargetObject) 
-{
+export function ParticleSound(aPositionHome, volume, aTargetObject) {
+	var THREE = globalThis.THREE;
+	var scene = globalThis.scene;
+	var sWIDTH = globalThis.sWIDTH;
+	var OPACITY_INFO = globalThis.OPACITY_INFO;
+	var PickColor = globalThis.PickColor;
+	var myRandom = globalThis.myRandom;
+	var isdefined = globalThis.isdefined;
+
 	this.name = aTargetObject.name;
 	this.url = aTargetObject.url;
 
-	var particle = new THREE.Particle( new THREE.ParticleCanvasMaterial( { color: PickColor(), program: programStroke, transparent:true } ) );
+	var particle = new THREE.Particle(
+		new THREE.ParticleCanvasMaterial({ color: PickColor(), program: programStroke, transparent: true })
+	);
 	particle.mParent = this;
 	particle.position = aPositionHome.clone();
 	particle.position.x += myRandom() * window.innerWidth * 0.05;
@@ -167,24 +197,40 @@ function ParticleSound(aPositionHome, volume, aTargetObject)
 	this.mPositionCenter = particle.position.clone();
 
 	var size = 2;
-	if(aTargetObject.size)
-	{
+	if (aTargetObject.size) {
 		size = aTargetObject.size;
-	}
-	else
-	{
+	} else {
 		aTargetObject.size = size;
 	}
 
 	var infoText = [];
-	infoText.push({string:this.name, size: 2});
-	var programText = function ( context ) 
-	{
-		SetTextInCanvas(infoText, context.canvas)
-	}
+	infoText.push({ string: this.name, size: 2 });
+	var drawInfoText = function (context, text) {
+		context.fillStyle = '#000000';
+		context.textAlign = 'left';
+		context.textBaseline = 'middle';
 
-	var info = new THREE.Particle( new THREE.ParticleCanvasMaterial( { color: PickColor(), program: programText, transparent:true, opacity:OPACITY_INFO } ) );
-	info.position = particle.position;
+		for (var lineIndex = 0; lineIndex < text.length; lineIndex++) {
+			if (!isdefined(text[lineIndex].size)) {
+				return;
+			}
+			context.font = text[lineIndex].size + 'pt TitleText';
+			context.fillText(text[lineIndex].string, 1.25, 0);
+		}
+	};
+	var programText = function (context) {
+		drawInfoText(context, infoText);
+	};
+
+	var info = new THREE.Particle(
+		new THREE.ParticleCanvasMaterial({
+			color: PickColor(),
+			program: programText,
+			transparent: true,
+			opacity: OPACITY_INFO,
+		})
+	);
+	info.position = new THREE.Vector3(particle.position.x + sWIDTH, particle.position.y, particle.position.z);
 	info.visible = false;
 
 	particle.scale.x = particle.scale.y = 3 * sWIDTH * 0.07 * size;
@@ -194,10 +240,16 @@ function ParticleSound(aPositionHome, volume, aTargetObject)
 	particle.TargetObject = aTargetObject;
 	this.mParticle = particle;
 
-	this.particleClear = new THREE.Particle( new THREE.ParticleCanvasMaterial( { color: Math.random() * 0x808080 + 0x808080, program: programDoNothing, opacity:0 } ) );
+	this.particleClear = new THREE.Particle(
+		new THREE.ParticleCanvasMaterial({
+			color: Math.random() * 0x808080 + 0x808080,
+			program: programDoNothing,
+			opacity: 0,
+		})
+	);
 	var width = window.innerWidth * 1.5;
 	this.particleClear.scale.x = this.particleClear.scale.y = 4 * width * 0.05;
-	scene.add( this.particleClear );
+	scene.add(this.particleClear);
 	this.particleClear.position = info.position;
 	particle.TargetObject.particleClear = this.particleClear;
 
@@ -208,146 +260,128 @@ function ParticleSound(aPositionHome, volume, aTargetObject)
 
 	this.amplifier = 0.;
 
-	sParticlesSound.push(this);
+	globalThis.sParticlesSound.push(this);
 	this.volume = volume;
 
-	particle.play = function()
-	{
+	particle.play = function () {
 		this.mParent.sound.play();
 		this.material.program = programPauseStroke;
-	}
-
-	particle.stop = function()
-	{
-		this.mParent.sound.stop();
-		this.material.program = programTriangleStroke;
-	}
-	
-	particle.MyMouseOn = function(intersect)
-	{
-		if(isdefined(this.mParent.sound))
-		{
-			if(this.mParent.sound.playState == 0)
-			{
-				this.material.program = programTriangle;
-			}
-			else
-			{
-				this.material.program = programPauseStroke;
-			}
-		}
-		else
-		{
-			this.material.program = programTriangle;
-		}
-
-	}
-
-	particle.MyMouseOff = function(intersect)
-	{
-		this.material.program = programTriangleStroke;
-	}
-
-	particle.MyMouseDown = function()
-	{
-		if(!isdefined(this.mParent.sound))
-		{
-			this.mParent.InitSound();	
-		}
-		if((this.mParent.sound.playState == 0))
-		{
-			sFoodArraySound.push(this);
-			for(var i = 0; i < sFoodArraySoundWait.length; i++)
-			{
-				if(sFoodArraySoundWait[i] == this)
-				{
-					sFoodArraySoundWait.splice(i,1);				
-				}
-			}
-			if(sPlayingSound)
-			{
-				sPlayingSound.particle.stop();
-			}
-		}
-		else
-		{
-			this.mParent.sound.stop();
-		}
-	}
-
-	particle.SetPosition = function(aPosition)
-	{
-		particle.position = aPosition;
-		particle.TargetObject.particleClear.position = aPosition;
-		particle.TargetObject.info.position = aPosition;
 	};
 
-	particle.SetTextEnabled = function(aIsEnabled)
-	{
-		if(aIsEnabled)	
-		{
+	particle.stop = function () {
+		this.mParent.sound.stop();
+		this.material.program = programTriangleStroke;
+	};
+
+	particle.MyMouseOn = function (intersect) {
+		if (isdefined(this.mParent.sound)) {
+			if (this.mParent.sound.playState == 0) {
+				this.material.program = programTriangle;
+			} else {
+				this.material.program = programPauseStroke;
+			}
+		} else {
+			this.material.program = programTriangle;
+		}
+	};
+
+	particle.MyMouseOff = function (intersect) {
+		this.material.program = programTriangleStroke;
+	};
+
+	particle.MyMouseDown = function () {
+		var sFoodArraySound = globalThis.sFoodArraySound;
+		var sFoodArraySoundWait = globalThis.sFoodArraySoundWait;
+		var sPlayingSound = globalThis.sPlayingSound;
+
+		if (!isdefined(this.mParent.sound)) {
+			this.mParent.InitSound();
+		}
+		if (this.mParent.sound.playState == 0) {
+			sFoodArraySound.push(this);
+			for (var i = 0; i < sFoodArraySoundWait.length; i++) {
+				if (sFoodArraySoundWait[i] == this) {
+					sFoodArraySoundWait.splice(i, 1);
+				}
+			}
+			if (sPlayingSound) {
+				sPlayingSound.particle.stop();
+			}
+		} else {
+			this.mParent.sound.stop();
+		}
+	};
+
+	particle.SetPosition = function (aPosition) {
+		particle.position = aPosition;
+		particle.TargetObject.particleClear.position = aPosition;
+		particle.TargetObject.info.position = new THREE.Vector3(aPosition.x + sWIDTH * 0.3, aPosition.y, aPosition.z);
+	};
+
+	particle.SetTextEnabled = function (aIsEnabled) {
+		if (aIsEnabled) {
 			this.material.program = programTriangleStroke;
 			this.TargetObject.info.visible = true;
-		}
-		else
-		{
+		} else {
 			this.material.program = programStroke;
 			this.TargetObject.info.visible = false;
 		}
-	}
+	};
 
-	particle.Update = function(delta)
-	{
-		// if(this.mParent.sound.playState > 0)
-		// {
-		// 	particle.rotation.z += delta;
-		// }
+	particle.Update = function (delta) {
 		particle.mParent.Update(delta);
 	};
 
-	particle.Delete = function()
-	{
+	particle.Delete = function () {
 		scene.remove(particle);
 		scene.remove(particle.TargetObject.particleClear);
 		scene.remove(particle.TargetObject.info);
 		delete this;
 	};
 
-	scene.add( particle );
+	scene.add(particle);
 	scene.add(info);
 	return particle;
 }
 
-ParticleSound.prototype.Update = function(delta)
-{
-	if(isdefined(this.sound))
-	{
-		if(this.sound.playState > 0)
-		{
+ParticleSound.prototype.Update = function (delta) {
+	var isdefined = globalThis.isdefined;
+
+	if (isdefined(this.sound)) {
+		if (this.sound.playState > 0) {
 			return;
-		}		
+		}
 	}
 
 	this.mSpeedTimer += delta * 0.5;
 	this.mParticle.position.x += this.mSpeed.x * delta;
 	this.mParticle.position.y += this.mSpeed.y * delta;
-	this.mSpeed.x += myRandom() * delta + Math.cos(this.mSpeedTimer + this.mAngleDecay) * 0.2 + 3.5 * (this.mPositionCenter.x - this.mParticle.position.x) / window.innerWidth;
-	this.mSpeed.y += myRandom() * delta + Math.sin(this.mSpeedTimer + this.mAngleDecay) * 0.2 + 3.5 * (this.mPositionCenter.y - this.mParticle.position.y) / window.innerWidth;
+	this.mSpeed.x +=
+		globalThis.myRandom() * delta +
+		Math.cos(this.mSpeedTimer + this.mAngleDecay) * 0.2 +
+		(3.5 * (this.mPositionCenter.x - this.mParticle.position.x)) / window.innerWidth;
+	this.mSpeed.y +=
+		globalThis.myRandom() * delta +
+		Math.sin(this.mSpeedTimer + this.mAngleDecay) * 0.2 +
+		(3.5 * (this.mPositionCenter.y - this.mParticle.position.y)) / window.innerWidth;
 	this.mSpeed.multiplyScalar(0.98);
 
 	this.mParticle.SetPosition(this.mPosition);
-}
+};
 
-var sSoundAmplitude = 0.;
+ParticleSound.prototype.InitSound = function () {
+	var sFoodArraySoundWait = globalThis.sFoodArraySoundWait;
+	var sFoodArraySound = globalThis.sFoodArraySound;
+	var sPlayingSound = globalThis.sPlayingSound;
+	var sMonsterSound = globalThis.sMonsterSound;
 
-ParticleSound.prototype.InitSound = function() {
 	this.sound = createWebAudioSound({
 		url: this.url,
 		volume: this.volume,
-		onPlaybackEnd: function() {
+		onPlaybackEnd: function () {
 			sFoodArraySoundWait.push(sPlayingSound.particle);
 			sFoodArraySound.splice(0, 1);
 			sMonsterSound.mParent.RemoveSound();
-		}
+		},
 	});
 };

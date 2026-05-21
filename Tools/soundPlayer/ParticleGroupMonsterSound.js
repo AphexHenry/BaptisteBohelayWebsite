@@ -1,3 +1,11 @@
+/**
+ * Sound-monster particle group: food bubbles + camera / interaction for the sound player scene.
+ *
+ * Classic script for experiment pages and any HTML that loads only synchronous/deferred scripts.
+ * Main site uses ./registerParticleGroupMonsterSoundGlobals.mjs + ./ParticleGroupMonsterSound.mjs instead.
+ * For new ES modules, import from ./ParticleGroupMonsterSound.mjs.
+ */
+
 sFoodArraySoundWait = [];
 
 function AddLeg()
@@ -211,27 +219,6 @@ ParticleGroupMonsterSound.prototype.Terminate = function()
 
 ParticleGroupMonsterSound.prototype.UpdateIntersectPlane = function()
 {
-	// var vector = new THREE.Vector3( mouse.x, mouse.y, 0.5 );
-	// projector.unprojectVector( vector, camera );
-
-	// var ray = new THREE.Ray( camera.position, vector.subSelf( camera.position ).normalize() );
-
-	// var intersects = ray.intersectObject( this.plane, true );
-
-	// if( intersects.length > 0 ) 
-	// {
-	// 	for(var i = 0; i < this.positionHomeMonsters.length; i++)
-	// 	{
-	// 		if(intersects[0].point.distanceTo(this.positionHomeMonsters[i].pos) < innerWidth * 0.5)
-	// 		{
-	// 			infoDisplay.SetSize(3.);
- //   				infoDisplay.SetText([{string:this.positionHomeMonsters[i].name, size: 2}]);
- //   				infoDisplay.SetPosition(this.positionHomeMonsters[i].pos, true);
-	// 			infoDisplay.FadeIn();
-	// 			return;
-	// 		}
-	// 	}
-	// } 
 		var i = (mouse.y < 0) ? 1 : 0;
 		if(Math.abs(mouse.y) < 0.3)
 		{
