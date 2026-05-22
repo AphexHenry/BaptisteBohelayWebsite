@@ -1,9 +1,26 @@
 /**
  * Resume landmarks for the About Me particle scene.
- * Each entry: company, title, years, place, description, importance (number, e.g. 1 = big, 0.4 = small), type, yearStart (for chronological path), xOffset (optional, relative to path scale), calloutAngle (optional degrees for small-entry hover label).
+ * Each entry: company, title, years, place, description (HTML panel via ParticleResume_descriptionHtml), importance (number, e.g. 1 = big, 0.4 = small), type, yearStart (for chronological path), xOffset (optional, relative to path scale), calloutAngle (optional degrees for small-entry hover label).
  */
 
 var ParticleResume = {};
+
+function ParticleResume_descriptionHtml(company, title, years, place, paragraphs) {
+	var taglineParts = [];
+	if (title) taglineParts.push(title);
+	if (years) taglineParts.push(years);
+	if (place) taglineParts.push(place);
+	var html = '<header class="about-description__header">';
+	html += '<h2 class="about-description__name">' + company + '</h2>';
+	if (taglineParts.length > 0) {
+		html += '<p class="about-description__tagline">' + taglineParts.join(' · ') + '</p>';
+	}
+	html += '</header><div class="about-description__body">';
+	for (var i = 0; i < paragraphs.length; i++) {
+		html += '<p>' + paragraphs[i] + '</p>';
+	}
+	return html + '</div>';
+}
 
 ParticleResume.ENTRIES = [
 	{
@@ -12,7 +29,13 @@ ParticleResume.ENTRIES = [
 		displayShort: "IRCAM",
 		years: "2008–2009",
 		place: "Paris, France",
-		description: "Graduate studies at IRCAM.",
+		description: ParticleResume_descriptionHtml(
+			"IRCAM",
+			"Master's degree — Science of Music",
+			"2008–2009",
+			"Paris, France",
+			["Graduate studies at IRCAM."]
+		),
 		importance: 1.1,
 		type: "study",
 		yearStart: 2008,
@@ -24,8 +47,15 @@ ParticleResume.ENTRIES = [
 		title: "Video Game Audio",
 		years: "2008",
 		place: "Paris, France",
-		description:
-			"Work on Horse Life 2 PC: programming of the sound manager; recording and processing of 70% of the game's sounds. Game released November 2008.",
+		description: ParticleResume_descriptionHtml(
+			"Dancing Dots",
+			"Video Game Audio",
+			"2008",
+			"Paris, France",
+			[
+				"Work on <em>Horse Life 2</em> PC: programming of the sound manager; recording and processing of 70% of the game's sounds. Game released November 2008.",
+			]
+		),
 		importance: 0.45,
 		type: "pro",
 		yearStart: 2008,
@@ -39,8 +69,15 @@ ParticleResume.ENTRIES = [
 		displayShort: "IRCAM Internship",
 		years: "2009",
 		place: "Paris, France",
-		description:
-			"Spoken voice real-time transformation: C++ implementation of analysis/synthesis for real-time use; improved the algorithm so users could adjust synthesis parameters to control voice quality.",
+		description: ParticleResume_descriptionHtml(
+			"IRCAM",
+			"Sound Processing Intern",
+			"2009",
+			"Paris, France",
+			[
+				"Spoken voice real-time transformation: C++ implementation of analysis/synthesis for real-time use; improved the algorithm so users could adjust synthesis parameters to control voice quality.",
+			]
+		),
 		importance: 0.4,
 		type: "pro",
 		yearStart: 2009,
@@ -52,7 +89,13 @@ ParticleResume.ENTRIES = [
 		displayShort: "Lulu's Unreal Exploration",
 		years: "2009-2013",
 		place: "France - Canada",
-		description: "Video game for iPhone.",
+		description: ParticleResume_descriptionHtml(
+			"Lulu's Exploration",
+			"Video Game",
+			"2009–2013",
+			"France · Canada",
+			["Video game for iPhone."]
+		),
 		importance: 0.6,
 		type: "art",
 		yearStart: 2010,
@@ -64,8 +107,15 @@ ParticleResume.ENTRIES = [
 		title: "Developer / Sound Designer",
 		years: "2010",
 		place: "Paris, France · On-site",
-		description:
-			"Pro Evolution Soccer 2010/2011 for smartphones: sound manager programming and part of the GUI using Airplay cross-platform middleware; sound design.",
+		description: ParticleResume_descriptionHtml(
+			"Konami",
+			"Developer / Sound Designer",
+			"2010",
+			"Paris, France · On-site",
+			[
+				"<em>Pro Evolution Soccer 2010/2011</em> for smartphones: sound manager programming and part of the GUI using Airplay cross-platform middleware; sound design.",
+			]
+		),
 		importance: 1,
 		type: "pro",
 		yearStart: 2010,
@@ -77,7 +127,13 @@ ParticleResume.ENTRIES = [
 		displayShort: "Le Cube",
 		years: "2011",
 		place: "Issy-les-Moulineaux, France",
-		description: "Developed a flexible video player for interactive art installations.",
+		description: ParticleResume_descriptionHtml(
+			"Le Cube",
+			"Interactive Installation Dev",
+			"2011",
+			"Issy-les-Moulineaux, France",
+			["Developed a flexible video player for interactive art installations."]
+		),
 		importance: 0.4,
 		type: "pro",
 		yearStart: 2011,
@@ -90,8 +146,18 @@ ParticleResume.ENTRIES = [
 		title: "Engineer",
 		years: "2012 – 2015",
 		place: "Vancouver",
-		description:
-			"Tangible Interaction blends art, design and technology for interactive experiences shown worldwide.\n\nDeveloped autonomously most of their recent applications: Cortex (control lights/motors with interaction); Mozza (Twitter/Instagram/Vine visualizer with 360° projection); driver for an innovative Graffiti Wall sensor.\n\nRobust, long-running installs presented at SXSW (Austin), Eyeo Festival (Minneapolis), Purity Ring concerts (Pitchfork), MTV Spring Break, Osheaga (Montreal).\n\nStack: C++, JavaScript, HTML, CSS, Max/MSP, Cinder, OpenFrameworks, WebGL, TUIO.",
+		description: ParticleResume_descriptionHtml(
+			"Tangible Interaction",
+			"Engineer",
+			"2012 – 2015",
+			"Vancouver",
+			[
+				"Tangible Interaction blends art, design and technology for interactive experiences shown worldwide.",
+				"Developed autonomously most of their recent applications: Cortex (control lights/motors with interaction); Mozza (Twitter/Instagram/Vine visualizer with 360° projection); driver for an innovative Graffiti Wall sensor.",
+				"Robust, long-running installs presented at SXSW (Austin), Eyeo Festival (Minneapolis), Purity Ring concerts (Pitchfork), MTV Spring Break, Osheaga (Montreal).",
+				"<em>Stack:</em> C++, JavaScript, HTML, CSS, Max/MSP, Cinder, OpenFrameworks, WebGL, TUIO.",
+			]
+		),
 		importance: 1.4,
 		type: "pro",
 		yearStart: 2012,
@@ -103,8 +169,15 @@ ParticleResume.ENTRIES = [
 		title: "Instagram Visualizer for Events",
 		years: "2012 – 2015",
 		place: "Vancouver",
-		description:
-			"Development of Social Mozaic, a Twitter/Instagram/Vine visualizer with 360° projection.",
+		description: ParticleResume_descriptionHtml(
+			"Social Mosa",
+			"Instagram Visualizer for Events",
+			"2012 – 2015",
+			"Vancouver",
+			[
+				"Development of Social Mozaic, a Twitter/Instagram/Vine visualizer with 360° projection.",
+			]
+		),
 		importance: 0.3,
 		type: "pro",
 		yearStart: 2012,
@@ -117,8 +190,13 @@ ParticleResume.ENTRIES = [
 		title: "Light Installation",
 		years: "2012 – 2015",
 		place: "Vancouver",
-		description:
-			"Halo is a light installation that reacts to the movement of the audience.",
+		description: ParticleResume_descriptionHtml(
+			"Halo",
+			"Light Installation",
+			"2012 – 2015",
+			"Vancouver",
+			["Halo is a light installation that reacts to the movement of the audience."]
+		),
 		importance: 0.3,
 		type: "pro",
 		yearStart: 2012,
@@ -131,8 +209,13 @@ ParticleResume.ENTRIES = [
 		title: "Light Control Software",
 		years: "2012 – 2015",
 		place: "Vancouver",
-		description:
-			"Cortex is a software for controlling lights and motors with interaction.",
+		description: ParticleResume_descriptionHtml(
+			"Cortex",
+			"Light Control Software",
+			"2012 – 2015",
+			"Vancouver",
+			["Cortex is a software for controlling lights and motors with interaction."]
+		),
 		importance: 0.3,
 		type: "pro",
 		yearStart: 2012,
@@ -145,8 +228,15 @@ ParticleResume.ENTRIES = [
 		title: "Digital Graffiti Wall",
 		years: "2012 – 2015",
 		place: "Vancouver",
-		description:
-			"Cortex is a software for controlling lights and motors with interaction.",
+		description: ParticleResume_descriptionHtml(
+			"Graffiti Wall",
+			"Digital Graffiti Wall",
+			"2012 – 2015",
+			"Vancouver",
+			[
+				"Driver for an innovative Graffiti Wall sensor — digital spray-paint on a large interactive wall.",
+			]
+		),
 		importance: 0.3,
 		type: "pro",
 		yearStart: 2012,
@@ -159,8 +249,13 @@ ParticleResume.ENTRIES = [
 		title: "Light Scrulpture",
 		years: "2012 – 2015",
 		place: "Vancouver",
-		description:
-			"Visitor is a 3D light sculpture that reacts to the touch.",
+		description: ParticleResume_descriptionHtml(
+			"Visitor",
+			"Light Scrulpture",
+			"2012 – 2015",
+			"Vancouver",
+			["Visitor is a 3D light sculpture that reacts to the touch."]
+		),
 		importance: 0.3,
 		type: "pro",
 		yearStart: 2015,
@@ -172,8 +267,13 @@ ParticleResume.ENTRIES = [
 		title: "Workshop Series",
 		years: "2016",
 		place: "Bucharest, Romania",
-		description:
-			"Workshop for kids experimenting with sound through drawn compositions.",
+		description: ParticleResume_descriptionHtml(
+			"Musical Box",
+			"Workshop Series",
+			"2016",
+			"Bucharest, Romania",
+			["Workshop for kids experimenting with sound through drawn compositions."]
+		),
 		importance: 0.45,
 		type: "art",
 		yearStart: 2016,
@@ -186,8 +286,15 @@ ParticleResume.ENTRIES = [
 		displayShort: "Onde de Choc",
 		years: "2013",
 		place: "Yukon Art Centre",
-		description:
-			"Opening of Onde de choc — improvised performance: dance and interactive visuals. Shayla Oxley — dance & interaction with visuals — William…",
+		description: ParticleResume_descriptionHtml(
+			"Onde de Choc",
+			"Dance Performance",
+			"2013",
+			"Yukon Art Centre",
+			[
+				"Opening of <em>Onde de choc</em> — improvised performance: dance and interactive visuals. Shayla Oxley — dance &amp; interaction with visuals — William…",
+			]
+		),
 		importance: 0.4,
 		type: "art",
 		yearStart: 2013,
@@ -198,8 +305,15 @@ ParticleResume.ENTRIES = [
 		title: "Light and Sound Interactive Installation",
 		years: "2015",
 		place: "Lyon, France",
-		description:
-			"Cocoons is an interactive audiovisual installation: thirteen cocoons on rooftops in Lyon. They react to light from phones and flashlights, responding with sound and light for a new kind of dialogue with the public.",
+		description: ParticleResume_descriptionHtml(
+			"Cocoons",
+			"Light and Sound Interactive Installation",
+			"2015",
+			"Lyon, France",
+			[
+				"Cocoons is an interactive audiovisual installation: thirteen cocoons on rooftops in Lyon. They react to light from phones and flashlights, responding with sound and light for a new kind of dialogue with the public.",
+			]
+		),
 		importance: 0.7,
 		type: "art",
 		yearStart: 2015,
@@ -210,8 +324,15 @@ ParticleResume.ENTRIES = [
 		title: "Interactive Video Installation",
 		years: "",
 		place: "",
-		description:
-			"Art exhibition in collaboration with Marten Berkman, Yukon-based 3D filmmaker.",
+		description: ParticleResume_descriptionHtml(
+			"Projection Intérieure Projection",
+			"Interactive Video Installation",
+			"",
+			"",
+			[
+				"Art exhibition in collaboration with Marten Berkman, Yukon-based 3D filmmaker.",
+			]
+		),
 		importance: 0.45,
 		type: "art",
 		yearStart: 2014,
@@ -222,7 +343,13 @@ ParticleResume.ENTRIES = [
 		title: "360 InteractiveVideo",
 		years: "2015",
 		place: "",
-		description: "Interactive audiovisual experience in a dome.",
+		description: ParticleResume_descriptionHtml(
+			"Womb",
+			"360 Interactive Video",
+			"2015",
+			"",
+			["Interactive audiovisual experience in a dome."]
+		),
 		importance: 0.4,
 		type: "art",
 		yearStart: 2016,
@@ -234,8 +361,15 @@ ParticleResume.ENTRIES = [
 		title: "Mobile Developer",
 		years: "2015",
 		place: "Greater Paris Metropolitan Region",
-		description:
-			"Development of Triber, a cross-platform mobile app (Cordova/Ionic) letting users create and share their own mobile applications. Mostly AngularJS.",
+		description: ParticleResume_descriptionHtml(
+			"Triber",
+			"Mobile Developer",
+			"2015",
+			"Greater Paris Metropolitan Region",
+			[
+				"Development of Triber, a cross-platform mobile app (Cordova/Ionic) letting users create and share their own mobile applications. Mostly AngularJS.",
+			]
+		),
 		importance: 0.45,
 		type: "pro",
 		yearStart: 2015,
@@ -247,8 +381,13 @@ ParticleResume.ENTRIES = [
 		title: "Comics Exhibition - Bishkek",
 		years: "2019",
 		place: "Bishkek, Kyrgyzstan",
-		description:
-			"Development of OrchPlay, educational musical software playing very high-quality orchestral material using a custom format. Control each instrument independently; educational visualizations; library download and management. Client in C++ (JUCE); server in Rails.\n\nOrchPlayMusic builds technologies for musical education and appreciation linked to the OrchPlay Library of multitrack excerpts (~100 works).",
+		description: ParticleResume_descriptionHtml(
+			"Шагни через границу",
+			"Comics Exhibition",
+			"2019",
+			"Bishkek, Kyrgyzstan",
+			["Comics exhibition held in Bishkek, Kyrgyzstan."]
+		),
 		importance: 0.45,
 		type: "art",
 		yearStart: 2019,
@@ -260,8 +399,16 @@ ParticleResume.ENTRIES = [
 		title: "Orchview / Orchplay",
 		years: "2018 – 2025",
 		place: "Montreal · Remote",
-		description:
-			"Programming OrchView, software for classical music theory researchers: annotate scores with maximum automation and versatility for conversion into the Orchard Database.\n\nSkills: software infrastructure, software development.",
+		description: ParticleResume_descriptionHtml(
+			"McGill University",
+			"Orchview / Orchplay",
+			"2018 – 2025",
+			"Montreal · Remote",
+			[
+				"Programming OrchView, software for classical music theory researchers: annotate scores with maximum automation and versatility for conversion into the Orchard Database.",
+				"<em>Skills:</em> software infrastructure, software development.",
+			]
+		),
 		importance: 1.3,
 		type: "pro",
 		yearStart: 2016,
@@ -272,8 +419,16 @@ ParticleResume.ENTRIES = [
 		title: "Educational Musical Software",
 		years: "2018 – 2025",
 		place: "Montreal · Remote",
-		description:
-			"Programming OrchView, software for classical music theory researchers: annotate scores with maximum automation and versatility for conversion into the Orchard Database.\n\nSkills: software infrastructure, software development.",
+		description: ParticleResume_descriptionHtml(
+			"Orchplay",
+			"Educational Musical Software",
+			"2018 – 2025",
+			"Montreal · Remote",
+			[
+				"Development of OrchPlay, educational musical software playing very high-quality orchestral material using a custom format. Control each instrument independently; educational visualizations; library download and management. Client in C++ (JUCE); server in Rails.",
+				"OrchPlayMusic builds technologies for musical education and appreciation linked to the OrchPlay Library of multitrack excerpts (~100 works).",
+			]
+		),
 		importance: 0.3,
 		type: "pro",
 		yearStart: 2016,
@@ -285,8 +440,16 @@ ParticleResume.ENTRIES = [
 		title: "Research Tool for Music Theory",
 		years: "2018 – 2025",
 		place: "Montreal · Remote",
-		description:
-			"Programming OrchView, software for classical music theory researchers: annotate scores with maximum automation and versatility for conversion into the Orchard Database.\n\nSkills: software infrastructure, software development.",
+		description: ParticleResume_descriptionHtml(
+			"Orchview",
+			"Research Tool for Music Theory",
+			"2018 – 2025",
+			"Montreal · Remote",
+			[
+				"Programming OrchView, software for classical music theory researchers: annotate scores with maximum automation and versatility for conversion into the Orchard Database.",
+				"<em>Skills:</em> software infrastructure, software development.",
+			]
+		),
 		importance: 0.3,
 		type: "pro",
 		yearStart: 2018,
@@ -298,8 +461,16 @@ ParticleResume.ENTRIES = [
 		title: "Founder",
 		years: "Jan 2025 – Present",
 		place: "Paris, Île-de-France, France",
-		description:
-			"Design and development of Badly Drawn — draw silly things and share with friends. Drawings appear live in friends' apps; stick friends' drawings on home-screen widgets; print favourites on merch; occasional surprise events to spark creativity.\n\nSkills: software design, Flutter, and more.",
+		description: ParticleResume_descriptionHtml(
+			"Badly Drawn",
+			"Founder",
+			"Jan 2025 – Present",
+			"Paris, Île-de-France, France",
+			[
+				"Design and development of Badly Drawn — draw silly things and share with friends. Drawings appear live in friends' apps; stick friends' drawings on home-screen widgets; print favourites on merch; occasional surprise events to spark creativity.",
+				"<em>Skills:</em> software design, Flutter, and more.",
+			]
+		),
 		importance: 1.1,
 		type: "pro",
 		yearStart: 2025,

@@ -229,6 +229,40 @@ function ParticleAboutMe_hideHoverAnimations(group) {
 	}
 }
 
+function ParticleAboutMe_saveDescriptionPanelDefault() {
+	if (typeof sTextDescriptionDOMController === "undefined") {
+		return;
+	}
+	if (!sTextDescriptionDOMController._aboutMeDefaultHtml && sTextDescriptionDOMController.$textarea.length) {
+		sTextDescriptionDOMController._aboutMeDefaultHtml = sTextDescriptionDOMController.$textarea.html();
+	}
+}
+
+function ParticleAboutMe_setDescriptionPanelHtml(html) {
+	if (typeof sTextDescriptionDOMController === "undefined" || !sTextDescriptionDOMController.$textarea.length) {
+		return;
+	}
+	if (typeof sTextDescriptionDOMController.setHtml === "function") {
+		sTextDescriptionDOMController.setHtml(html);
+		return;
+	}
+	sTextDescriptionDOMController.$textarea.html(html != null ? String(html) : "");
+}
+
+function ParticleAboutMe_updateDescriptionPanel(particle) {
+	if (typeof sTextDescriptionDOMController === "undefined") {
+		return;
+	}
+	if (particle && particle.TargetObject && particle.TargetObject.resumeEntry) {
+		var description = particle.TargetObject.resumeEntry.description;
+		ParticleAboutMe_setDescriptionPanelHtml(description || "");
+		return;
+	}
+	if (sTextDescriptionDOMController._aboutMeDefaultHtml) {
+		ParticleAboutMe_setDescriptionPanelHtml(sTextDescriptionDOMController._aboutMeDefaultHtml);
+	}
+}
+
 function ParticleGroupAboutMe(positionCenter, name) 
 {
 	this.name = name;
@@ -375,6 +409,7 @@ ParticleGroupAboutMe.prototype.Init = function()
 
 	if (typeof sTextDescriptionDOMController !== "undefined")
 	{
+		ParticleAboutMe_saveDescriptionPanelDefault();
 		sTextDescriptionDOMController.show();
 	}
 }
@@ -403,6 +438,23 @@ ParticleGroupAboutMe.prototype.MouseDown = function()
 			var newURL = window.location.href.substring(0, window.location.href.indexOf('#')) + INTERSECTED.TargetObject.targetURL;
 			open_in_new_tab(newURL);
 		}
+		else if (INTERSECTED.TargetObject.resumeEntry)
+		{
+			if (SELECTED && SELECTED !== INTERSECTED) {
+				SELECTED.material.program = ParticleAboutMe_particleStrokeProgram(SELECTED.TargetObject);
+				ParticleAboutMe_resetInfo(SELECTED);
+			}
+			SELECTED = INTERSECTED;
+			INTERSECTED.material.program = ParticleAboutMe_particleTriangleProgram(INTERSECTED.TargetObject);
+			ParticleAboutMe_updateDescriptionPanel(INTERSECTED);
+		}
+	}
+	else if (SELECTED)
+	{
+		SELECTED.material.program = ParticleAboutMe_particleStrokeProgram(SELECTED.TargetObject);
+		ParticleAboutMe_resetInfo(SELECTED);
+		SELECTED = null;
+		ParticleAboutMe_updateDescriptionPanel(null);
 	}
 }
 
@@ -466,6 +518,7 @@ ParticleGroupAboutMe.prototype.Terminate = function()
 	$("#roundCorner").slideUp(400);
 	if (typeof sTextDescriptionDOMController !== "undefined")
 	{
+		ParticleAboutMe_updateDescriptionPanel(null);
 		sTextDescriptionDOMController.hide();
 	}
 }

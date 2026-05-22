@@ -26,6 +26,46 @@ TextDescriptionDOMController.prototype.setText = function ( text )
 	}
 };
 
+TextDescriptionDOMController.prototype.setHtml = function ( html )
+{
+	if (!this.$textarea.length)
+	{
+		return;
+	}
+	this.$textarea.html(html != null ? String(html) : '');
+};
+
+/**
+ * Plain text: escape and split on blank lines into paragraphs.
+ * Strings that already contain HTML tags are inserted as-is.
+ */
+TextDescriptionDOMController.formatDescriptionHtml = function ( content )
+{
+	if (content == null || content === '')
+	{
+		return '';
+	}
+	var s = String(content);
+	if (/<\/?[a-z][\s\S]*>/i.test(s))
+	{
+		return s;
+	}
+	var escaped = s
+		.replace(/&/g, '&amp;')
+		.replace(/</g, '&lt;')
+		.replace(/>/g, '&gt;');
+	var paragraphs = escaped.split(/\n\n+/).map(function (para)
+	{
+		return '<p>' + para.replace(/\n/g, '<br>') + '</p>';
+	}).join('');
+	return '<div class="about-description__body">' + paragraphs + '</div>';
+};
+
+TextDescriptionDOMController.prototype.setDescriptionContent = function ( content )
+{
+	this.setHtml(TextDescriptionDOMController.formatDescriptionHtml(content));
+};
+
 TextDescriptionDOMController.prototype.getText = function ()
 {
 	if (!this.$textarea.length)
