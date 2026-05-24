@@ -48,7 +48,7 @@ ParticleGroup =
     PART_LULU : ParticleGroupID++,
     PART_SOUND_EXPERIMENTS : ParticleGroupID++,
     PART_SOUND_MONSTER : ParticleGroupID++,
-    PART_VIDEOS : ParticleGroupID++,
+    PART_COMICS : ParticleGroupID++,
     PART_OTHER : ParticleGroupID++,
     PART_FUNKY_CREATION : ParticleGroupID++,
     PART_MONSTER : ParticleGroupID++,

@@ -92,7 +92,7 @@
 		var lFunky = new ParticleGroupIntro(lMenuPosition.clone().addSelf(new THREE.Vector3(600, 1300, -1700)), flyer, "funkyCreation", sTools.ParticleGroup.PART_FUNKY_CREATION);
 		var particleWebExp = { particle: new ParticleCircleNavigate(lFunky.positionCenter.clone().addSelf(new THREE.Vector3(sWIDTH * 1., sWIDTH * 0.5, 0.)), { name: "web exploration", target: sTools.ParticleGroup.PART_WEB }) };
 		var monsterNoise = new MonsterNoise(lFunky.positionCenter.clone().addSelf(new THREE.Vector3(-sWIDTH * 1.6, 0., 0.)), window.innerWidth * 0.06, { name: "sound monsters", target: sTools.ParticleGroup.PART_SOUND_MONSTER });
-		var monsterVideo = new MonsterVideo(lFunky.positionCenter.clone().addSelf(new THREE.Vector3(0, -sWIDTH * .3, sWIDTH * 1.6)), window.innerWidth * 0.06, { name: "videos", target: sTools.ParticleGroup.PART_VIDEOS });
+		var monsterVideo = new MonsterVideo(lFunky.positionCenter.clone().addSelf(new THREE.Vector3(0, -sWIDTH * .3, sWIDTH * 1.6)), window.innerWidth * 0.06, { name: "comics", target: sTools.ParticleGroup.PART_COMICS });
 		var monsterProjects = new MonsterProjects(lFunky.positionCenter.clone().addSelf(new THREE.Vector3(-sWIDTH * 0., sWIDTH * .3, 0.)), window.innerWidth * 0.06, { name: "projects", target: sTools.ParticleGroup.PART_OTHER, scale: 1.5 });
 
 		lFunky.AddParticle(monsterNoise);
@@ -110,7 +110,7 @@
 		sTools.ParticleGroups[sTools.ParticleGroup.PART_WEB] = new ParticleGroupWebExperiment(new THREE.Vector3(-500, -2000, 1000), "WebExperiment");
 
 		//  // Lulu
-		sTools.ParticleGroups[sTools.ParticleGroup.PART_VIDEOS] = new ParticleGroupVideos(new THREE.Vector3(1000, 1000, -1000), "videos");
+		sTools.ParticleGroups[sTools.ParticleGroup.PART_COMICS] = new ParticleGroupComics(new THREE.Vector3(1000, 1000, -1000), "comics");
 
 		sTools.ParticleGroups[sTools.ParticleGroup.PART_PROGRAMMING] = new ParticleGroupProgramming(new THREE.Vector3(-1500, 2800, 500), "programming");
 

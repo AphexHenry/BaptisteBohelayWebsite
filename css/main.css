@@ -147,6 +147,122 @@
 	}
 
 	/* Left half of the viewport: programmatic copy panel (see TextDescriptionDOMController.js) */
+	#comicsViewer {
+		position: fixed;
+		inset: 0;
+		width: 100%;
+		height: 100vh;
+		height: 100dvh;
+		box-sizing: border-box;
+		--comics-footer-clearance: 7.75rem;
+		--comics-footer-height: 5.75rem;
+		z-index: 235;
+		opacity: 0;
+		visibility: hidden;
+		pointer-events: none;
+	}
+
+	.comics-viewer__panel {
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: calc(var(--comics-footer-clearance) + var(--comics-footer-height));
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: clamp(1rem, 3vw, 2rem);
+		box-sizing: border-box;
+		pointer-events: none;
+	}
+
+	.comics-viewer__image {
+		display: block;
+		max-width: min(88vw, 900px);
+		max-height: 100%;
+		width: auto;
+		height: auto;
+		object-fit: contain;
+		border-radius: 8px;
+		box-shadow: 0 10px 28px rgba(15, 3, 16, 0.12);
+		background: rgba(255, 255, 255, 0.55);
+		pointer-events: auto;
+	}
+
+	.comics-viewer__footer {
+		position: absolute;
+		left: 50%;
+		bottom: var(--comics-footer-clearance);
+		transform: translateX(-50%);
+		width: min(72vw, 560px);
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.45rem;
+		pointer-events: auto;
+	}
+
+	.comics-viewer__title {
+		margin: 0;
+		font-family: "Raleway", system-ui, -apple-system, sans-serif;
+		font-size: 0.95rem;
+		font-weight: 400;
+		letter-spacing: 0.03em;
+		color: rgba(15, 3, 16, 0.78);
+		text-align: center;
+	}
+
+	.comics-viewer__counter {
+		margin: 0;
+		font-family: Monospace;
+		font-size: 0.75rem;
+		color: rgba(15, 3, 16, 0.45);
+	}
+
+	.comics-viewer__slider-wrap {
+		width: 100%;
+		padding-top: 0.35rem;
+		touch-action: none;
+	}
+
+	.comics-viewer__slider-track {
+		position: relative;
+		width: 100%;
+		height: 28px;
+		cursor: grab;
+		touch-action: none;
+		user-select: none;
+	}
+
+	.comics-viewer__slider-track:active {
+		cursor: grabbing;
+	}
+
+	.comics-viewer__slider-line {
+		position: absolute;
+		left: 0;
+		right: 0;
+		top: 50%;
+		height: 1px;
+		background: rgba(15, 3, 16, 0.28);
+		transform: translateY(-50%);
+		pointer-events: none;
+	}
+
+	.comics-viewer__slider-thumb {
+		position: absolute;
+		top: 50%;
+		left: 0%;
+		width: 10px;
+		height: 10px;
+		margin-left: -5px;
+		margin-top: -5px;
+		border-radius: 50%;
+		background: #0f0310;
+		box-shadow: 0 1px 4px rgba(15, 3, 16, 0.2);
+		pointer-events: none;
+	}
+
 	#textDescription {
 		position: fixed;
 		left: 0;
