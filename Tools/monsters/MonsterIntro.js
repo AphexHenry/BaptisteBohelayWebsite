@@ -1,6 +1,7 @@
 var lIndexStates = 0;
 var sPutALetter = 0;
 var sEnd = false;
+var sMonsterLineWidth = 0.01;
 
 var MonsterStates =
 {
@@ -234,12 +235,12 @@ function Attack(part, indexLeg)
 
 function MonsterIntro(positionCenter, width)
 {
-	for(var i = 0; i < 11; i++)
+	for(var i = 0; i < 7; i++)
 	{
 		AddLeg();
 	}
 
-	this.particle = new THREE.Particle( new THREE.ParticleCanvasMaterial( { color: PickColor() * 0.3, program: this.programMonster, transparent:true } ) );
+	this.particle = new THREE.Particle( new THREE.ParticleCanvasMaterial( { color: 0xd5675a, program: this.programMonster, transparent:true } ) );
 
 	this.particle.position.x = positionCenter.x - 0.7 * window.innerWidth; 
 	this.particle.position.y = positionCenter.y - window.innerHeight * 0.3; 
@@ -291,7 +292,7 @@ MonsterIntro.prototype.Update = function(delta)
 		infoDisplay.SetSize(1.3);
 		// infoDisplay.SetText([{string:"enter", size: 2}]);
 		infoDisplay.FadeIn();	
-		sEnd = true;
+		// sEnd = true;
 	}
 	infoDisplay.SetPosition(sMonster.position, true);
 }
@@ -300,7 +301,7 @@ MonsterIntro.prototype.programMonster = function ( context )
 {
 	var closeStuffs = getCloseFood();
 
-	context.lineWidth = 0.01;
+	context.lineWidth = sMonsterLineWidth;
 
 	if(sSizeLegs > 0.05)
 	{
@@ -326,7 +327,7 @@ MonsterIntro.prototype.programMonster = function ( context )
 
     var centerX = 0.;
     var centerY = 0.;
-    context.lineWidth = 0.02;
+    context.lineWidth = context.lineWidth * 2;
     context.beginPath();
     context.arc( centerX, centerY, sRayCircle, 0, PI2, true );
     context.closePath();
