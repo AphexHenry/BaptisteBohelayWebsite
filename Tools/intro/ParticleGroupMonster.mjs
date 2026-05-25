@@ -34,6 +34,10 @@ export function ParticleGroupMonster(positionCenter, name) {
 	// this.particleRotate = new THREE.Vector3(0, 0, 0);
 	this.particleRotateSpeed = new THREE.Vector3(0, 0, 0);
 	this.foodArray = [];
+	this.introLetterSlots = [];
+	this.introSlotOccupants = [];
+	this.nextIntroLetterSlotIndex = 0;
+	this.nextIntroStringIndex = 0;
 
 	this.monster = new MonsterIntro(positionCenter, this.width, this);
 	this.monsterEndPosition = null;
@@ -85,7 +89,8 @@ ParticleGroupMonster.prototype.AddFood = function (
 	aPositionTarget,
 	aLetterColor,
 	setToFinalPosition = false,
-	isMonsterEndTarget = false
+	isMonsterEndTarget = false,
+	introLetterMeta = null
 ) {
 	var THREE = globalThis.THREE;
 	var scene = globalThis.scene;
@@ -99,6 +104,19 @@ ParticleGroupMonster.prototype.AddFood = function (
 	particle.isMovable = !setToFinalPosition;
 	particle.isTarget = setToFinalPosition;
 	particle.mSpeed = speed.clone();
+	if (introLetterMeta) {
+		particle.introOriginIndex = introLetterMeta.originIndex;
+		particle.introDestinationIndex = introLetterMeta.destinationIndex;
+		particle.introCurrentSlotIndex = introLetterMeta.originIndex;
+		particle.introStringIndex = introLetterMeta.stringIndex;
+		particle.introCharacterIndex = introLetterMeta.characterIndex;
+		particle.introOriginPosition = introLetterMeta.originPosition.clone();
+		particle.introSlotPosition = introLetterMeta.slotPosition.clone();
+		particle.introLifted = false;
+		if (particle.introCurrentSlotIndex >= 0) {
+			this.introSlotOccupants[particle.introCurrentSlotIndex] = particle;
+		}
+	}
 	if(setToFinalPosition)
 	{
 		particle.position.x = aPositionTarget.x;
@@ -125,12 +143,22 @@ ParticleGroupMonster.prototype.AddFood = function (
 }
 
 /** Random cyclic permutation (Sattolo): every item moves, no fixed points when length > 1. */
-function permuteVector3Targets(targets) {
-	var n = targets.length;
+function permuteIntroLetterSlots(slots) {
+	var n = slots.length;
 	if (n <= 1) {
-		return targets.map(function (t) { return t.clone(); });
+		return slots.map(function (slot) {
+			return {
+				index: slot.index,
+				positionTarget: slot.positionTarget.clone(),
+			};
+		});
 	}
-	var permuted = targets.map(function (t) { return t.clone(); });
+	var permuted = slots.map(function (slot) {
+		return {
+			index: slot.index,
+			positionTarget: slot.positionTarget.clone(),
+		};
+	});
 	for (var i = n - 1; i > 0; i--) {
 		// myRandom() is in [-1, 1]; use Math.random() for a valid index in [0, i - 1].
 		var j = Math.floor(Math.random() * i);
@@ -139,6 +167,45 @@ function permuteVector3Targets(targets) {
 		permuted[j] = tmp;
 	}
 	return permuted;
+}
+
+ParticleGroupMonster.prototype.IsIntroSlotFree = function (slotIndex) {
+	if (slotIndex == null || slotIndex < 0) {
+		return true;
+	}
+	return !this.introSlotOccupants[slotIndex];
+}
+
+ParticleGroupMonster.prototype.CaptureIntroLetter = function (particle) {
+	if (particle.introCurrentSlotIndex != null && this.introSlotOccupants[particle.introCurrentSlotIndex] === particle) {
+		this.introSlotOccupants[particle.introCurrentSlotIndex] = null;
+	}
+	particle.introCurrentSlotIndex = null;
+	particle.introLifted = true;
+	particle.isMovable = false;
+}
+
+ParticleGroupMonster.prototype.CanPlaceIntroLetter = function (particle) {
+	if (particle.introDestinationIndex == null) {
+		return true;
+	}
+	var occupant = this.introSlotOccupants[particle.introDestinationIndex];
+	return !occupant || occupant === particle;
+}
+
+ParticleGroupMonster.prototype.PlaceIntroLetter = function (particle) {
+	var target = particle.TargetObject.positionTarget;
+	particle.position.x = target.x;
+	particle.position.y = target.y;
+	particle.position.z = target.z;
+	particle.introCurrentSlotIndex = particle.introDestinationIndex;
+	particle.introLifted = false;
+	if (particle.introDestinationIndex != null) {
+		this.introSlotOccupants[particle.introDestinationIndex] = particle;
+	}
+	particle.isEaten = true;
+	particle.isTarget = true;
+	particle.isMovable = false;
 }
 
 ParticleGroupMonster.prototype.AddString = function (aText, aPosition, aTextSize = 0.03, aTextColor = 0x000000) {
@@ -157,6 +224,8 @@ ParticleGroupMonster.prototype.AddString = function (aText, aPosition, aTextSize
     var etalon = context.measureText('a').width;
 	var thisSize = 0;
 	var letterSpecs = [];
+	var stringIndex = this.nextIntroStringIndex++;
+	var maxToMove = 4;
 
 	for (var i = 0; i < aText.length; i++) {
 		var char = aText[i];
@@ -164,10 +233,26 @@ ParticleGroupMonster.prototype.AddString = function (aText, aPosition, aTextSize
 		thisSize = textMeasured.width / etalon;
 		position.x += spaceInit * thisSize * 0.5;
 		if (char !== ' ') {
-			var isFinalPosition = i % 7 == 0 || i % 5 == 0 || i % 4 == 0;
 			var isMonsterEndTarget = aText == "BAPTISTE BOHELAY" && char == "O";
+			var slotIndex = this.nextIntroLetterSlotIndex++;
+			var isFinalPosition = i == 0 || Math.random() < 0.8 || isMonsterEndTarget;
+			if (maxToMove <= 0 && !isFinalPosition) {
+				isFinalPosition = true;
+				maxToMove--;
+			}
+			
+			this.introLetterSlots[slotIndex] = {
+				index: slotIndex,
+				stringIndex: stringIndex,
+				characterIndex: i,
+				char: char,
+				positionTarget: position.clone(),
+			};
 			letterSpecs.push({
 				char: char,
+				slotIndex: slotIndex,
+				stringIndex: stringIndex,
+				characterIndex: i,
 				positionTarget: position.clone(),
 				isFinalPosition: isFinalPosition,
 				isMonsterEndTarget: isMonsterEndTarget,
@@ -176,28 +261,35 @@ ParticleGroupMonster.prototype.AddString = function (aText, aPosition, aTextSize
 		position.x += spaceInit * thisSize * 0.5;
 	}
 
-	var movableTargets = [];
+	var movableSlots = [];
 	for (var j = 0; j < letterSpecs.length; j++) {
 		if (!letterSpecs[j].isFinalPosition) {
-			movableTargets.push(letterSpecs[j].positionTarget);
+			movableSlots.push({
+				index: letterSpecs[j].slotIndex,
+				positionTarget: letterSpecs[j].positionTarget,
+			});
 		}
 	}
-	var permutedMovableTargets = permuteVector3Targets(movableTargets);
+	var permutedMovableSlots = permuteIntroLetterSlots(movableSlots);
 	var movableIndex = 0;
 
 	for (var k = 0; k < letterSpecs.length; k++) {
 		var spec = letterSpecs[k];
 		var startPosition;
+		var originIndex = spec.slotIndex;
 		if (spec.isFinalPosition) {
 			startPosition = spec.positionTarget.clone();
-		} else if (movableTargets.length <= 1) {
+		} else if (movableSlots.length <= 1) {
 			startPosition = new THREE.Vector3(
 				this.positionCenter.x + myRandom() * width * 0.5 + width * 0.3,
 				this.positionCenter.y + (myRandom() - 0.5) * width * 0.3,
 				0
 			);
+			originIndex = -1;
 		} else {
-			startPosition = permutedMovableTargets[movableIndex++].clone();
+			var originSlot = permutedMovableSlots[movableIndex++];
+			startPosition = originSlot.positionTarget.clone();
+			originIndex = originSlot.index;
 		}
 		this.AddFood(
 			spec.char,
@@ -207,7 +299,15 @@ ParticleGroupMonster.prototype.AddString = function (aText, aPosition, aTextSize
 			spec.positionTarget,
 			aTextColor,
 			spec.isFinalPosition,
-			spec.isMonsterEndTarget
+			spec.isMonsterEndTarget,
+			{
+				originIndex: originIndex,
+				destinationIndex: spec.slotIndex,
+				stringIndex: spec.stringIndex,
+				characterIndex: spec.characterIndex,
+				originPosition: startPosition,
+				slotPosition: spec.positionTarget,
+			}
 		);
 	}
 }

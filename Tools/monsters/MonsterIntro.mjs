@@ -146,6 +146,7 @@ MonsterIntro.prototype.GetCloseFood = function () {
 		return [];
 	}
 	var closeElements = [];
+	var blockedDestinationIndexes = this.GetBlockedDestinationIndexes();
 	var lFoodArray = this.particleGroupMonster.foodArray;
 	var sMonster = this.particle;
 	var sizeLegsMax = this.legs.length > 0 ? this.legs[0].sizeMax : 0;
@@ -176,12 +177,45 @@ MonsterIntro.prototype.GetCloseFood = function () {
 				}
 			}
 
-			closeElements.push({ pos: lFoodArray[i].position, indexLeg: index, particle: lFoodArray[i] });
+			closeElements.push({
+				pos: lFoodArray[i].position,
+				indexLeg: index,
+				particle: lFoodArray[i],
+				freesBlockedDestination: !!blockedDestinationIndexes[lFoodArray[i].introOriginIndex],
+			});
 			globalThis.sTimerClose = 0.7;
 		}
 	}
 
+	closeElements.sort(function (a, b) {
+		if (a.freesBlockedDestination === b.freesBlockedDestination) {
+			return 0;
+		}
+		return a.freesBlockedDestination ? -1 : 1;
+	});
 	return closeElements;
+};
+
+MonsterIntro.prototype.GetBlockedDestinationIndexes = function () {
+	var blockedDestinationIndexes = {};
+	for (var i = 0; i < this.legs.length; i++) {
+		var gotObject = this.legs[i].gotObject;
+		if (!gotObject || this.particleGroupMonster.CanPlaceIntroLetter(gotObject.particle)) {
+			continue;
+		}
+		blockedDestinationIndexes[gotObject.particle.introDestinationIndex] = true;
+	}
+	return blockedDestinationIndexes;
+};
+
+MonsterIntro.prototype.CountActiveEatingLegs = function () {
+	var count = 0;
+	for (var i = 0; i < this.legs.length; i++) {
+		if (this.legs[i].gotObject) {
+			count++;
+		}
+	}
+	return count;
 };
 
 MonsterIntro.prototype.SetIntroMode = function (mode) {
@@ -225,6 +259,7 @@ MonsterIntro.prototype.AreLegsResting = function () {
 MonsterIntro.prototype.UpdateLegs = function (delta, sTimerClose) {
 	var shouldRest = this.ShouldLegsRest(sTimerClose);
 	var closeStuffs = this.introMode === 'eating' ? this.GetCloseFood() : [];
+	var activeEatingLegs = this.CountActiveEatingLegs();
 
 	for (var i = 0; i < this.legs.length; i++) {
 		if(this.introMode === 'scratch') {
@@ -243,7 +278,11 @@ MonsterIntro.prototype.UpdateLegs = function (delta, sTimerClose) {
 				this.legs[i].SetState(LegStates.IDLE);
 			}
 			for (var j = 0; j < closeStuffs.length; j++) {
+				if (activeEatingLegs >= this.legs.length - 1 && !closeStuffs[j].freesBlockedDestination) {
+					continue;
+				}
 				if (closeStuffs[j].indexLeg == i && this.legs[i].TryGrabFood(closeStuffs[j])) {
+					activeEatingLegs++;
 					break;
 				}
 			}

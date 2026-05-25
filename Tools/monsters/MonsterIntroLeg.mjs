@@ -2,8 +2,10 @@ export var LegStates = {
 	REST: 0,
 	IDLE: 1,
 	GRABBING_FOOD: 2,
-	PLACING_FOOD: 3,
-	SCRATCH: 4,
+	LIFTING_FOOD: 3,
+	CHECKING_FOOD_DESTINATION: 4,
+	PLACING_FOOD: 5,
+	SCRATCH: 6,
 };
 
 globalThis.IntroLegStates = LegStates;
@@ -11,13 +13,12 @@ globalThis.IntroLegStates = LegStates;
 export function MonsterIntroLeg(monsterIntro) {
 	this.monsterIntro = monsterIntro;
 	var THREE = globalThis.THREE;
-	var myRandom = globalThis.myRandom;
 
 	this.angle = 0;
 	this.random = myRandom();
 	this.state = LegStates.REST;
 	this.size = 0;
-	this.sizeMax = globalThis.sSizeLegsMax;
+	this.sizeMax = 2.;
 	this.posHandCurrent = new THREE.Vector2();
 	this.posHandTarget = new THREE.Vector2();
 	this.posHandInit = new THREE.Vector2();
@@ -37,12 +38,13 @@ MonsterIntroLeg.prototype.SetState = function (state) {
 		return;
 	}
 	this.state = state;
-	this.posHandInit = this.posHandCurrent;
+	this.posHandInit.x = this.posHandCurrent.x;
+	this.posHandInit.y = this.posHandCurrent.y;
 	this.coeffMove = 0.;
 };
 
 MonsterIntroLeg.prototype.TryGrabFood = function (closeStuff) {
-	if (!closeStuff || closeStuff.particle.isTarget || this.state !== LegStates.IDLE) {
+	if (!closeStuff || closeStuff.particle.isTarget || closeStuff.particle.introLifted || this.state !== LegStates.IDLE) {
 		return false;
 	}
 
@@ -50,6 +52,41 @@ MonsterIntroLeg.prototype.TryGrabFood = function (closeStuff) {
 	this.gotObject = closeStuff;
 	this.SetState(LegStates.GRABBING_FOOD);
 	return true;
+};
+
+MonsterIntroLeg.prototype.GetParticleHandPosition = function (particle, monster) {
+	var THREE = globalThis.THREE;
+	return new THREE.Vector2(
+		(particle.position.x - monster.position.x) / monster.scale.x,
+		(particle.position.y - monster.position.y) / monster.scale.y
+	);
+};
+
+MonsterIntroLeg.prototype.GetLiftHandPosition = function (particle, monster, lRayCircle) {
+	var THREE = globalThis.THREE;
+	var originPosition = particle.introOriginPosition || particle.position;
+	var destinationPosition = particle.TargetObject.positionTarget;
+	var middleX = (originPosition.x + destinationPosition.x) * 0.5;
+	return new THREE.Vector2(
+		(middleX - monster.position.x) / monster.scale.x,
+		lRayCircle * 1.75
+	);
+};
+
+MonsterIntroLeg.prototype.GetTargetHandPosition = function (particle, monster) {
+	var THREE = globalThis.THREE;
+	return new THREE.Vector2(
+		(particle.TargetObject.positionTarget.x - monster.position.x) / monster.scale.x,
+		(particle.TargetObject.positionTarget.y - monster.position.y) / monster.scale.y
+	);
+};
+
+MonsterIntroLeg.prototype.MoveHeldParticleToHand = function (posHandX, posHandY, monster) {
+	if (!this.gotObject) {
+		return;
+	}
+	this.gotObject.particle.position.x = monster.position.x + posHandX * monster.scale.x;
+	this.gotObject.particle.position.y = monster.position.y + posHandY * monster.scale.y;
 };
 
 MonsterIntroLeg.prototype.Update = function (delta, amp) {
@@ -76,8 +113,10 @@ MonsterIntroLeg.prototype.Update = function (delta, amp) {
 	var posElbowX = posShoulderX + size * (COS * 0.5 + amp * Math.cos(lTime2 * 0.01 + decay * 1.5) * SIN);
 	var posElbowY = posShoulderY + size * (SIN * size * 0.5 + amp * Math.cos(lTime2 * 0.01 + decay * 1.5) * -COS);
 
-	this.coeffMove += 0.2 * this.speed * delta;
+	this.coeffMove += 0.7 * this.speed * delta;
 	this.coeffMove = Math.min(1.000001, this.coeffMove);
+	var actualCoeffMove = Math.sin(this.coeffMove * Math.PI * 0.5);
+	actualCoeffMove * actualCoeffMove;
 
 	switch (this.state) {
 		case LegStates.IDLE:
@@ -92,19 +131,25 @@ MonsterIntroLeg.prototype.Update = function (delta, amp) {
 			this.posHandTarget.y = lRayCircle * Math.sin(0.4 + rub * 0.2) * this.scratchCoeff + (1 - this.scratchCoeff) * (posElbowY + lRayCircle * Math.sin(this.scratchCoeff * Math.PI));
 			break;
 		case LegStates.GRABBING_FOOD:
-			this.posHandTarget.x = (gotObject.particle.position.x - monster.position.x) / monster.scale.x;
-			this.posHandTarget.y = (gotObject.particle.position.y - monster.position.y) / monster.scale.y;
+			var grabPosition = this.GetParticleHandPosition(gotObject.particle, monster);
+			this.posHandTarget.x = grabPosition.x;
+			this.posHandTarget.y = grabPosition.y;
+			break;
+		case LegStates.LIFTING_FOOD:
+		case LegStates.CHECKING_FOOD_DESTINATION:
+			var liftPosition = this.GetLiftHandPosition(gotObject.particle, monster, lRayCircle);
+			this.posHandTarget.x = liftPosition.x;
+			this.posHandTarget.y = liftPosition.y;
 			break;
 		case LegStates.PLACING_FOOD:
-			this.posHandTarget.x =
-				(gotObject.particle.TargetObject.positionTarget.x - monster.position.x) / monster.scale.x;
-			this.posHandTarget.y =
-				(gotObject.particle.TargetObject.positionTarget.y - monster.position.y) / monster.scale.x;
+			var targetPosition = this.GetTargetHandPosition(gotObject.particle, monster);
+			this.posHandTarget.x = targetPosition.x;
+			this.posHandTarget.y = targetPosition.y;
 			break;
 	}
 
-	var posHandX = this.posHandInit.x + this.coeffMove * (this.posHandTarget.x - this.posHandInit.x);
-	var posHandY = this.posHandInit.y + this.coeffMove * (this.posHandTarget.y - this.posHandInit.y);
+	var posHandX = this.posHandInit.x + actualCoeffMove * (this.posHandTarget.x - this.posHandInit.x);
+	var posHandY = this.posHandInit.y + actualCoeffMove * (this.posHandTarget.y - this.posHandInit.y);
 	this.posHandCurrent.x = posHandX;
 	this.posHandCurrent.y = posHandY;
 
@@ -113,18 +158,27 @@ MonsterIntroLeg.prototype.Update = function (delta, amp) {
 		case LegStates.SCRATCH:
 			break;
 		case LegStates.GRABBING_FOOD:
-			if (this.coeffMove >= 0.2) {
-				gotObject.particle.isMovable = false;
+			if (this.coeffMove >= 1) {
+				this.monsterIntro.particleGroupMonster.CaptureIntroLetter(gotObject.particle);
+				this.SetState(LegStates.LIFTING_FOOD);
+			}
+			break;
+		case LegStates.LIFTING_FOOD:
+			this.MoveHeldParticleToHand(posHandX, posHandY, monster);
+			if (this.coeffMove >= 1) {
+				this.SetState(LegStates.CHECKING_FOOD_DESTINATION);
+			}
+			break;
+		case LegStates.CHECKING_FOOD_DESTINATION:
+			this.MoveHeldParticleToHand(posHandX, posHandY, monster);
+			if (this.monsterIntro.particleGroupMonster.CanPlaceIntroLetter(gotObject.particle)) {
 				this.SetState(LegStates.PLACING_FOOD);
 			}
 			break;
 		case LegStates.PLACING_FOOD:
-			gotObject.particle.position.x = monster.position.x + posHandX * monster.scale.x;
-			gotObject.particle.position.y = monster.position.y + posHandY * monster.scale.y;
-			if (this.coeffMove >= 0.2) {
-				gotObject.particle.position.x = gotObject.particle.TargetObject.positionTarget.x;
-				gotObject.particle.position.y = gotObject.particle.TargetObject.positionTarget.y;
-				gotObject.particle.isEaten = true;
+			this.MoveHeldParticleToHand(posHandX, posHandY, monster);
+			if (this.coeffMove >= 1) {
+				this.monsterIntro.particleGroupMonster.PlaceIntroLetter(gotObject.particle);
 				this.gotObject = null;
 				globalThis.sPutALetter++;
 				if (globalThis.sPutALetter == 20) {
