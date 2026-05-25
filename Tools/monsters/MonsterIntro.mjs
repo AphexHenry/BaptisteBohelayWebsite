@@ -220,23 +220,28 @@ MonsterIntro.prototype.UpdateLegs = function (delta, sTimerClose) {
 	var closeStuffs = this.introMode === 'eating' ? this.GetCloseFood() : [];
 
 	for (var i = 0; i < this.legs.length; i++) {
-		if (this.introMode === 'scratch' && i === this.scratchLegIndex) {
-			this.legs[i].SetState(LegStates.SCRATCH);
-		} else if (this.legs[i].state === LegStates.SCRATCH) {
-			this.legs[i].SetState(shouldRest ? LegStates.REST : LegStates.IDLE);
-		}
-
-		if (shouldRest && this.legs[i].state === LegStates.IDLE) {
-			this.legs[i].SetState(LegStates.REST);
-		} else if (!shouldRest && this.legs[i].state === LegStates.REST) {
-			this.legs[i].SetState(LegStates.IDLE);
-		}
-
-		if (this.introMode === 'eating') {
+		if(this.introMode === 'scratch') {
+			if (i === this.scratchLegIndex) {
+				this.legs[i].SetState(LegStates.SCRATCH);
+			} else {
+				this.legs[i].SetState(LegStates.REST);
+			}
+		}	
+		else if (this.introMode === 'eating') {
+			if (this.legs[i].state === LegStates.REST || this.legs[i].state === LegStates.SCRATCH) {
+				this.legs[i].SetState(LegStates.IDLE);
+			}
 			for (var j = 0; j < closeStuffs.length; j++) {
 				if (closeStuffs[j].indexLeg == i && this.legs[i].TryGrabFood(closeStuffs[j])) {
 					break;
 				}
+			}
+		}
+		else {
+			if (shouldRest && this.legs[i].state === LegStates.IDLE) {
+				this.legs[i].SetState(LegStates.REST);
+			} else if (!shouldRest && this.legs[i].state === LegStates.REST) {
+				this.legs[i].SetState(LegStates.IDLE);
 			}
 		}
 
