@@ -1,14 +1,20 @@
+/**
+ * Intro particle group: name letters, menu navigators, and the intro monster.
+ *
+ * Import named exports from this file in ES modules. For legacy pages that load
+ * classic scripts in order, use registerParticleGroupMonsterGlobals.mjs (main site).
+ */
+import { MonsterIntro } from '../monsters/MonsterIntro.mjs';
+
 var lIndexStates = 0;
-var ResumeStates =
-{
-	INIT:lIndexStates++,
-	IDLE:lIndexStates++,
-}
+export var ResumeStates = {
+	INIT: lIndexStates++,
+	IDLE: lIndexStates++,
+};
 
-sCurrentResumeSate = ResumeStates.INIT;
+export function ParticleGroupMonster(positionCenter, name) {
+	var sTools = globalThis.sTools;
 
-function ParticleGroupMonster(positionCenter, name) 
-{
 	this.width = (window.innerWidth + window.innerHeight) * 0.5 * 0.3;
 	this.cameraDistance = this.width * 3.;
 	this.positionCenter = positionCenter;
@@ -37,32 +43,57 @@ function ParticleGroupMonster(positionCenter, name)
 	this.monsterSpiralPhase = 'spiraling';
 	this.monsterSpringVel = { x: 0, y: 0, z: 0 };
 	this.monsterSpringScaleVel = { x: 0, y: 0 };
+	this.monsterIntroPhase = 'scratching';
+	this.monsterIntroScratchTimer = 0;
+	this.monsterIntroEatTimer = 0;
+	this.monsterIntroScratchDuration = 2.4;
+	this.monsterIntroMinEatDuration = 1.0;
 	this.InitFood(this.width);
 	this.InitSurface(this.width);
 }
 
 
-ParticleGroupMonster.prototype.InitSurface = function(width)
-{
-	var particleClear = new THREE.Particle( new THREE.ParticleCanvasMaterial( { color: Math.random() * 0x808080 + 0x808080, program: programStroke, opacity:0 } ) );
-	var width = window.innerWidth * 1.;
-	particleClear.scale.x = particleClear.scale.y = width;
+ParticleGroupMonster.prototype.InitSurface = function (width) {
+	var THREE = globalThis.THREE;
+	var scene = globalThis.scene;
+	var programStroke = globalThis.programStroke;
+
+	var particleClear = new THREE.Particle(
+		new THREE.ParticleCanvasMaterial({ color: Math.random() * 0x808080 + 0x808080, program: programStroke, opacity: 0 })
+	);
+	var surfaceWidth = window.innerWidth * 1.;
+	particleClear.scale.x = particleClear.scale.y = surfaceWidth;
 	particleClear.position = this.positionCenter.clone();
-	scene.add( particleClear );
+	scene.add(particleClear);
 
-	// create the mesh's material
-	this.plane = new THREE.Mesh( new THREE.PlaneGeometry( 2000, 2000, 8, 8 ), new THREE.MeshBasicMaterial( { color: 0x000000, opacity: 0.25, transparent: true, wireframe: true } ) );
-			this.plane.geometry.applyMatrix( new THREE.Matrix4().makeRotationX( Math.PI / 2 ) );
-			this.plane.visible = false;
-			this.plane.position = this.positionCenter;
-			scene.add( this.plane );
-}
+	this.plane = new THREE.Mesh(
+		new THREE.PlaneGeometry(2000, 2000, 8, 8),
+		new THREE.MeshBasicMaterial({ color: 0x000000, opacity: 0.25, transparent: true, wireframe: true })
+	);
+	this.plane.geometry.applyMatrix(new THREE.Matrix4().makeRotationX(Math.PI / 2));
+	this.plane.visible = false;
+	this.plane.position = this.positionCenter;
+	scene.add(this.plane);
+};
 
-ParticleGroupMonster.prototype.AddFood = function(aName, position, speed, size, aPositionTarget, aLetterColor, setToFinalPosition = false, isMonsterEndTarget = false)
-{
+ParticleGroupMonster.prototype.AddFood = function (
+	aName,
+	position,
+	speed,
+	size,
+	aPositionTarget,
+	aLetterColor,
+	setToFinalPosition = false,
+	isMonsterEndTarget = false
+) {
+	var THREE = globalThis.THREE;
+	var scene = globalThis.scene;
+	var ParticleLetter = globalThis.ParticleLetter;
+	var sFoodArray = globalThis.sFoodArray;
+
 	var lPosition = position.clone();
 	lPosition.z = this.positionCenter.z;
-	var particle = new ParticleLetter( lPosition, aName, aPositionTarget, size, aLetterColor);
+	var particle = new ParticleLetter(lPosition, aName, aPositionTarget, size, aLetterColor);
 
 	particle.scaleInit = particle.scale.x;
 	particle.isMovable = !setToFinalPosition;
@@ -93,8 +124,10 @@ ParticleGroupMonster.prototype.AddFood = function(aName, position, speed, size, 
 	return particle;
 }
 
-ParticleGroupMonster.prototype.AddString = function(aText, aPosition, aTextSize = 0.03, aTextColor = 0x000000)
-{
+ParticleGroupMonster.prototype.AddString = function (aText, aPosition, aTextSize = 0.03, aTextColor = 0x000000) {
+	var THREE = globalThis.THREE;
+	var myRandom = globalThis.myRandom;
+
 	var size = window.innerWidth * aTextSize;
 	var spaceInit = size * 1.9;
 	var position = aPosition.clone();
@@ -112,7 +145,7 @@ ParticleGroupMonster.prototype.AddString = function(aText, aPosition, aTextSize 
 		thisSize = textMeasured.width / etalon;
 		position.x += spaceInit * thisSize * 0.5;
 		var isFinalPosition = i % 7 == 0 || i % 5 == 0 || i % 3 == 0;
-		var isMonsterEndTarget = aText == "Baptiste Bohelay" && aText[i] == "o";
+		var isMonsterEndTarget = aText == "BAPTISTE BOHELAY" && aText[i] == "O";
 		this.AddFood(aText[i], new THREE.Vector3(this.positionCenter.x + myRandom() * width * 0.7, this.positionCenter.y + (myRandom() - 0.4) * width * 0.6, 0), new THREE.Vector3(), size, position.clone(), aTextColor, isFinalPosition, isMonsterEndTarget);	
 		position.x += spaceInit * thisSize * 0.5;
 	}
@@ -120,17 +153,17 @@ ParticleGroupMonster.prototype.AddString = function(aText, aPosition, aTextSize 
 
 ParticleGroupMonster.prototype.InitFood = function(width)
 {
-	this.AddString("Baptiste Bohelay", new THREE.Vector3(-window.innerWidth * .4, window.innerHeight * 0.3, 0));
+	this.AddString("BAPTISTE BOHELAY", new THREE.Vector3(-window.innerWidth * .4, window.innerHeight * 0.3, 0));
 	this.AddString("Developer & Designer", new THREE.Vector3(-window.innerWidth * .4, window.innerHeight * 0.3 - window.innerWidth * 0.08, 0), 0.023, 0x666666);
 }
 
-ParticleGroupMonster.prototype.MouseUp = function()
-{
-	SELECTED = false;	
-}
+ParticleGroupMonster.prototype.MouseUp = function () {
+	globalThis.SELECTED = false;
+};
 
-ParticleGroupMonster.prototype.GetMenuPositionCenter = function()
-{
+ParticleGroupMonster.prototype.GetMenuPositionCenter = function () {
+	var THREE = globalThis.THREE;
+
 	// Push z toward the camera so the particles are ~w*0.27 in front of it,
 	// matching the apparent scale they had in the old PART_CREA_LULU group
 	// (which used cameraDistance = w*0.27, vs the intro's much larger (w+h)*0.45).
@@ -138,10 +171,11 @@ ParticleGroupMonster.prototype.GetMenuPositionCenter = function()
 	return this.positionCenter.clone().addSelf(new THREE.Vector3(window.innerWidth * 0.0, window.innerHeight * 0.0, zOffset));
 }
 
-ParticleGroupMonster.prototype.SetMenuParticleVisible = function(aParticle, aVisible)
-{
+ParticleGroupMonster.prototype.SetMenuParticleVisible = function (aParticle, aVisible) {
+	var isdefined = globalThis.isdefined;
+
 	aParticle.visible = aVisible;
-	if(isdefined(aParticle.TargetObject.info))
+	if (isdefined(aParticle.TargetObject.info))
 	{
 		aParticle.TargetObject.info.visible = aVisible;
 	}
@@ -151,8 +185,10 @@ ParticleGroupMonster.prototype.SetMenuParticleVisible = function(aParticle, aVis
 	}
 }
 
-ParticleGroupMonster.prototype.AddParticle = function(aParticleObject)
-{
+ParticleGroupMonster.prototype.AddParticle = function (aParticleObject) {
+	var isdefined = globalThis.isdefined;
+	var Organigram = globalThis.Organigram;
+
 	var particle = aParticleObject.particle;
 	particle.positionTargetIntro = particle.position.clone();
 	particle.SetPosition(particle.positionTargetIntro.clone());
@@ -186,21 +222,22 @@ ParticleGroupMonster.prototype.GetParticleThatLeadTo = function(aTarget)
 	}
 }
 
-ParticleGroupMonster.prototype.UpdateMenuParticles = function(delta)
-{
-	for(var j = 0; j < this.menuParticlesToUpdate.length; j++)
-	{
-		if(isdefined(this.menuParticlesToUpdate[j].Update))
+ParticleGroupMonster.prototype.UpdateMenuParticles = function (delta) {
+	var isdefined = globalThis.isdefined;
+
+	for (var j = 0; j < this.menuParticlesToUpdate.length; j++) {
+		if (isdefined(this.menuParticlesToUpdate[j].Update))
 		{
 			this.menuParticlesToUpdate[j].Update(delta);
 		}
 	}
 }
 
-ParticleGroupMonster.prototype.UpdateNavigatorsRotation = function()
-{
-	if(!isdefined(this.NavigatorsCenter) || this.menuParticles.length === 0)
-		return;
+ParticleGroupMonster.prototype.UpdateNavigatorsRotation = function () {
+	var isdefined = globalThis.isdefined;
+	var mouse = globalThis.mouse;
+
+	if (!isdefined(this.NavigatorsCenter) || this.menuParticles.length === 0) return;
 
 	var theta = -mouse.x * this.navigatorsAngleAmplitude;
 	var phi = mouse.y * this.navigatorsVerticalAngleAmplitude;
@@ -254,9 +291,16 @@ ParticleGroupMonster.prototype.IsMenuParticle = function(aParticle)
 	return false;
 }
 
-ParticleGroupMonster.prototype.SelectMenuParticle = function(aParticle)
-{
-	if(isdefined(aParticle.TargetObject.isAutonomous))
+ParticleGroupMonster.prototype.SelectMenuParticle = function (aParticle) {
+	var isdefined = globalThis.isdefined;
+	var programStroke = globalThis.programStroke;
+	var OPACITY_INFO = globalThis.OPACITY_INFO;
+	var GoToIndex = globalThis.GoToIndex;
+	var CirclesToHtml = globalThis.CirclesToHtml;
+	var GoToURL = globalThis.GoToURL;
+	var ImageFrontCtx = globalThis.ImageFrontCtx;
+
+	if (isdefined(aParticle.TargetObject.isAutonomous))
 	{
 		aParticle.MyMouseDown();
 		this.cameraDistance = aParticle.MyCameraDistance();
@@ -281,46 +325,45 @@ ParticleGroupMonster.prototype.SelectMenuParticle = function(aParticle)
 	}
 }
 
-ParticleGroupMonster.prototype.MouseDown = function()
-{
-	if(IS_PHONE)
-		this.UpdatePointer();
+ParticleGroupMonster.prototype.MouseDown = function () {
+	var IS_PHONE = globalThis.IS_PHONE;
+	var INTERSECTED = globalThis.INTERSECTED;
 
-	if(this.menuParticles.length > 0 && INTERSECTED && this.IsMenuParticle(INTERSECTED))
-	{
+	if (IS_PHONE) this.UpdatePointer();
+
+	if (this.menuParticles.length > 0 && INTERSECTED && this.IsMenuParticle(INTERSECTED)) {
 		this.SelectMenuParticle(INTERSECTED);
 		return;
 	}
 
-	if(INTERSECTED || !sEnd)
-	{
-		sEnd = true;
-		// this.goAway = true;
-		
+	if (INTERSECTED || !globalThis.sEnd) {
+		globalThis.sEnd = true;
+
 		$('#githubButton').slideUp(300);
 		$('#contactButton').slideUp(200);
-		
-		infoDisplay.FadeOut();
-		// $('#githubButton').slideUp();
-	}
-}
 
-ParticleGroupMonster.prototype.UpdateCamera = function(delta)
-{
+		globalThis.infoDisplay.FadeOut();
+	}
+};
+
+ParticleGroupMonster.prototype.UpdateCamera = function (delta) {
+	var sTools = globalThis.sTools;
+
 	this.cameraZTimer += delta;
 	var delay = 2.;
 	var t = Math.min(1., Math.max(0., this.cameraZTimer - delay));
 	t = t * t * (3. - 2. * t);
 	this.cameraZRatio = 0.7 + 0.3 * t;
 
-	cameraTarget = sTools.ParticleGroups[sTools.ParticleGroup.PART_INTRO].positionCenter;
-	cameraPosition = this.GetCameraPosition();
+	globalThis.cameraTarget = sTools.ParticleGroups[sTools.ParticleGroup.PART_INTRO].positionCenter;
+	globalThis.cameraPosition = this.GetCameraPosition();
 	this.positionCenter.x = this.positionCenterInitial.x + t * window.innerWidth * 0.25;
 	this.positionCenter.y = this.positionCenterInitial.y - t * window.innerHeight * 0.3;
 }
 
-ParticleGroupMonster.prototype.GetCameraPosition = function()
-{
+ParticleGroupMonster.prototype.GetCameraPosition = function () {
+	var THREE = globalThis.THREE;
+
 	return new THREE.Vector3(
 		this.positionCenter.x + this.cameraDistance * 0.0,
 		this.positionCenter.y,
@@ -328,14 +371,76 @@ ParticleGroupMonster.prototype.GetCameraPosition = function()
 	);
 }
 
+ParticleGroupMonster.prototype.AreIntroLettersSettled = function () {
+	var sFoodArray = globalThis.sFoodArray;
+
+	for(var i = 0; i < sFoodArray.length; i++)
+	{
+		var target = sFoodArray[i].TargetObject.positionTarget;
+		var dx = target.x - sFoodArray[i].position.x;
+		var dy = target.y - sFoodArray[i].position.y;
+		var settleDistance = Math.sqrt(dx * dx + dy * dy);
+		if(settleDistance > sFoodArray[i].scale.x * 0.1)
+		{
+			return false;
+		}
+	}
+	return sFoodArray.length > 0;
+}
+
+ParticleGroupMonster.prototype.StartMonsterTravel = function () {
+	if(this.monsterIntroPhase === 'travelling' || this.monsterIntroPhase === 'settled')
+	{
+		return;
+	}
+
+	this.monsterIntroPhase = 'travelling';
+	this.monster.SetIntroMode('travelling');
+	this.monsterSpiralInit = false;
+	this.monsterSpiralPhase = 'spiraling';
+	this.monsterPathProgress = 0;
+	this.monsterSpringVel = { x: 0, y: 0, z: 0 };
+	this.monsterSpringScaleVel = { x: 0, y: 0 };
+}
+
+ParticleGroupMonster.prototype.UpdateMonsterIntroPhase = function (delta) {
+	if(globalThis.sEnd && this.monsterIntroPhase !== 'travelling' && this.monsterIntroPhase !== 'settled')
+	{
+		this.StartMonsterTravel();
+		return;
+	}
+
+	switch(this.monsterIntroPhase)
+	{
+		case 'scratching':
+			this.monsterIntroScratchTimer += delta;
+			if(this.monsterIntroScratchTimer >= this.monsterIntroScratchDuration)
+			{
+				this.monsterIntroPhase = 'eating';
+				this.monsterIntroEatTimer = 0;
+				this.monster.SetIntroMode('eating');
+			}
+			break;
+		case 'eating':
+			this.monsterIntroEatTimer += delta;
+			if(this.monsterIntroEatTimer >= this.monsterIntroMinEatDuration && this.AreIntroLettersSettled())
+			{
+				this.StartMonsterTravel();
+			}
+			break;
+	}
+}
+
 /*
 * update the position of the letters.
 */
-ParticleGroupMonster.prototype.UpdateFood = function(delta)
-{
+ParticleGroupMonster.prototype.UpdateFood = function (delta) {
+	var sFoodArray = globalThis.sFoodArray;
+	var sMonster = globalThis.sMonster;
+	var isdefined = globalThis.isdefined;
+
 	var lPart;
-	for(var i = 0; i < sFoodArray.length; i++)
-	{
+	for (var i = 0; i < sFoodArray.length; i++) {
 		lPart = sFoodArray[i];
 		if(lPart.isMovable && !lPart.isEaten)
 		{
@@ -363,6 +468,13 @@ ParticleGroupMonster.prototype.UpdateFood = function(delta)
 
 	var prevMonsterX = sMonster.position.x;
 	var prevMonsterY = sMonster.position.y;
+
+	this.UpdateMonsterIntroPhase(delta);
+	if(this.monsterIntroPhase !== 'travelling' && this.monsterIntroPhase !== 'settled')
+	{
+		sMonster.speed = { x: 0, y: 0 };
+		return;
+	}
 
 	if(isdefined(this.monsterEndPosition))
 	{
@@ -429,6 +541,8 @@ ParticleGroupMonster.prototype.UpdateFood = function(delta)
 				if(settleDist < window.innerWidth * 0.002 && settleSpeed < window.innerWidth * 0.02)
 				{
 					this.monsterSpiralPhase = 'settled';
+					this.monsterIntroPhase = 'settled';
+					this.monster.SetIntroMode('settled');
 					sMonster.position.x = targetX;
 					sMonster.position.y = targetY;
 					sMonster.position.z = targetZ;
@@ -480,7 +594,7 @@ ParticleGroupMonster.prototype.UpdateFood = function(delta)
 				sMonster.scale.y = this.monsterSpiralStartScaleY + (this.monsterEndScale.y * 2 - this.monsterSpiralStartScaleY) * t;
 			}
 
-			sMonsterLineWidth = 1000.11 / (sMonster.scale.x * sMonster.scale.x);
+			globalThis.sMonsterLineWidth = 1000.11 / (sMonster.scale.x * sMonster.scale.x);
 
 			if(delta > 0)
 			{
@@ -497,35 +611,34 @@ ParticleGroupMonster.prototype.UpdateFood = function(delta)
 	}
 }
 
-ParticleGroupMonster.prototype.SwitchNextState = function()
-{
-	sCurrentResumeSate = ResumeStates.IDLE;
-}
+ParticleGroupMonster.prototype.SwitchNextState = function () {
+	globalThis.sCurrentResumeSate = ResumeStates.IDLE;
+};
 
-ParticleGroupMonster.prototype.Update = function(delta)
-{
-	switch(sCurrentResumeSate)
-	{
+ParticleGroupMonster.prototype.Update = function (delta) {
+	var sFoodArray = globalThis.sFoodArray;
+	var sChallenge = globalThis.sChallenge;
+	var isdefined = globalThis.isdefined;
+	var sCurrentResumeSate = globalThis.sCurrentResumeSate;
+
+	switch (sCurrentResumeSate) {
 		case ResumeStates.INIT:
-			if(sFoodArray.length == 0)
-			{
-				sCurrentResumeSate = ResumeStates.IDLE;
+			if (sFoodArray.length == 0) {
+				globalThis.sCurrentResumeSate = ResumeStates.IDLE;
 			}
 			break;
 		case ResumeStates.IDLE:
 			this.InitChallenge(this.NextChallenge);
-			sCurrentResumeSate++;
+			globalThis.sCurrentResumeSate++;
 			break;
 	}
 
-	if(isdefined(sChallenge))
-		sChallenge.Update(delta);
+	if (isdefined(sChallenge)) sChallenge.Update(delta);
 
-	if(sMessageDisplaying)
-	{
+	if (globalThis.sMessageDisplaying) {
 		delta *= 0.05;
 	}
-	cameraManager.SetControlMode(sTools.CameraControlType.NONE);
+	globalThis.cameraManager.SetControlMode(globalThis.sTools.CameraControlType.NONE);
 	this.UpdateCamera(delta);
 
 	this.UpdateFood(delta);
@@ -558,87 +671,81 @@ ParticleGroupMonster.prototype.Terminate = function()
 	// }
 }
 
-ParticleGroupMonster.prototype.UpdateIntersectPlane = function()
-{
-	if(IS_PHONE)
-		return;
+ParticleGroupMonster.prototype.UpdateIntersectPlane = function () {
+	if (globalThis.IS_PHONE) return;
 
-	if(this.menuParticles.length > 0 || sEnd)
+	if (this.menuParticles.length > 0 || globalThis.sEnd)
 	{
 		this.UpdatePointer();
 	}
 }
 
-ParticleGroupMonster.prototype.UpdatePointer = function()
-{
-	var vector = new THREE.Vector3( mouse.x, mouse.y, 0.5 );
-	projector.unprojectVector( vector, camera );
+ParticleGroupMonster.prototype.UpdatePointer = function () {
+	var THREE = globalThis.THREE;
+	var mouse = globalThis.mouse;
+	var projector = globalThis.projector;
+	var camera = globalThis.camera;
+	var isdefined = globalThis.isdefined;
+	var programStroke = globalThis.programStroke;
+	var programFill = globalThis.programFill;
+	var OPACITY_INFO = globalThis.OPACITY_INFO;
+	var sMonster = globalThis.sMonster;
+	var sRayCircle = globalThis.sRayCircle;
 
-	var ray = new THREE.Ray( camera.position, vector.subSelf( camera.position ).normalize() );
+	var vector = new THREE.Vector3(mouse.x, mouse.y, 0.5);
+	projector.unprojectVector(vector, camera);
+
+	var ray = new THREE.Ray(camera.position, vector.subSelf(camera.position).normalize());
 
 	if(this.menuParticles.length > 0)
 	{
 		var menuIntersects = ray.intersectObjects(this.menuParticles);
-		if(menuIntersects.length > 0)
-		{
-			if(INTERSECTED != menuIntersects[0].object)
-			{
-				if(INTERSECTED && this.IsMenuParticle(INTERSECTED))
-				{
-					if(isdefined(INTERSECTED.TargetObject.isAutonomous))
-					{
-						INTERSECTED.MyMouseOff(menuIntersects[0]);
+		if (menuIntersects.length > 0) {
+			if (globalThis.INTERSECTED != menuIntersects[0].object) {
+				if (globalThis.INTERSECTED && this.IsMenuParticle(globalThis.INTERSECTED)) {
+					if (isdefined(globalThis.INTERSECTED.TargetObject.isAutonomous)) {
+						globalThis.INTERSECTED.MyMouseOff(menuIntersects[0]);
+					} else {
+						globalThis.INTERSECTED.material.program = programStroke;
 					}
-					else
-					{
-						INTERSECTED.material.program = programStroke;
-					}
-					INTERSECTED.TargetObject.info.material.opacity = OPACITY_INFO;
+					globalThis.INTERSECTED.TargetObject.info.material.opacity = OPACITY_INFO;
 				}
 
-				INTERSECTED = menuIntersects[0].object;
-				if(isdefined(INTERSECTED.TargetObject.isAutonomous))
-				{
-					INTERSECTED.MyMouseOn(menuIntersects[0]);
+				globalThis.INTERSECTED = menuIntersects[0].object;
+				if (isdefined(globalThis.INTERSECTED.TargetObject.isAutonomous)) {
+					globalThis.INTERSECTED.MyMouseOn(menuIntersects[0]);
 					return;
 				}
-				INTERSECTED.material.program = programFill;
+				globalThis.INTERSECTED.material.program = programFill;
 			}
 
-			if(isdefined(INTERSECTED.TargetObject.info))
-			{
-				INTERSECTED.TargetObject.info.material.opacity += (1. - INTERSECTED.TargetObject.info.material.opacity) * 2. * 0.02;
+			if (isdefined(globalThis.INTERSECTED.TargetObject.info)) {
+				globalThis.INTERSECTED.TargetObject.info.material.opacity +=
+					(1. - globalThis.INTERSECTED.TargetObject.info.material.opacity) * 2. * 0.02;
 			}
 			return;
 		}
 
-		if(INTERSECTED && this.IsMenuParticle(INTERSECTED))
-		{
-			if(isdefined(INTERSECTED.TargetObject.isAutonomous))
-			{
-				INTERSECTED.MyMouseOff(menuIntersects[0]);
+		if (globalThis.INTERSECTED && this.IsMenuParticle(globalThis.INTERSECTED)) {
+			if (isdefined(globalThis.INTERSECTED.TargetObject.isAutonomous)) {
+				globalThis.INTERSECTED.MyMouseOff(menuIntersects[0]);
+			} else {
+				globalThis.INTERSECTED.material.program = programStroke;
 			}
-			else
-			{
-				INTERSECTED.material.program = programStroke;
-			}
-			INTERSECTED.TargetObject.info.material.opacity = OPACITY_INFO;
-			INTERSECTED = null;
+			globalThis.INTERSECTED.TargetObject.info.material.opacity = OPACITY_INFO;
+			globalThis.INTERSECTED = null;
 		}
 	}
 
-	var intersects = ray.intersectObject( sMonster );
+	var intersects = ray.intersectObject(sMonster);
 
-	if ( intersects.length > 0 ) 
-	{
-			INTERSECTED = intersects[ 0 ].object;
-			if(intersects[0].distance < INTERSECTED.boundRadiusScale * sRayCircle)
-			{
-				// sMonster.material.program = monsterTouched;
-				this.monster.setMouseOverDisplay();
-				return;
-			}
-	} 
+	if (intersects.length > 0) {
+		globalThis.INTERSECTED = intersects[0].object;
+		if (intersects[0].distance < globalThis.INTERSECTED.boundRadiusScale * sRayCircle) {
+			this.monster.setMouseOverDisplay();
+			return;
+		}
+	}
 	this.monster.setNormalDisplay();
-}
+};
 

@@ -21,6 +21,12 @@ var sMonster = null;
 var sFoodArray = [];
 var sLegArray = [];
 var sChallenge;
+var IntroLegStates = {
+	IDLE: 0,
+	GRABBING_FOOD: 1,
+	PLACING_FOOD: 2,
+};
+globalThis.IntroLegStates = IntroLegStates;
 
 var isSizeMessageDisplayed = false;
 function EvolutionParseObject(object)
@@ -30,7 +36,7 @@ function EvolutionParseObject(object)
 
 function AddLeg()
 {
-	sLegArray.push({angle:0, random:myRandom(), state:0, posHandCurrent:new THREE.Vector2(), posHandTarget:new THREE.Vector2(), posHandInit:new THREE.Vector2(), coeffMove: 1, gotObject:null, speed:0.9 + Math.random() * 0.2});
+	sLegArray.push({angle:0, random:myRandom(), state:IntroLegStates.IDLE, posHandCurrent:new THREE.Vector2(), posHandTarget:new THREE.Vector2(), posHandInit:new THREE.Vector2(), coeffMove: 1, gotObject:null, speed:0.9 + Math.random() * 0.2});
 	for(var i = 0; i < sLegArray.length; i++)
 	{
 		sLegArray[i].angle = i * Math.PI * 2. / sLegArray.length;
