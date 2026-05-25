@@ -74,7 +74,7 @@ MonsterIntroLeg.prototype.Update = function (delta, amp, monster) {
 	var posElbowX = posShoulderX + size * (COS * 0.5 + amp * Math.cos(sTime2 * 0.01 + decay * 1.5) * SIN);
 	var posElbowY = posShoulderY + size * (SIN * size * 0.5 + amp * Math.cos(sTime2 * 0.01 + decay * 1.5) * -COS);
 
-	this.coeffMove += 0.1 * this.speed * delta;
+	this.coeffMove += 0.2 * this.speed * delta;
 	this.coeffMove = Math.min(1.000001, this.coeffMove);
 
 	switch (this.state) {

@@ -112,8 +112,8 @@ ParticleGroupMonster.prototype.AddFood = function (
 		// Apply the same scale transform to get the actual world position of the glyph.
 		// scale.x = aSize, scale.y = -aSize, so:  Δx = -1*aSize (left),  Δy = 1*(-aSize) (down).
 		this.monsterEndPosition.x += -1 * particle.scale.x;
-		this.monsterEndPosition.y += 0.5 * particle.scale.y;
-		this.monsterEndScale = new THREE.Vector3(particle.scale.x, Math.abs(particle.scale.y), particle.scale.z);
+		this.monsterEndPosition.y += 0 * particle.scale.y;
+		this.monsterEndScale = new THREE.Vector3(particle.scale.x * 4, Math.abs(particle.scale.y) * 4, particle.scale.z * 2);
 	}
 	
 	if (!isMonsterEndTarget) {
@@ -122,6 +122,23 @@ ParticleGroupMonster.prototype.AddFood = function (
 	}
 	
 	return particle;
+}
+
+/** Random cyclic permutation (Sattolo): every item moves, no fixed points when length > 1. */
+function permuteVector3Targets(targets) {
+	var n = targets.length;
+	if (n <= 1) {
+		return targets.map(function (t) { return t.clone(); });
+	}
+	var permuted = targets.map(function (t) { return t.clone(); });
+	for (var i = n - 1; i > 0; i--) {
+		// myRandom() is in [-1, 1]; use Math.random() for a valid index in [0, i - 1].
+		var j = Math.floor(Math.random() * i);
+		var tmp = permuted[i];
+		permuted[i] = permuted[j];
+		permuted[j] = tmp;
+	}
+	return permuted;
 }
 
 ParticleGroupMonster.prototype.AddString = function (aText, aPosition, aTextSize = 0.03, aTextColor = 0x000000) {
@@ -139,15 +156,59 @@ ParticleGroupMonster.prototype.AddString = function (aText, aPosition, aTextSize
         context.textAlign = "left";
     var etalon = context.measureText('a').width;
 	var thisSize = 0;
-	for(var i = 0; i < aText.length; i++)
-	{
-		var textMeasured = context.measureText(aText[i]);
+	var letterSpecs = [];
+
+	for (var i = 0; i < aText.length; i++) {
+		var char = aText[i];
+		var textMeasured = context.measureText(char);
 		thisSize = textMeasured.width / etalon;
 		position.x += spaceInit * thisSize * 0.5;
-		var isFinalPosition = i % 7 == 0 || i % 5 == 0 || i % 4 == 0;
-		var isMonsterEndTarget = aText == "BAPTISTE BOHELAY" && aText[i] == "O";
-		this.AddFood(aText[i], new THREE.Vector3(this.positionCenter.x + myRandom() * width * 0.5 + width * 0.3, this.positionCenter.y + (myRandom() - 0.5) * width * 0.3, 0), new THREE.Vector3(), size, position.clone(), aTextColor, isFinalPosition, isMonsterEndTarget);	
+		if (char !== ' ') {
+			var isFinalPosition = i % 7 == 0 || i % 5 == 0 || i % 4 == 0;
+			var isMonsterEndTarget = aText == "BAPTISTE BOHELAY" && char == "O";
+			letterSpecs.push({
+				char: char,
+				positionTarget: position.clone(),
+				isFinalPosition: isFinalPosition,
+				isMonsterEndTarget: isMonsterEndTarget,
+			});
+		}
 		position.x += spaceInit * thisSize * 0.5;
+	}
+
+	var movableTargets = [];
+	for (var j = 0; j < letterSpecs.length; j++) {
+		if (!letterSpecs[j].isFinalPosition) {
+			movableTargets.push(letterSpecs[j].positionTarget);
+		}
+	}
+	var permutedMovableTargets = permuteVector3Targets(movableTargets);
+	var movableIndex = 0;
+
+	for (var k = 0; k < letterSpecs.length; k++) {
+		var spec = letterSpecs[k];
+		var startPosition;
+		if (spec.isFinalPosition) {
+			startPosition = spec.positionTarget.clone();
+		} else if (movableTargets.length <= 1) {
+			startPosition = new THREE.Vector3(
+				this.positionCenter.x + myRandom() * width * 0.5 + width * 0.3,
+				this.positionCenter.y + (myRandom() - 0.5) * width * 0.3,
+				0
+			);
+		} else {
+			startPosition = permutedMovableTargets[movableIndex++].clone();
+		}
+		this.AddFood(
+			spec.char,
+			startPosition,
+			new THREE.Vector3(),
+			size,
+			spec.positionTarget,
+			aTextColor,
+			spec.isFinalPosition,
+			spec.isMonsterEndTarget
+		);
 	}
 }
 
@@ -443,140 +504,145 @@ ParticleGroupMonster.prototype.UpdateFood = function (delta) {
 	var prevMonsterY = sMonster.position.y;
 
 	this.UpdateMonsterIntroPhase(delta);
-	if(this.monsterIntroPhase !== 'travelling' && this.monsterIntroPhase !== 'settled')
-	{
-		sMonster.speed = { x: 0, y: 0 };
-		return;
-	}
+	// if(this.monsterIntroPhase !== 'travelling' && this.monsterIntroPhase !== 'settled')
+	// {
+	// 	sMonster.speed = { x: 0, y: 0 };
+	// 	return;
+	// }
 
 	if(isdefined(this.monsterEndPosition))
 	{
-		if(!this.monsterSpiralInit)
-		{
-			var spiralDx = sMonster.position.x - this.monsterEndPosition.x;
-			var spiralDy = sMonster.position.y - this.monsterEndPosition.y;
-			this.monsterSpiralRadius = Math.sqrt(spiralDx * spiralDx + spiralDy * spiralDy);
-			this.monsterSpiralAngle = Math.atan2(spiralDy, spiralDx);
-			this.monsterSpiralTurns = 2.;
-			this.monsterSpiralStartZ = sMonster.position.z;
-			this.monsterSpiralStartScaleX = sMonster.scale.x;
-			this.monsterSpiralStartScaleY = sMonster.scale.y;
-			this.monsterPathProgress = 0;
-			this.monsterSpiralStopT = 1.;
-			var dTheta = this.monsterSpiralTurns * Math.PI * 2;
-			for(var n = 0; n < 20; n++)
-			{
-				var targetTheta = Math.PI / 2 + n * Math.PI * 2;
-				var tStop = (targetTheta - this.monsterSpiralAngle) / dTheta;
-				if(tStop > 0.01 && tStop <= 1.)
-				{
-					this.monsterSpiralStopT = tStop;
-					break;
-				}
-			}
-			this.monsterSpiralInit = true;
-		}
 
-		if(this.monsterSpiralPhase === 'springing' || this.monsterSpiralPhase === 'settled')
-		{
-			if(this.monsterSpiralPhase === 'springing')
-			{
-				var springK = 70.;
-				var springD = 11.;
-				var scaleSpringK = 55.;
-				var scaleSpringD = 9.;
-				var targetX = this.monsterEndPosition.x;
-				var targetY = this.monsterEndPosition.y;
-				var targetZ = this.monsterEndPosition.z;
-				var targetScaleX = isdefined(this.monsterEndScale) ? this.monsterEndScale.x * 2 : sMonster.scale.x;
-				var targetScaleY = isdefined(this.monsterEndScale) ? this.monsterEndScale.y * 2 : sMonster.scale.y;
+		sMonster.position = this.monsterEndPosition.clone();
+		sMonster.scale = this.monsterEndScale.clone();
+		// if(!this.monsterSpiralInit)
+		// {
+		// 	var spiralDx = sMonster.position.x - this.monsterEndPosition.x;
+		// 	var spiralDy = sMonster.position.y - this.monsterEndPosition.y;
+		// 	this.monsterSpiralRadius = Math.sqrt(spiralDx * spiralDx + spiralDy * spiralDy);
+		// 	this.monsterSpiralAngle = Math.atan2(spiralDy, spiralDx);
+		// 	this.monsterSpiralTurns = 2.;
+		// 	this.monsterSpiralStartZ = sMonster.position.z;
+		// 	this.monsterSpiralStartScaleX = sMonster.scale.x;
+		// 	this.monsterSpiralStartScaleY = sMonster.scale.y;
+		// 	this.monsterPathProgress = 0;
+		// 	this.monsterSpiralStopT = 1.;
+		// 	var dTheta = this.monsterSpiralTurns * Math.PI * 2;
+		// 	for(var n = 0; n < 20; n++)
+		// 	{
+		// 		var targetTheta = Math.PI / 2 + n * Math.PI * 2;
+		// 		var tStop = (targetTheta - this.monsterSpiralAngle) / dTheta;
+		// 		if(tStop > 0.01 && tStop <= 1.)
+		// 		{
+		// 			this.monsterSpiralStopT = tStop;
+		// 			break;
+		// 		}
+		// 	}
+		// 	this.monsterSpiralInit = true;
+		// }
 
-				this.monsterSpringVel.x += (springK * (targetX - sMonster.position.x) - springD * this.monsterSpringVel.x) * delta;
-				this.monsterSpringVel.y += (springK * (targetY - sMonster.position.y) - springD * this.monsterSpringVel.y) * delta;
-				this.monsterSpringVel.z += (springK * (targetZ - sMonster.position.z) - springD * this.monsterSpringVel.z) * delta;
-				sMonster.position.x += this.monsterSpringVel.x * delta;
-				sMonster.position.y += this.monsterSpringVel.y * delta;
-				sMonster.position.z += this.monsterSpringVel.z * delta;
+		// if(this.monsterSpiralPhase === 'springing' || this.monsterSpiralPhase === 'settled')
+		// {
+		// 	if(this.monsterSpiralPhase === 'springing')
+		// 	{
+		// 		var springK = 70.;
+		// 		var springD = 11.;
+		// 		var scaleSpringK = 55.;
+		// 		var scaleSpringD = 9.;
+		// 		var targetX = this.monsterEndPosition.x;
+		// 		var targetY = this.monsterEndPosition.y;
+		// 		var targetZ = this.monsterEndPosition.z;
+		// 		var targetScaleX = isdefined(this.monsterEndScale) ? this.monsterEndScale.x * 2 : sMonster.scale.x;
+		// 		var targetScaleY = isdefined(this.monsterEndScale) ? this.monsterEndScale.y * 2 : sMonster.scale.y;
 
-				this.monsterSpringScaleVel.x += (scaleSpringK * (targetScaleX - sMonster.scale.x) - scaleSpringD * this.monsterSpringScaleVel.x) * delta;
-				this.monsterSpringScaleVel.y += (scaleSpringK * (targetScaleY - sMonster.scale.y) - scaleSpringD * this.monsterSpringScaleVel.y) * delta;
-				sMonster.scale.x += this.monsterSpringScaleVel.x * delta;
-				sMonster.scale.y += this.monsterSpringScaleVel.y * delta;
+		// 		this.monsterSpringVel.x += (springK * (targetX - sMonster.position.x) - springD * this.monsterSpringVel.x) * delta;
+		// 		this.monsterSpringVel.y += (springK * (targetY - sMonster.position.y) - springD * this.monsterSpringVel.y) * delta;
+		// 		this.monsterSpringVel.z += (springK * (targetZ - sMonster.position.z) - springD * this.monsterSpringVel.z) * delta;
+		// 		sMonster.position.x += this.monsterSpringVel.x * delta;
+		// 		sMonster.position.y += this.monsterSpringVel.y * delta;
+		// 		sMonster.position.z += this.monsterSpringVel.z * delta;
 
-				var settleDist = Math.sqrt(
-					(targetX - sMonster.position.x) * (targetX - sMonster.position.x) +
-					(targetY - sMonster.position.y) * (targetY - sMonster.position.y)
-				);
-				var settleSpeed = Math.sqrt(
-					this.monsterSpringVel.x * this.monsterSpringVel.x +
-					this.monsterSpringVel.y * this.monsterSpringVel.y
-				);
-				if(settleDist < window.innerWidth * 0.002 && settleSpeed < window.innerWidth * 0.02)
-				{
-					this.monsterSpiralPhase = 'settled';
-					this.monsterIntroPhase = 'settled';
-					this.monster.SetIntroMode('settled');
-					sMonster.position.x = targetX;
-					sMonster.position.y = targetY;
-					sMonster.position.z = targetZ;
-					sMonster.scale.x = targetScaleX;
-					sMonster.scale.y = targetScaleY;
-					this.monsterSpringVel = { x: 0, y: 0, z: 0 };
-					this.monsterSpringScaleVel = { x: 0, y: 0 };
-				}
-			}
+		// 		this.monsterSpringScaleVel.x += (scaleSpringK * (targetScaleX - sMonster.scale.x) - scaleSpringD * this.monsterSpringScaleVel.x) * delta;
+		// 		this.monsterSpringScaleVel.y += (scaleSpringK * (targetScaleY - sMonster.scale.y) - scaleSpringD * this.monsterSpringScaleVel.y) * delta;
+		// 		sMonster.scale.x += this.monsterSpringScaleVel.x * delta;
+		// 		sMonster.scale.y += this.monsterSpringScaleVel.y * delta;
 
-			if(delta > 0)
-			{
-				sMonster.speed = {
-					x: (sMonster.position.x - prevMonsterX) / delta,
-					y: (sMonster.position.y - prevMonsterY) / delta
-				};
-			}
-		}
-		else
-		{
-			var PHI = (1 + Math.sqrt(5)) * 0.5;
-			this.monsterPathProgress = Math.min(this.monsterSpiralStopT, this.monsterPathProgress + delta * 0.12 * (1 + this.monsterPathProgress));
-			var t = this.monsterPathProgress;
-			var theta = this.monsterSpiralAngle + t * this.monsterSpiralTurns * Math.PI * 2;
-			var radius = this.monsterSpiralRadius * Math.pow(PHI, -t * this.monsterSpiralTurns * 4);
+		// 		var settleDist = Math.sqrt(
+		// 			(targetX - sMonster.position.x) * (targetX - sMonster.position.x) +
+		// 			(targetY - sMonster.position.y) * (targetY - sMonster.position.y)
+		// 		);
+		// 		var settleSpeed = Math.sqrt(
+		// 			this.monsterSpringVel.x * this.monsterSpringVel.x +
+		// 			this.monsterSpringVel.y * this.monsterSpringVel.y
+		// 		);
+		// 		if(settleDist < window.innerWidth * 0.002 && settleSpeed < window.innerWidth * 0.02)
+		// 		{
+		// 			this.monsterSpiralPhase = 'settled';
+		// 			this.monsterIntroPhase = 'settled';
+		// 			this.monster.SetIntroMode('settled');
+		// 			sMonster.position.x = targetX;
+		// 			sMonster.position.y = targetY;
+		// 			sMonster.position.z = targetZ;
+		// 			sMonster.scale.x = targetScaleX;
+		// 			sMonster.scale.y = targetScaleY;
+		// 			this.monsterSpringVel = { x: 0, y: 0, z: 0 };
+		// 			this.monsterSpringScaleVel = { x: 0, y: 0 };
+		// 		}
+		// 	}
 
-			if(t >= this.monsterSpiralStopT)
-			{
-				sMonster.position.x = this.monsterEndPosition.x;
-				sMonster.position.y = this.monsterEndPosition.y + 0.7 * radius;
-				this.monsterSpiralPhase = 'springing';
-				this.monsterSpringVel = {
-					x: delta > 0 ? (sMonster.position.x - prevMonsterX) / delta : 0,
-					y: delta > 0 ? (sMonster.position.y - prevMonsterY) / delta : 0,
-					z: 0
-				};
-				this.monsterSpringScaleVel = { x: 0, y: 0 };
-			}
-			else
-			{
-				sMonster.position.x = this.monsterEndPosition.x + radius * Math.cos(theta);
-				sMonster.position.y = this.monsterEndPosition.y + 0.7 * radius * Math.sin(theta);
-			}
-			sMonster.position.z = this.monsterSpiralStartZ + (this.monsterEndPosition.z - this.monsterSpiralStartZ) * t;
+		
 
-			if(isdefined(this.monsterEndScale))
-			{
-				sMonster.scale.x = this.monsterSpiralStartScaleX + (this.monsterEndScale.x * 2 - this.monsterSpiralStartScaleX) * t;
-				sMonster.scale.y = this.monsterSpiralStartScaleY + (this.monsterEndScale.y * 2 - this.monsterSpiralStartScaleY) * t;
-			}
+		// 	if(delta > 0)
+		// 	{
+		// 		sMonster.speed = {
+		// 			x: (sMonster.position.x - prevMonsterX) / delta,
+		// 			y: (sMonster.position.y - prevMonsterY) / delta
+		// 		};
+		// 	}
+		// }
+		// else
+		// {
+		// 	var PHI = (1 + Math.sqrt(5)) * 0.5;
+		// 	this.monsterPathProgress = Math.min(this.monsterSpiralStopT, this.monsterPathProgress + delta * 0.12 * (1 + this.monsterPathProgress));
+		// 	var t = this.monsterPathProgress;
+		// 	var theta = this.monsterSpiralAngle + t * this.monsterSpiralTurns * Math.PI * 2;
+		// 	var radius = this.monsterSpiralRadius * Math.pow(PHI, -t * this.monsterSpiralTurns * 4);
 
-			globalThis.sMonsterLineWidth = 1000.11 / (sMonster.scale.x * sMonster.scale.x);
+		// 	if(t >= this.monsterSpiralStopT)
+		// 	{
+		// 		sMonster.position.x = this.monsterEndPosition.x;
+		// 		sMonster.position.y = this.monsterEndPosition.y + 0.7 * radius;
+		// 		this.monsterSpiralPhase = 'springing';
+		// 		this.monsterSpringVel = {
+		// 			x: delta > 0 ? (sMonster.position.x - prevMonsterX) / delta : 0,
+		// 			y: delta > 0 ? (sMonster.position.y - prevMonsterY) / delta : 0,
+		// 			z: 0
+		// 		};
+		// 		this.monsterSpringScaleVel = { x: 0, y: 0 };
+		// 	}
+		// 	else
+		// 	{
+		// 		sMonster.position.x = this.monsterEndPosition.x + radius * Math.cos(theta);
+		// 		sMonster.position.y = this.monsterEndPosition.y + 0.7 * radius * Math.sin(theta);
+		// 	}
+		// 	sMonster.position.z = this.monsterSpiralStartZ + (this.monsterEndPosition.z - this.monsterSpiralStartZ) * t;
 
-			if(delta > 0)
-			{
-				sMonster.speed = {
-					x: (sMonster.position.x - prevMonsterX) / delta,
-					y: (sMonster.position.y - prevMonsterY) / delta
-				};
-			}
-		}
+		// 	if(isdefined(this.monsterEndScale))
+		// 	{
+		// 		sMonster.scale.x = this.monsterSpiralStartScaleX + (this.monsterEndScale.x * 2 - this.monsterSpiralStartScaleX) * t;
+		// 		sMonster.scale.y = this.monsterSpiralStartScaleY + (this.monsterEndScale.y * 2 - this.monsterSpiralStartScaleY) * t;
+		// 	}
+
+		// 	globalThis.sMonsterLineWidth = 1000.11 / (sMonster.scale.x * sMonster.scale.x);
+
+		// 	if(delta > 0)
+		// 	{
+		// 		sMonster.speed = {
+		// 			x: (sMonster.position.x - prevMonsterX) / delta,
+		// 			y: (sMonster.position.y - prevMonsterY) / delta
+		// 		};
+		// 	}
+		// }
 	}
 	else
 	{
