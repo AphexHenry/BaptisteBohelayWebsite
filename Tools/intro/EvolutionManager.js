@@ -13,12 +13,8 @@ var sTime1 = 0, sTime2 = 0;
 var sSizeLegs = 0;
 var sSizeLegsTarget = 0;
 var sSizeLegsMax = 1.5;
-var sRayCircle = 0.3;
 var sMovementMonster = 0.;
 var sAttractionMonster = 0.;
-var sRayCircleTarget = sRayCircle;
-var sMonster = null;
-var sFoodArray = [];
 var sLegArray = [];
 var sChallenge;
 var IntroLegStates = {

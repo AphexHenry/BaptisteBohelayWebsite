@@ -8,7 +8,8 @@ export var LegStates = {
 
 globalThis.IntroLegStates = LegStates;
 
-export function MonsterIntroLeg() {
+export function MonsterIntroLeg(monsterIntro) {
+	this.monsterIntro = monsterIntro;
 	var THREE = globalThis.THREE;
 	var myRandom = globalThis.myRandom;
 
@@ -51,10 +52,11 @@ MonsterIntroLeg.prototype.TryGrabFood = function (closeStuff) {
 	return true;
 };
 
-MonsterIntroLeg.prototype.Update = function (delta, amp, monster) {
-	var sTime1 = globalThis.sTime1;
-	var sTime2 = globalThis.sTime2;
-	var sRayCircle = globalThis.sRayCircle;
+MonsterIntroLeg.prototype.Update = function (delta, amp) {
+	var lTime1 = globalThis.sTime1;
+	var lTime2 = globalThis.sTime2;
+	var monster = this.monsterIntro.particle;
+	var lRayCircle = this.monsterIntro.rayCircle;
 	var decay = this.random;
 	var angle = this.angle;
 	var gotObject = this.gotObject;
@@ -66,28 +68,28 @@ MonsterIntroLeg.prototype.Update = function (delta, amp, monster) {
 		return null;
 	}
 
-	var size = Math.max(sRayCircle, this.size) * 0.69;
+	var size = Math.max(lRayCircle, this.size) * 0.69;
 	var COS = Math.cos(angle);
 	var SIN = Math.sin(angle);
-	var posShoulderX = COS * sRayCircle;
-	var posShoulderY = SIN * sRayCircle;
-	var posElbowX = posShoulderX + size * (COS * 0.5 + amp * Math.cos(sTime2 * 0.01 + decay * 1.5) * SIN);
-	var posElbowY = posShoulderY + size * (SIN * size * 0.5 + amp * Math.cos(sTime2 * 0.01 + decay * 1.5) * -COS);
+	var posShoulderX = COS * lRayCircle;
+	var posShoulderY = SIN * lRayCircle;
+	var posElbowX = posShoulderX + size * (COS * 0.5 + amp * Math.cos(lTime2 * 0.01 + decay * 1.5) * SIN);
+	var posElbowY = posShoulderY + size * (SIN * size * 0.5 + amp * Math.cos(lTime2 * 0.01 + decay * 1.5) * -COS);
 
 	this.coeffMove += 0.2 * this.speed * delta;
 	this.coeffMove = Math.min(1.000001, this.coeffMove);
 
 	switch (this.state) {
 		case LegStates.IDLE:
-			this.posHandTarget.x = posShoulderX + size * (COS * size + 1.5 * amp * Math.sin(sTime1 + decay * 2.) * SIN);
-			this.posHandTarget.y = posShoulderY + size * (SIN * size + 1.5 * amp * Math.sin(sTime1 + decay * 2.) * COS);
+			this.posHandTarget.x = posShoulderX + size * (COS * size + 1.5 * amp * Math.sin(lTime1 + decay * 2.) * SIN);
+			this.posHandTarget.y = posShoulderY + size * (SIN * size + 1.5 * amp * Math.sin(lTime1 + decay * 2.) * COS);
 			break;
 		case LegStates.SCRATCH:
 			this.scratchCoeff += delta;
 			this.scratchCoeff = Math.min(1, this.scratchCoeff);
 			var rub = Math.sin(globalThis.sMonsterScratchTimer * 2.);
-			this.posHandTarget.x = sRayCircle * Math.cos(0.4 + rub * 0.2) * this.scratchCoeff + (1 - this.scratchCoeff) * (posElbowX + sRayCircle * 0.5);
-			this.posHandTarget.y = sRayCircle * Math.sin(0.4 + rub * 0.2) * this.scratchCoeff + (1 - this.scratchCoeff) * (posElbowY + sRayCircle * Math.sin(this.scratchCoeff * Math.PI));
+			this.posHandTarget.x = lRayCircle * Math.cos(0.4 + rub * 0.2) * this.scratchCoeff + (1 - this.scratchCoeff) * (posElbowX + lRayCircle * 0.5);
+			this.posHandTarget.y = lRayCircle * Math.sin(0.4 + rub * 0.2) * this.scratchCoeff + (1 - this.scratchCoeff) * (posElbowY + lRayCircle * Math.sin(this.scratchCoeff * Math.PI));
 			break;
 		case LegStates.GRABBING_FOOD:
 			this.posHandTarget.x = (gotObject.particle.position.x - monster.position.x) / monster.scale.x;

@@ -33,8 +33,9 @@ export function ParticleGroupMonster(positionCenter, name) {
 	this.navigatorsVerticalAngleAmplitude = Math.PI / 16;
 	// this.particleRotate = new THREE.Vector3(0, 0, 0);
 	this.particleRotateSpeed = new THREE.Vector3(0, 0, 0);
+	this.foodArray = [];
 
-	this.monster = new MonsterIntro(positionCenter, this.width);
+	this.monster = new MonsterIntro(positionCenter, this.width, this);
 	this.monsterEndPosition = null;
 	this.monsterEndScale = null;
 	this.monsterPathProgress = 0;
@@ -89,7 +90,6 @@ ParticleGroupMonster.prototype.AddFood = function (
 	var THREE = globalThis.THREE;
 	var scene = globalThis.scene;
 	var ParticleLetter = globalThis.ParticleLetter;
-	var sFoodArray = globalThis.sFoodArray;
 
 	var lPosition = position.clone();
 	lPosition.z = this.positionCenter.z;
@@ -118,7 +118,7 @@ ParticleGroupMonster.prototype.AddFood = function (
 	
 	if (!isMonsterEndTarget) {
 		scene.add(particle);
-		sFoodArray.push(particle);	
+		this.foodArray.push(particle);
 	}
 	
 	return particle;
@@ -433,20 +433,16 @@ ParticleGroupMonster.prototype.GetCameraPosition = function () {
 }
 
 ParticleGroupMonster.prototype.AreIntroLettersSettled = function () {
-	var sFoodArray = globalThis.sFoodArray;
-
-	for(var i = 0; i < sFoodArray.length; i++)
-	{
-		var target = sFoodArray[i].TargetObject.positionTarget;
-		var dx = target.x - sFoodArray[i].position.x;
-		var dy = target.y - sFoodArray[i].position.y;
+	for (var i = 0; i < this.foodArray.length; i++) {
+		var target = this.foodArray[i].TargetObject.positionTarget;
+		var dx = target.x - this.foodArray[i].position.x;
+		var dy = target.y - this.foodArray[i].position.y;
 		var settleDistance = Math.sqrt(dx * dx + dy * dy);
-		if(settleDistance > sFoodArray[i].scale.x * 0.1)
-		{
+		if (settleDistance > this.foodArray[i].scale.x * 0.1) {
 			return false;
 		}
 	}
-	return sFoodArray.length > 0;
+	return this.foodArray.length > 0;
 }
 
 ParticleGroupMonster.prototype.StartMonsterTravel = function () {
@@ -496,12 +492,11 @@ ParticleGroupMonster.prototype.UpdateMonsterIntroPhase = function (delta) {
 * update the position of the letters.
 */
 ParticleGroupMonster.prototype.UpdateFood = function (delta) {
-	var sFoodArray = globalThis.sFoodArray;
-	var sMonster = globalThis.sMonster;
+	var monsterParticle = this.monster.particle;
 	var isdefined = globalThis.isdefined;
 
-	var prevMonsterX = sMonster.position.x;
-	var prevMonsterY = sMonster.position.y;
+	var prevMonsterX = monsterParticle.position.x;
+	var prevMonsterY = monsterParticle.position.y;
 
 	this.UpdateMonsterIntroPhase(delta);
 	// if(this.monsterIntroPhase !== 'travelling' && this.monsterIntroPhase !== 'settled')
@@ -513,8 +508,8 @@ ParticleGroupMonster.prototype.UpdateFood = function (delta) {
 	if(isdefined(this.monsterEndPosition))
 	{
 
-		sMonster.position = this.monsterEndPosition.clone();
-		sMonster.scale = this.monsterEndScale.clone();
+		monsterParticle.position = this.monsterEndPosition.clone();
+		monsterParticle.scale = this.monsterEndScale.clone();
 		// if(!this.monsterSpiralInit)
 		// {
 		// 	var spiralDx = sMonster.position.x - this.monsterEndPosition.x;
@@ -646,7 +641,7 @@ ParticleGroupMonster.prototype.UpdateFood = function (delta) {
 	}
 	else
 	{
-		sMonster.speed = { x: 0, y: 0 };
+		monsterParticle.speed = { x: 0, y: 0 };
 	}
 }
 
@@ -655,14 +650,13 @@ ParticleGroupMonster.prototype.SwitchNextState = function () {
 };
 
 ParticleGroupMonster.prototype.Update = function (delta) {
-	var sFoodArray = globalThis.sFoodArray;
 	var sChallenge = globalThis.sChallenge;
 	var isdefined = globalThis.isdefined;
 	var sCurrentResumeSate = globalThis.sCurrentResumeSate;
 
 	switch (sCurrentResumeSate) {
 		case ResumeStates.INIT:
-			if (sFoodArray.length == 0) {
+			if (this.foodArray.length == 0) {
 				globalThis.sCurrentResumeSate = ResumeStates.IDLE;
 			}
 			break;
@@ -704,9 +698,9 @@ ParticleGroupMonster.prototype.Init = function()
 };
 ParticleGroupMonster.prototype.Terminate = function()
 {
-	// for(var i = 0; i < sFoodArray.length; i++)
+	// for(var i = 0; i < this.foodArray.length; i++)
 	// {
-	// 	scene.remove(sFoodArray[i]);
+	// 	scene.remove(this.foodArray[i]);
 	// }
 }
 
@@ -728,8 +722,8 @@ ParticleGroupMonster.prototype.UpdatePointer = function () {
 	var programStroke = globalThis.programStroke;
 	var programFill = globalThis.programFill;
 	var OPACITY_INFO = globalThis.OPACITY_INFO;
-	var sMonster = globalThis.sMonster;
-	var sRayCircle = globalThis.sRayCircle;
+	var monsterParticle = this.monster.particle;
+	var sRayCircle = this.monster.rayCircle;
 
 	var vector = new THREE.Vector3(mouse.x, mouse.y, 0.5);
 	projector.unprojectVector(vector, camera);
@@ -776,7 +770,7 @@ ParticleGroupMonster.prototype.UpdatePointer = function () {
 		}
 	}
 
-	var intersects = ray.intersectObject(sMonster);
+	var intersects = ray.intersectObject(monsterParticle);
 
 	if (intersects.length > 0) {
 		globalThis.INTERSECTED = intersects[0].object;

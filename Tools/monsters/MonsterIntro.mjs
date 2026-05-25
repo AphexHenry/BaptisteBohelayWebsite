@@ -9,6 +9,7 @@ import { LegStates, MonsterIntroLeg } from './MonsterIntroLeg.mjs';
 export { LegStates } from './MonsterIntroLeg.mjs';
 
 const PI2 = -Math.PI * 1.99;
+const DEFAULT_RAY_CIRCLE = 0.3;
 
 function ensureMonsterIntroState() {
 	if (globalThis.sPutALetter == null) globalThis.sPutALetter = 0;
@@ -30,20 +31,19 @@ export var MonsterStates = {
 	EAT_IN: lIndexStates++,
 };
 
-function drawHair(context, count) {
+function drawHair(context, count, particle, rayCircle) {
 	var random = sfc32(1, 3, 4, 5);
-	var sMonster = globalThis.sMonster;
 	var sGeneralTimer = globalThis.sGeneralTimer;
-	var sRayCircle = globalThis.sRayCircle;
-	var lAngleSpeed = Math.atan2(sMonster.speed.y, sMonster.speed.x);
+	var speed = particle.speed || { x: 0, y: 0 };
+	var lAngleSpeed = Math.atan2(speed.y, speed.x);
 	var lAmplitudeFromSpeed = Math.min(
 		0.3,
-		0.5 * Math.sqrt(sMonster.speed.y * sMonster.speed.y + sMonster.speed.x * sMonster.speed.x) / window.innerWidth
+		0.5 * Math.sqrt(speed.y * speed.y + speed.x * speed.x) / window.innerWidth
 	);
 	for (var i = 0; i < count; i++) {
 		context.beginPath();
 
-		var lRadiusNorm = sRayCircle * random();
+		var lRadiusNorm = rayCircle * random();
 		lRadiusNorm *= 1.2;
 		var lAngle = random() * Math.PI * 2 + sGeneralTimer * 0.2;
 		var posStartX = lRadiusNorm * Math.cos(lAngle);
@@ -100,13 +100,16 @@ function drawArm(context, leg) {
 	context.stroke();
 }
 
-export function MonsterIntro(positionCenter, width) {
+export function MonsterIntro(positionCenter, width, particleGroupMonster) {
 	var THREE = globalThis.THREE;
 	var scene = globalThis.scene;
 
+	this.particleGroupMonster = particleGroupMonster;
+	this.rayCircle = DEFAULT_RAY_CIRCLE;
+	this.rayCircleTarget = DEFAULT_RAY_CIRCLE;
 	this.legs = [];
 	for (var i = 0; i < 7; i++) {
-		this.legs.push(new MonsterIntroLeg());
+		this.legs.push(new MonsterIntroLeg(this));
 	}
 	this.UpdateLegAngles();
 	this.scratchLegIndex = 0;
@@ -129,7 +132,6 @@ export function MonsterIntro(positionCenter, width) {
 
 	globalThis.sTime1 = 0;
 	globalThis.sTime2 = 0;
-	globalThis.sMonster = this.particle;
 	this.SetIntroMode('scratch');
 }
 
@@ -144,21 +146,20 @@ MonsterIntro.prototype.GetCloseFood = function () {
 		return [];
 	}
 	var closeElements = [];
-	var sFoodArray = globalThis.sFoodArray;
+	var lFoodArray = this.particleGroupMonster.foodArray;
 	var sMonster = this.particle;
-	var sRayCircle = globalThis.sRayCircle;
 	var sizeLegsMax = this.legs.length > 0 ? this.legs[0].sizeMax : 0;
 
-	for (var i = 0; i < sFoodArray.length; i++) {
-		if (sFoodArray[i].isTarget) {
+	for (var i = 0; i < lFoodArray.length; i++) {
+		if (lFoodArray[i].isTarget) {
 			continue;
 		}
-		var distance = sFoodArray[i].position.distanceTo(sMonster.position);
-		if (distance < sMonster.scale.x * (sRayCircle + 3.8 * sizeLegsMax)) {
+		var distance = lFoodArray[i].position.distanceTo(sMonster.position);
+		if (distance < sMonster.scale.x * (this.rayCircle + 3.8 * sizeLegsMax)) {
 			var angleClose = Math.atan(
-				(sMonster.position.y - sFoodArray[i].position.y) / (sMonster.position.x - sFoodArray[i].position.x)
+				(sMonster.position.y - lFoodArray[i].position.y) / (sMonster.position.x - lFoodArray[i].position.x)
 			);
-			if (sMonster.position.x - sFoodArray[i].position.x > 0) {
+			if (sMonster.position.x - lFoodArray[i].position.x > 0) {
 				angleClose += Math.PI;
 			}
 			if (angleClose < 0.) {
@@ -175,7 +176,7 @@ MonsterIntro.prototype.GetCloseFood = function () {
 				}
 			}
 
-			closeElements.push({ pos: sFoodArray[i].position, indexLeg: index, particle: sFoodArray[i] });
+			closeElements.push({ pos: lFoodArray[i].position, indexLeg: index, particle: lFoodArray[i] });
 			globalThis.sTimerClose = 0.7;
 		}
 	}
@@ -235,7 +236,7 @@ MonsterIntro.prototype.UpdateLegs = function (delta, sTimerClose) {
 		}	
 		else if (this.introMode === 'eating') {
 			if (this.eatingTimer < this.eatingLegActivationDelays[i]) {
-				this.legs[i].Update(delta, 0.2, this.particle);
+				this.legs[i].Update(delta, 0.2);
 				continue;
 			}
 			if (this.legs[i].state === LegStates.REST || this.legs[i].state === LegStates.SCRATCH) {
@@ -255,7 +256,7 @@ MonsterIntro.prototype.UpdateLegs = function (delta, sTimerClose) {
 			}
 		}
 
-		this.legs[i].Update(delta, 0.2, this.particle);
+		this.legs[i].Update(delta, 0.2);
 	}
 };
 
@@ -276,14 +277,14 @@ MonsterIntro.prototype.Update = function (delta) {
 		globalThis.sMonsterScratchTimer = this.scratchTimer;
 	}
 
-	globalThis.sRayCircle += (globalThis.sRayCircleTarget - globalThis.sRayCircle) * delta * 0.5;
+	this.rayCircle += (this.rayCircleTarget - this.rayCircle) * delta * 0.5;
 	this.UpdateLegs(delta, sTimerClose);
 
 	if (this.AreLegsResting() && globalThis.sPutALetter > 0 && !globalThis.sEnd) {
 		globalThis.infoDisplay.SetSize(1.3);
 		globalThis.infoDisplay.FadeIn();
 	}
-	globalThis.infoDisplay.SetPosition(globalThis.sMonster.position, true);
+	globalThis.infoDisplay.SetPosition(this.particle.position, true);
 };
 
 MonsterIntro.prototype.programMonster = function (context) {
@@ -297,20 +298,16 @@ MonsterIntro.prototype.programMonster = function (context) {
 	var centerY = 0.;
 	context.lineWidth = context.lineWidth * 2;
 	context.beginPath();
-	context.arc(centerX, centerY, globalThis.sRayCircle, 0, PI2, true);
+	context.arc(centerX, centerY, this.rayCircle, 0, PI2, true);
 	context.closePath();
 	context.stroke();
 };
 
 MonsterIntro.prototype.monsterTouched = function (context) {
 	context.beginPath();
-	context.arc(0, 0, globalThis.sRayCircle, 0, PI2, true);
+	context.arc(0, 0, this.rayCircle, 0, PI2, true);
 	context.closePath();
 	context.fill();
-};
-
-MonsterIntro.prototype.SetFood = function (foodArray) {
-	globalThis.sFoodArray = foodArray;
 };
 
 MonsterIntro.prototype.setNormalDisplay = function () {
