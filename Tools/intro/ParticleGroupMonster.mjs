@@ -144,9 +144,9 @@ ParticleGroupMonster.prototype.AddString = function (aText, aPosition, aTextSize
 		var textMeasured = context.measureText(aText[i]);
 		thisSize = textMeasured.width / etalon;
 		position.x += spaceInit * thisSize * 0.5;
-		var isFinalPosition = i % 7 == 0 || i % 5 == 0 || i % 3 == 0;
+		var isFinalPosition = i % 7 == 0 || i % 5 == 0 || i % 4 == 0;
 		var isMonsterEndTarget = aText == "BAPTISTE BOHELAY" && aText[i] == "O";
-		this.AddFood(aText[i], new THREE.Vector3(this.positionCenter.x + myRandom() * width * 0.7, this.positionCenter.y + (myRandom() - 0.4) * width * 0.6, 0), new THREE.Vector3(), size, position.clone(), aTextColor, isFinalPosition, isMonsterEndTarget);	
+		this.AddFood(aText[i], new THREE.Vector3(this.positionCenter.x + myRandom() * width * 0.5 + width * 0.3, this.positionCenter.y + (myRandom() - 0.5) * width * 0.3, 0), new THREE.Vector3(), size, position.clone(), aTextColor, isFinalPosition, isMonsterEndTarget);	
 		position.x += spaceInit * thisSize * 0.5;
 	}
 }
@@ -438,33 +438,6 @@ ParticleGroupMonster.prototype.UpdateFood = function (delta) {
 	var sFoodArray = globalThis.sFoodArray;
 	var sMonster = globalThis.sMonster;
 	var isdefined = globalThis.isdefined;
-
-	var lPart;
-	for (var i = 0; i < sFoodArray.length; i++) {
-		lPart = sFoodArray[i];
-		if(lPart.isMovable && !lPart.isEaten)
-		{
-			// lPart.mSpeed.x += myRandom() * window.innerHeight * 0.02;
-			lPart.mSpeed.x += (this.positionCenter.x - lPart.position.x) * 0.003;
-			// lPart.mSpeed.y += myRandom() * window.innerHeight * 0.02;
-			lPart.mSpeed.y += (this.positionCenter.y - lPart.position.y) * 0.003;
-			lPart.position.x += lPart.mSpeed.x * delta;
-			lPart.position.y += lPart.mSpeed.y * delta;
-			lPart.SetPosition(lPart.position);
-			lPart.mSpeed.multiplyScalar(0.95);
-		}
-		// if(this.goAway)
-		// {
-		// 	lPart.mSpeed.x += myRandom() * window.innerHeight * 0.02;
-		// 	lPart.mSpeed.x += (this.positionCenter.x - lPart.position.x) * -0.3;
-		// 	lPart.mSpeed.y += myRandom() * window.innerHeight * 0.02;
-		// 	lPart.mSpeed.y += (this.positionCenter.y - lPart.position.y) * -0.3;
-		// 	lPart.position.x += lPart.mSpeed.x * delta;
-		// 	lPart.position.y += lPart.mSpeed.y * delta;
-		// 	lPart.SetPosition(lPart.position);
-		// 	lPart.mSpeed.multiplyScalar(0.95);
-		// }
-	}
 
 	var prevMonsterX = sMonster.position.x;
 	var prevMonsterY = sMonster.position.y;

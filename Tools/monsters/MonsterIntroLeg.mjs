@@ -24,6 +24,7 @@ export function MonsterIntroLeg() {
 	this.gotObject = null;
 	this.speed = 0.9 + Math.random() * 0.2;
 	this.pose = null;
+	this.scratchCoeff = 0;
 }
 
 MonsterIntroLeg.prototype.SetAngle = function (angle) {
@@ -82,9 +83,11 @@ MonsterIntroLeg.prototype.Update = function (delta, amp, monster) {
 			this.posHandTarget.y = posShoulderY + size * (SIN * size + 1.5 * amp * Math.sin(sTime1 + decay * 2.) * COS);
 			break;
 		case LegStates.SCRATCH:
+			this.scratchCoeff += delta;
+			this.scratchCoeff = Math.min(1, this.scratchCoeff);
 			var rub = Math.sin(globalThis.sMonsterScratchTimer * 2.);
-			this.posHandTarget.x = sRayCircle * Math.cos(0.4 + rub * 0.2);
-			this.posHandTarget.y = sRayCircle * Math.sin(0.4 + rub * 0.2);
+			this.posHandTarget.x = sRayCircle * Math.cos(0.4 + rub * 0.2) * this.scratchCoeff + (1 - this.scratchCoeff) * (posElbowX + sRayCircle * 0.5);
+			this.posHandTarget.y = sRayCircle * Math.sin(0.4 + rub * 0.2) * this.scratchCoeff + (1 - this.scratchCoeff) * (posElbowY + sRayCircle * Math.sin(this.scratchCoeff * Math.PI));
 			break;
 		case LegStates.GRABBING_FOOD:
 			this.posHandTarget.x = (gotObject.particle.position.x - monster.position.x) / monster.scale.x;
