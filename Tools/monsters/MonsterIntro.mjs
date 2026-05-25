@@ -110,6 +110,8 @@ export function MonsterIntro(positionCenter, width) {
 	}
 	this.UpdateLegAngles();
 	this.scratchLegIndex = 0;
+	this.eatingTimer = 0;
+	this.eatingLegActivationDelays = [];
 	this.programMonster = this.programMonster.bind(this);
 	this.monsterTouched = this.monsterTouched.bind(this);
 
@@ -194,6 +196,10 @@ MonsterIntro.prototype.SetIntroMode = function (mode) {
 		}
 	}
 	if (mode === 'eating') {
+		this.eatingTimer = 0;
+		for (var i = 0; i < this.legs.length; i++) {
+			this.eatingLegActivationDelays[i] = Math.random() * 0.5;
+		}
 		globalThis.sTimerClose = Math.max(globalThis.sTimerClose, 0.8);
 	}
 };
@@ -228,6 +234,10 @@ MonsterIntro.prototype.UpdateLegs = function (delta, sTimerClose) {
 			}
 		}	
 		else if (this.introMode === 'eating') {
+			if (this.eatingTimer < this.eatingLegActivationDelays[i]) {
+				this.legs[i].Update(delta, 0.2, this.particle);
+				continue;
+			}
 			if (this.legs[i].state === LegStates.REST || this.legs[i].state === LegStates.SCRATCH) {
 				this.legs[i].SetState(LegStates.IDLE);
 			}
@@ -253,6 +263,10 @@ MonsterIntro.prototype.Update = function (delta) {
 	var sTimerClose = globalThis.sTimerClose;
 	sTimerClose -= delta;
 	globalThis.sTimerClose = sTimerClose;
+
+	if (this.introMode === 'eating') {
+		this.eatingTimer += delta;
+	}
 
 	delta *= 4.;
 	globalThis.sTime1 += delta;

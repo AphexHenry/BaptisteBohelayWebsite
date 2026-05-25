@@ -46,7 +46,7 @@ export function ParticleGroupMonster(positionCenter, name) {
 	this.monsterIntroPhase = 'scratching';
 	this.monsterIntroScratchTimer = 0;
 	this.monsterIntroEatTimer = 0;
-	this.monsterIntroScratchDuration = 2.4;
+	this.monsterIntroScratchDuration = 1.4;
 	this.monsterIntroMinEatDuration = 1.0;
 	this.InitFood(this.width);
 	this.InitSurface(this.width);

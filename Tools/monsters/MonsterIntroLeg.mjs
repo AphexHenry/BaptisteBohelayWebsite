@@ -66,7 +66,7 @@ MonsterIntroLeg.prototype.Update = function (delta, amp, monster) {
 		return null;
 	}
 
-	var size = this.size * 0.69;
+	var size = Math.max(sRayCircle, this.size) * 0.69;
 	var COS = Math.cos(angle);
 	var SIN = Math.sin(angle);
 	var posShoulderX = COS * sRayCircle;
@@ -74,7 +74,7 @@ MonsterIntroLeg.prototype.Update = function (delta, amp, monster) {
 	var posElbowX = posShoulderX + size * (COS * 0.5 + amp * Math.cos(sTime2 * 0.01 + decay * 1.5) * SIN);
 	var posElbowY = posShoulderY + size * (SIN * size * 0.5 + amp * Math.cos(sTime2 * 0.01 + decay * 1.5) * -COS);
 
-	this.coeffMove += 0.02 * this.speed;
+	this.coeffMove += 0.1 * this.speed * delta;
 	this.coeffMove = Math.min(1.000001, this.coeffMove);
 
 	switch (this.state) {
@@ -111,7 +111,7 @@ MonsterIntroLeg.prototype.Update = function (delta, amp, monster) {
 		case LegStates.SCRATCH:
 			break;
 		case LegStates.GRABBING_FOOD:
-			if (this.coeffMove >= 0.5) {
+			if (this.coeffMove >= 0.2) {
 				gotObject.particle.isMovable = false;
 				this.SetState(LegStates.PLACING_FOOD);
 			}
@@ -119,7 +119,7 @@ MonsterIntroLeg.prototype.Update = function (delta, amp, monster) {
 		case LegStates.PLACING_FOOD:
 			gotObject.particle.position.x = monster.position.x + posHandX * monster.scale.x;
 			gotObject.particle.position.y = monster.position.y + posHandY * monster.scale.y;
-			if (this.coeffMove >= 0.5) {
+			if (this.coeffMove >= 0.2) {
 				gotObject.particle.position.x = gotObject.particle.TargetObject.positionTarget.x;
 				gotObject.particle.position.y = gotObject.particle.TargetObject.positionTarget.y;
 				gotObject.particle.isEaten = true;
