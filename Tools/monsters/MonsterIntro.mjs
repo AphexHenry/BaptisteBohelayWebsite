@@ -4,6 +4,10 @@
  * Import named exports from this file in ES modules. For legacy pages that load
  * classic scripts in order, use registerParticleGroupMonsterGlobals.mjs (main site).
  */
+import { LegStates, MonsterIntroLeg } from './MonsterIntroLeg.mjs';
+
+export { LegStates } from './MonsterIntroLeg.mjs';
+
 const PI2 = -Math.PI * 1.99;
 
 function ensureMonsterIntroState() {
@@ -25,58 +29,6 @@ export var MonsterStates = {
 	EAT_OUT: lIndexStates++,
 	EAT_IN: lIndexStates++,
 };
-
-export var LegStates = {
-	IDLE: 0,
-	GRABBING_FOOD: 1,
-	PLACING_FOOD: 2,
-};
-globalThis.IntroLegStates = globalThis.IntroLegStates || LegStates;
-
-function getCloseFood() {
-	if (globalThis.sEnd || globalThis.sMonsterIntroMode !== 'eating') {
-		return [];
-	}
-	var closeElements = [];
-	var sFoodArray = globalThis.sFoodArray;
-	var sMonster = globalThis.sMonster;
-	var sRayCircle = globalThis.sRayCircle;
-	var sSizeLegsMax = globalThis.sSizeLegsMax;
-	var sLegArray = globalThis.sLegArray;
-
-	for (var i = 0; i < sFoodArray.length; i++) {
-		if (sFoodArray[i].isTarget) {
-			continue;
-		}
-		var distance = sFoodArray[i].position.distanceTo(sMonster.position);
-		if (distance < sMonster.scale.x * (sRayCircle + 3.8 * sSizeLegsMax)) {
-			var angleClose = Math.atan(
-				(sMonster.position.y - sFoodArray[i].position.y) / (sMonster.position.x - sFoodArray[i].position.x)
-			);
-			if (sMonster.position.x - sFoodArray[i].position.x > 0) {
-				angleClose += Math.PI;
-			}
-			if (angleClose < 0.) {
-				angleClose += 2. * Math.PI;
-			}
-			var index = Math.round((sLegArray.length - 1) * angleClose * 0.5 / Math.PI);
-
-			if (sLegArray[index].gotObject) {
-				index++;
-				index = index % sLegArray.length;
-				if (sLegArray[index].gotObject) {
-					index -= 2;
-					index = Math.abs(index % sLegArray.length);
-				}
-			}
-
-			closeElements.push({ pos: sFoodArray[i].position, indexLeg: index, particle: sFoodArray[i] });
-			globalThis.sTimerClose = 0.7;
-		}
-	}
-
-	return closeElements;
-}
 
 function drawHair(context, count) {
 	var random = sfc32(1, 3, 4, 5);
@@ -136,113 +88,30 @@ function sfc32(a, b, c, d) {
 	};
 }
 
-function drawArm(context, size, i, amp) {
-	var sLegArray = globalThis.sLegArray;
-	var sMonster = globalThis.sMonster;
-	var sTime1 = globalThis.sTime1;
-	var sTime2 = globalThis.sTime2;
-	var sRayCircle = globalThis.sRayCircle;
-	var decay = sLegArray[i].random;
-	var angle = sLegArray[i].angle;
-	var gotObject = sLegArray[i].gotObject;
+function drawArm(context, leg) {
+	var legPose = leg.pose;
+	if (!legPose) {
+		return;
+	}
 
 	context.beginPath();
-	size *= 0.69;
-	var COS = Math.cos(angle);
-	var SIN = Math.sin(angle);
-	var posShoulderX = COS * sRayCircle;
-	var posShoulderY = SIN * sRayCircle;
-	var posElbowX = posShoulderX + size * (COS * 0.5 + amp * Math.cos(sTime2 + decay * 1.5) * SIN);
-	var posElbowY = posShoulderY + size * (SIN * size * 0.5 + amp * Math.cos(sTime2 + decay * 1.5) * -COS);
-
-	var posHandX = 0;
-	var posHandY = 0;
-
-	sLegArray[i].coeffMove += 0.02 * sLegArray[i].speed;
-	sLegArray[i].coeffMove = Math.min(1.000001, sLegArray[i].coeffMove);
-
-	if (globalThis.sMonsterIntroMode === 'scratch' && i === globalThis.sMonsterScratchLegIndex) {
-		var rub = Math.sin(globalThis.sMonsterScratchTimer * 2.);
-		sLegArray[i].posHandTarget.x = sRayCircle * 1.08;
-		sLegArray[i].posHandTarget.y = sRayCircle * 0.2 * rub;
-	} else {
-		switch (sLegArray[i].state) {
-			case LegStates.IDLE:
-				sLegArray[i].posHandTarget.x = posShoulderX + size * (COS * size + 1.5 * amp * Math.sin(sTime1 + decay * 2.) * SIN);
-				sLegArray[i].posHandTarget.y = posShoulderY + size * (SIN * size + 1.5 * amp * Math.sin(sTime1 + decay * 2.) * COS);
-				break;
-			case LegStates.GRABBING_FOOD:
-				sLegArray[i].posHandTarget.x = (gotObject.particle.position.x - sMonster.position.x) / sMonster.scale.x;
-				sLegArray[i].posHandTarget.y = (gotObject.particle.position.y - sMonster.position.y) / sMonster.scale.y;
-				break;
-			case LegStates.PLACING_FOOD:
-				sLegArray[i].posHandTarget.x =
-					(gotObject.particle.TargetObject.positionTarget.x - sMonster.position.x) / sMonster.scale.x;
-				sLegArray[i].posHandTarget.y =
-					(gotObject.particle.TargetObject.positionTarget.y - sMonster.position.y) / sMonster.scale.x;
-				break;
-		}
-	}
-
-	posHandX = sLegArray[i].posHandInit.x + sLegArray[i].coeffMove * (sLegArray[i].posHandTarget.x - sLegArray[i].posHandInit.x);
-	posHandY = sLegArray[i].posHandInit.y + sLegArray[i].coeffMove * (sLegArray[i].posHandTarget.y - sLegArray[i].posHandInit.y);
-	sLegArray[i].posHandCurrent.x = posHandX;
-	sLegArray[i].posHandCurrent.y = posHandY;
-
-	switch (sLegArray[i].state) {
-		case LegStates.IDLE:
-			break;
-		case LegStates.GRABBING_FOOD:
-			if (sLegArray[i].coeffMove >= 0.5) {
-				gotObject.particle.isMovable = false;
-				SetStateLeg(i, LegStates.PLACING_FOOD);
-			}
-			break;
-		case LegStates.PLACING_FOOD:
-			gotObject.particle.position.x = sMonster.position.x + posHandX * sMonster.scale.x;
-			gotObject.particle.position.y = sMonster.position.y + posHandY * sMonster.scale.y;
-			if (sLegArray[i].coeffMove >= 0.5) {
-				gotObject.particle.position.x = gotObject.particle.TargetObject.positionTarget.x;
-				gotObject.particle.position.y = gotObject.particle.TargetObject.positionTarget.y;
-				gotObject.particle.isEaten = true;
-				sLegArray[i].gotObject = null;
-				globalThis.sPutALetter++;
-				if (globalThis.sPutALetter == 20) {
-					$('#githubButton').slideDown(300);
-					$('#contactButton').slideDown(200);
-				}
-				SetStateLeg(i, LegStates.IDLE);
-			}
-			break;
-	}
-
-	context.moveTo(posHandX, posHandY);
-	context.quadraticCurveTo(posElbowX, posElbowY, posShoulderX, posShoulderY);
+	context.moveTo(legPose.posHandX, legPose.posHandY);
+	context.quadraticCurveTo(legPose.posElbowX, legPose.posElbowY, legPose.posShoulderX, legPose.posShoulderY);
 	context.stroke();
-}
-
-function SetStateLeg(i, state) {
-	var sLegArray = globalThis.sLegArray;
-	sLegArray[i].state = state;
-	sLegArray[i].posHandInit = sLegArray[i].posHandCurrent;
-	sLegArray[i].coeffMove = 0.;
-}
-
-function Attack(part, indexLeg) {
-	var sChallenge = globalThis.sChallenge;
-	if (sChallenge.particle === part.particle) {
-		sChallenge.SetAttacked(1);
-	}
 }
 
 export function MonsterIntro(positionCenter, width) {
 	var THREE = globalThis.THREE;
 	var scene = globalThis.scene;
-	var AddLeg = globalThis.AddLeg;
 
+	this.legs = [];
 	for (var i = 0; i < 7; i++) {
-		AddLeg();
+		this.legs.push(new MonsterIntroLeg());
 	}
+	this.UpdateLegAngles();
+	this.scratchLegIndex = 0;
+	this.programMonster = this.programMonster.bind(this);
+	this.monsterTouched = this.monsterTouched.bind(this);
 
 	this.particle = new THREE.Particle(
 		new THREE.ParticleCanvasMaterial({ color: 0xd5675a, program: this.programMonster, transparent: true })
@@ -262,15 +131,66 @@ export function MonsterIntro(positionCenter, width) {
 	this.SetIntroMode('scratch');
 }
 
+MonsterIntro.prototype.UpdateLegAngles = function () {
+	for (var i = 0; i < this.legs.length; i++) {
+		this.legs[i].SetAngle(i * Math.PI * 2. / this.legs.length);
+	}
+};
+
+MonsterIntro.prototype.GetCloseFood = function () {
+	if (globalThis.sEnd || this.introMode !== 'eating') {
+		return [];
+	}
+	var closeElements = [];
+	var sFoodArray = globalThis.sFoodArray;
+	var sMonster = this.particle;
+	var sRayCircle = globalThis.sRayCircle;
+	var sizeLegsMax = this.legs.length > 0 ? this.legs[0].sizeMax : 0;
+
+	for (var i = 0; i < sFoodArray.length; i++) {
+		if (sFoodArray[i].isTarget) {
+			continue;
+		}
+		var distance = sFoodArray[i].position.distanceTo(sMonster.position);
+		if (distance < sMonster.scale.x * (sRayCircle + 3.8 * sizeLegsMax)) {
+			var angleClose = Math.atan(
+				(sMonster.position.y - sFoodArray[i].position.y) / (sMonster.position.x - sFoodArray[i].position.x)
+			);
+			if (sMonster.position.x - sFoodArray[i].position.x > 0) {
+				angleClose += Math.PI;
+			}
+			if (angleClose < 0.) {
+				angleClose += 2. * Math.PI;
+			}
+			var index = Math.round((this.legs.length - 1) * angleClose * 0.5 / Math.PI);
+
+			if (this.legs[index].gotObject) {
+				index++;
+				index = index % this.legs.length;
+				if (this.legs[index].gotObject) {
+					index -= 2;
+					index = Math.abs(index % this.legs.length);
+				}
+			}
+
+			closeElements.push({ pos: sFoodArray[i].position, indexLeg: index, particle: sFoodArray[i] });
+			globalThis.sTimerClose = 0.7;
+		}
+	}
+
+	return closeElements;
+};
+
 MonsterIntro.prototype.SetIntroMode = function (mode) {
 	this.introMode = mode;
 	globalThis.sMonsterIntroMode = mode;
 	if (mode === 'scratch') {
 		this.scratchTimer = 0;
 		globalThis.sMonsterScratchTimer = 0;
-		if (globalThis.sLegArray.length > 0) {
-			globalThis.sMonsterScratchLegIndex = Math.min(0, globalThis.sLegArray.length - 1);
-			SetStateLeg(globalThis.sMonsterScratchLegIndex, LegStates.IDLE);
+		if (this.legs.length > 0) {
+			this.scratchLegIndex = Math.min(0, this.legs.length - 1);
+			globalThis.sMonsterScratchLegIndex = this.scratchLegIndex;
+			this.legs[this.scratchLegIndex].SetState(LegStates.SCRATCH);
 		}
 	}
 	if (mode === 'eating') {
@@ -280,6 +200,48 @@ MonsterIntro.prototype.SetIntroMode = function (mode) {
 
 MonsterIntro.prototype.WakeUp = function (duration) {
 	globalThis.sTimerClose = Math.max(duration, globalThis.sTimerClose);
+};
+
+MonsterIntro.prototype.ShouldLegsRest = function (sTimerClose) {
+	return !((this.introMode === 'scratch' || this.introMode === 'eating' || sTimerClose > 0.) && !globalThis.sEnd);
+};
+
+MonsterIntro.prototype.AreLegsResting = function () {
+	for (var i = 0; i < this.legs.length; i++) {
+		if (this.legs[i].size >= 0.52) {
+			return false;
+		}
+	}
+	return true;
+};
+
+MonsterIntro.prototype.UpdateLegs = function (delta, sTimerClose) {
+	var shouldRest = this.ShouldLegsRest(sTimerClose);
+	var closeStuffs = this.introMode === 'eating' ? this.GetCloseFood() : [];
+
+	for (var i = 0; i < this.legs.length; i++) {
+		if (this.introMode === 'scratch' && i === this.scratchLegIndex) {
+			this.legs[i].SetState(LegStates.SCRATCH);
+		} else if (this.legs[i].state === LegStates.SCRATCH) {
+			this.legs[i].SetState(shouldRest ? LegStates.REST : LegStates.IDLE);
+		}
+
+		if (shouldRest && this.legs[i].state === LegStates.IDLE) {
+			this.legs[i].SetState(LegStates.REST);
+		} else if (!shouldRest && this.legs[i].state === LegStates.REST) {
+			this.legs[i].SetState(LegStates.IDLE);
+		}
+
+		if (this.introMode === 'eating') {
+			for (var j = 0; j < closeStuffs.length; j++) {
+				if (closeStuffs[j].indexLeg == i && this.legs[i].TryGrabFood(closeStuffs[j])) {
+					break;
+				}
+			}
+		}
+
+		this.legs[i].Update(delta, 0.2, this.particle);
+	}
 };
 
 MonsterIntro.prototype.Update = function (delta) {
@@ -295,21 +257,10 @@ MonsterIntro.prototype.Update = function (delta) {
 		globalThis.sMonsterScratchTimer = this.scratchTimer;
 	}
 
-	if ((this.introMode === 'scratch' || this.introMode === 'eating' || sTimerClose > 0.) && !globalThis.sEnd) {
-		globalThis.sSizeLegsTarget = globalThis.sSizeLegsMax;
-	} else {
-		globalThis.sSizeLegsTarget = 0;
-	}
-
-	var strength = 0.1;
-	if (globalThis.sSizeLegsTarget - globalThis.sSizeLegs > 0) {
-		strength = 1.;
-	}
-	globalThis.sSizeLegs += (globalThis.sSizeLegsTarget - globalThis.sSizeLegs) * delta * 0.5;
-
 	globalThis.sRayCircle += (globalThis.sRayCircleTarget - globalThis.sRayCircle) * delta * 0.5;
+	this.UpdateLegs(delta, sTimerClose);
 
-	if (globalThis.sSizeLegs < 0.52 && globalThis.sPutALetter > 0 && !globalThis.sEnd) {
+	if (this.AreLegsResting() && globalThis.sPutALetter > 0 && !globalThis.sEnd) {
 		globalThis.infoDisplay.SetSize(1.3);
 		globalThis.infoDisplay.FadeIn();
 	}
@@ -317,27 +268,10 @@ MonsterIntro.prototype.Update = function (delta) {
 };
 
 MonsterIntro.prototype.programMonster = function (context) {
-	var closeStuffs = globalThis.sMonsterIntroMode === 'eating' ? getCloseFood() : [];
-	var sLegArray = globalThis.sLegArray;
-	var sSizeLegs = globalThis.sSizeLegs;
-
 	context.lineWidth = globalThis.sMonsterLineWidth;
 
-	if (sSizeLegs > 0.05) {
-		for (var i = 0; i < sLegArray.length; i++) {
-			if (globalThis.sMonsterIntroMode === 'eating') {
-				for (var j = 0; j < closeStuffs.length; j++) {
-					if (closeStuffs[j].indexLeg == i && !closeStuffs[j].particle.isTarget && sLegArray[i].state == LegStates.IDLE) {
-						closeStuffs[j].particle.isTarget = true;
-						sLegArray[i].gotObject = closeStuffs[j];
-						SetStateLeg(i, LegStates.GRABBING_FOOD);
-						break;
-					}
-				}
-			}
-
-			drawArm(context, sSizeLegs, i, 0.2);
-		}
+	for (var i = 0; i < this.legs.length; i++) {
+		drawArm(context, this.legs[i]);
 	}
 
 	var centerX = 0.;
