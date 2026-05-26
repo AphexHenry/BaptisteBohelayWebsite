@@ -48,11 +48,6 @@ export function ParticleGroupMonster(positionCenter, name) {
 	this.monsterSpiralPhase = 'spiraling';
 	this.monsterSpringVel = { x: 0, y: 0, z: 0 };
 	this.monsterSpringScaleVel = { x: 0, y: 0 };
-	this.monsterIntroPhase = 'scratching';
-	this.monsterIntroScratchTimer = 0;
-	this.monsterIntroEatTimer = 0;
-	this.monsterIntroScratchDuration = 1.4;
-	this.monsterIntroMinEatDuration = 1.0;
 	this.InitFood(this.width);
 	this.InitSurface(this.width);
 }
@@ -545,49 +540,6 @@ ParticleGroupMonster.prototype.AreIntroLettersSettled = function () {
 	return this.foodArray.length > 0;
 }
 
-ParticleGroupMonster.prototype.StartMonsterTravel = function () {
-	if(this.monsterIntroPhase === 'travelling' || this.monsterIntroPhase === 'settled')
-	{
-		return;
-	}
-
-	this.monsterIntroPhase = 'travelling';
-	this.monster.SetIntroMode('travelling');
-	this.monsterSpiralInit = false;
-	this.monsterSpiralPhase = 'spiraling';
-	this.monsterPathProgress = 0;
-	this.monsterSpringVel = { x: 0, y: 0, z: 0 };
-	this.monsterSpringScaleVel = { x: 0, y: 0 };
-}
-
-ParticleGroupMonster.prototype.UpdateMonsterIntroPhase = function (delta) {
-	if(globalThis.sEnd && this.monsterIntroPhase !== 'travelling' && this.monsterIntroPhase !== 'settled')
-	{
-		this.StartMonsterTravel();
-		return;
-	}
-
-	switch(this.monsterIntroPhase)
-	{
-		case 'scratching':
-			this.monsterIntroScratchTimer += delta;
-			if(this.monsterIntroScratchTimer >= this.monsterIntroScratchDuration)
-			{
-				this.monsterIntroPhase = 'eating';
-				this.monsterIntroEatTimer = 0;
-				this.monster.SetIntroMode('eating');
-			}
-			break;
-		case 'eating':
-			this.monsterIntroEatTimer += delta;
-			if(this.monsterIntroEatTimer >= this.monsterIntroMinEatDuration && this.AreIntroLettersSettled())
-			{
-				this.StartMonsterTravel();
-			}
-			break;
-	}
-}
-
 /*
 * update the position of the letters.
 */
@@ -597,13 +549,6 @@ ParticleGroupMonster.prototype.UpdateFood = function (delta) {
 
 	var prevMonsterX = monsterParticle.position.x;
 	var prevMonsterY = monsterParticle.position.y;
-
-	this.UpdateMonsterIntroPhase(delta);
-	// if(this.monsterIntroPhase !== 'travelling' && this.monsterIntroPhase !== 'settled')
-	// {
-	// 	sMonster.speed = { x: 0, y: 0 };
-	// 	return;
-	// }
 
 	if(isdefined(this.monsterEndPosition))
 	{

@@ -16,7 +16,6 @@ function ensureMonsterIntroState() {
 	if (globalThis.sEnd == null) globalThis.sEnd = false;
 	if (globalThis.sMonsterLineWidth == null) globalThis.sMonsterLineWidth = 0.01;
 	if (globalThis.sTimerClose == null) globalThis.sTimerClose = 0;
-	if (globalThis.sMonsterIntroMode == null) globalThis.sMonsterIntroMode = 'scratch';
 	if (globalThis.sMonsterScratchTimer == null) globalThis.sMonsterScratchTimer = 0;
 	if (globalThis.sMonsterScratchLegIndex == null) globalThis.sMonsterScratchLegIndex = 1;
 }
@@ -113,6 +112,9 @@ export function MonsterIntro(positionCenter, width, particleGroupMonster) {
 	}
 	this.UpdateLegAngles();
 	this.scratchLegIndex = 0;
+	this.phaseScratchTimer = 0;
+	this.scratchDuration = 1.0;
+	this.minEatDuration = 1.0;
 	this.eatingTimer = 0;
 	this.eatingLegActivationDelays = [];
 	this.programMonster = this.programMonster.bind(this);
@@ -132,8 +134,32 @@ export function MonsterIntro(positionCenter, width, particleGroupMonster) {
 
 	globalThis.sTime1 = 0;
 	globalThis.sTime2 = 0;
-	this.SetIntroMode('scratch');
+	this.SetIntroMode('scratching');
 }
+
+MonsterIntro.prototype.AreIntroLettersSettled = function () {
+	return this.particleGroupMonster.AreIntroLettersSettled();
+};
+
+MonsterIntro.prototype.UpdateIntroPhase = function (delta) {
+	if (globalThis.sEnd && this.introMode !== 'resting') {
+		this.SetIntroMode('resting');
+		return;
+	}
+
+	switch (this.introMode) {
+		case 'scratching':
+			if (this.phaseScratchTimer >= this.scratchDuration) {
+				this.SetIntroMode('eating');
+			}
+			break;
+		case 'eating':
+			if (this.eatingTimer >= this.minEatDuration && this.AreIntroLettersSettled()) {
+				this.SetIntroMode('resting');
+			}
+			break;
+	}
+};
 
 MonsterIntro.prototype.UpdateLegAngles = function () {
 	for (var i = 0; i < this.legs.length; i++) {
@@ -220,14 +246,19 @@ MonsterIntro.prototype.CountActiveEatingLegs = function () {
 
 MonsterIntro.prototype.SetIntroMode = function (mode) {
 	this.introMode = mode;
-	globalThis.sMonsterIntroMode = mode;
-	if (mode === 'scratch') {
+	if (mode === 'scratching') {
+		this.phaseScratchTimer = 0;
 		this.scratchTimer = 0;
 		globalThis.sMonsterScratchTimer = 0;
 		if (this.legs.length > 0) {
 			this.scratchLegIndex = Math.min(0, this.legs.length - 1);
 			globalThis.sMonsterScratchLegIndex = this.scratchLegIndex;
 			this.legs[this.scratchLegIndex].SetState(LegStates.SCRATCH);
+		}
+	}
+	if (mode === 'resting') {
+		for (var r = 0; r < this.legs.length; r++) {
+			this.legs[r].SetState(LegStates.REST);
 		}
 	}
 	if (mode === 'eating') {
@@ -244,7 +275,7 @@ MonsterIntro.prototype.WakeUp = function (duration) {
 };
 
 MonsterIntro.prototype.ShouldLegsRest = function (sTimerClose) {
-	return !((this.introMode === 'scratch' || this.introMode === 'eating' || sTimerClose > 0.) && !globalThis.sEnd);
+	return !((this.introMode === 'scratching' || this.introMode === 'eating' || sTimerClose > 0.) && !globalThis.sEnd);
 };
 
 MonsterIntro.prototype.AreLegsResting = function () {
@@ -262,13 +293,13 @@ MonsterIntro.prototype.UpdateLegs = function (delta, sTimerClose) {
 	var activeEatingLegs = this.CountActiveEatingLegs();
 
 	for (var i = 0; i < this.legs.length; i++) {
-		if(this.introMode === 'scratch') {
+		if (this.introMode === 'scratching') {
 			if (i === this.scratchLegIndex) {
 				this.legs[i].SetState(LegStates.SCRATCH);
 			} else {
 				this.legs[i].SetState(LegStates.REST);
 			}
-		}	
+		}
 		else if (this.introMode === 'eating') {
 			if (this.eatingTimer < this.eatingLegActivationDelays[i]) {
 				this.legs[i].Update(delta, 0.2);
@@ -287,7 +318,7 @@ MonsterIntro.prototype.UpdateLegs = function (delta, sTimerClose) {
 				}
 			}
 		}
-		else {
+		else if (this.introMode === 'resting') {
 			if (shouldRest && this.legs[i].state === LegStates.IDLE) {
 				this.legs[i].SetState(LegStates.REST);
 			} else if (!shouldRest && this.legs[i].state === LegStates.REST) {
@@ -307,17 +338,22 @@ MonsterIntro.prototype.Update = function (delta) {
 	if (this.introMode === 'eating') {
 		this.eatingTimer += delta;
 	}
+	if (this.introMode === 'scratching') {
+		this.phaseScratchTimer += delta;
+	}
 
-	delta *= 4.;
-	globalThis.sTime1 += delta;
-	globalThis.sTime2 += 1.5 * delta;
-	if (this.introMode === 'scratch') {
-		this.scratchTimer += delta;
+	this.UpdateIntroPhase(delta);
+
+	var animDelta = delta * 4.;
+	globalThis.sTime1 += animDelta;
+	globalThis.sTime2 += 1.5 * animDelta;
+	if (this.introMode === 'scratching') {
+		this.scratchTimer += animDelta;
 		globalThis.sMonsterScratchTimer = this.scratchTimer;
 	}
 
-	this.rayCircle += (this.rayCircleTarget - this.rayCircle) * delta * 0.5;
-	this.UpdateLegs(delta, sTimerClose);
+	this.rayCircle += (this.rayCircleTarget - this.rayCircle) * animDelta * 0.5;
+	this.UpdateLegs(animDelta, sTimerClose);
 
 	if (this.AreLegsResting() && globalThis.sPutALetter > 0 && !globalThis.sEnd) {
 		globalThis.infoDisplay.SetSize(1.3);
