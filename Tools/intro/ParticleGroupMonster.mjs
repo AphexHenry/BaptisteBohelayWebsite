@@ -42,10 +42,10 @@ export function ParticleGroupMonster(positionCenter, name) {
 	this.monster = new MonsterIntro(positionCenter, this.width, this);
 	this.monsterEndPosition = null;
 	this.monsterEndScale = null;
-	this.monsterPathProgress = 0;
-	this.monsterSpiralInit = false;
-	this.monsterSpiralStopT = 1.;
-	this.monsterSpiralPhase = 'spiraling';
+	// this.monsterPathProgress = 0;
+	// this.monsterSpiralInit = false;
+	// this.monsterSpiralStopT = 1.;
+	// this.monsterSpiralPhase = 'spiraling';
 	this.monsterSpringVel = { x: 0, y: 0, z: 0 };
 	this.monsterSpringScaleVel = { x: 0, y: 0 };
 	this.InitFood(this.width);
@@ -137,7 +137,7 @@ ParticleGroupMonster.prototype.AddFood = function (
 	return particle;
 }
 
-/** Random cyclic permutation (Sattolo): every item moves, no fixed points when length > 1. */
+/** Sattolo shuffle: uniform random derangement (every slot gets another slot's position). */
 function permuteIntroLetterSlots(slots) {
 	var n = slots.length;
 	if (n <= 1) {
@@ -155,7 +155,6 @@ function permuteIntroLetterSlots(slots) {
 		};
 	});
 	for (var i = n - 1; i > 0; i--) {
-		// myRandom() is in [-1, 1]; use Math.random() for a valid index in [0, i - 1].
 		var j = Math.floor(Math.random() * i);
 		var tmp = permuted[i];
 		permuted[i] = permuted[j];
@@ -220,7 +219,7 @@ ParticleGroupMonster.prototype.AddString = function (aText, aPosition, aTextSize
 	var thisSize = 0;
 	var letterSpecs = [];
 	var stringIndex = this.nextIntroStringIndex++;
-	var maxToMove = 4;
+	var maxToMove = 8;
 
 	for (var i = 0; i < aText.length; i++) {
 		var char = aText[i];
@@ -230,9 +229,11 @@ ParticleGroupMonster.prototype.AddString = function (aText, aPosition, aTextSize
 		if (char !== ' ') {
 			var isMonsterEndTarget = aText == "BAPTISTE BOHELAY" && char == "O";
 			var slotIndex = this.nextIntroLetterSlotIndex++;
-			var isFinalPosition = i == 0 || Math.random() < 0.8 || isMonsterEndTarget;
-			if (maxToMove <= 0 && !isFinalPosition) {
+			var isFinalPosition = i == 0 || i % 3 != 0 || isMonsterEndTarget;
+			if (!isFinalPosition && maxToMove <= 0) {
 				isFinalPosition = true;
+			}
+			if (!isFinalPosition) {
 				maxToMove--;
 			}
 			
@@ -506,7 +507,7 @@ ParticleGroupMonster.prototype.UpdateCamera = function (delta) {
 	var sTools = globalThis.sTools;
 
 	this.cameraZTimer += delta;
-	var delay = 2.;
+	var delay = 3.;
 	var t = Math.min(1., Math.max(0., this.cameraZTimer - delay));
 	t = t * t * (3. - 2. * t);
 	this.cameraZRatio = 0.7 + 0.3 * t;
@@ -554,6 +555,7 @@ ParticleGroupMonster.prototype.UpdateFood = function (delta) {
 	{
 
 		monsterParticle.position = this.monsterEndPosition.clone();
+		monsterParticle.position.z += -1;
 		monsterParticle.scale = this.monsterEndScale.clone();
 		// if(!this.monsterSpiralInit)
 		// {
@@ -673,7 +675,7 @@ ParticleGroupMonster.prototype.UpdateFood = function (delta) {
 		// 		sMonster.scale.y = this.monsterSpiralStartScaleY + (this.monsterEndScale.y * 2 - this.monsterSpiralStartScaleY) * t;
 		// 	}
 
-		// 	globalThis.sMonsterLineWidth = 1000.11 / (sMonster.scale.x * sMonster.scale.x);
+		// 	this.monster.monsterLineWidth = 1000.11 / (sMonster.scale.x * sMonster.scale.x);
 
 		// 	if(delta > 0)
 		// 	{

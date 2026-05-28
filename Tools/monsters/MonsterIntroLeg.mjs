@@ -19,6 +19,7 @@ export function MonsterIntroLeg(monsterIntro) {
 	this.state = LegStates.REST;
 	this.size = 0;
 	this.sizeMax = 2.;
+	this.sizeRest = 0.95;
 	this.posHandCurrent = new THREE.Vector2();
 	this.posHandTarget = new THREE.Vector2();
 	this.posHandInit = new THREE.Vector2();
@@ -27,6 +28,7 @@ export function MonsterIntroLeg(monsterIntro) {
 	this.speed = 0.9 + Math.random() * 0.2;
 	this.pose = null;
 	this.scratchCoeff = 0;
+	this.restCurlBlend = 0;
 }
 
 MonsterIntroLeg.prototype.SetAngle = function (angle) {
@@ -97,7 +99,10 @@ MonsterIntroLeg.prototype.Update = function (delta, amp) {
 	var decay = this.random;
 	var angle = this.angle;
 	var gotObject = this.gotObject;
-	var sizeTarget = this.state === LegStates.REST ? 0 : this.sizeMax;
+	var isRest = this.state === LegStates.REST;
+	var sizeTarget = isRest ? this.sizeRest : this.sizeMax;
+	var restCurlTarget = isRest && this.monsterIntro.introMode === 'resting' ? 1 : 0;
+	this.restCurlBlend += (restCurlTarget - this.restCurlBlend) * Math.min(1, delta * 0.7);
 
 	this.size += (sizeTarget - this.size) * delta * 0.5;
 	if (this.size < 0.05) {
@@ -105,7 +110,8 @@ MonsterIntroLeg.prototype.Update = function (delta, amp) {
 		return null;
 	}
 
-	var size = Math.max(lRayCircle, this.size) * 0.69;
+	var armLength = isRest ? this.size : Math.max(lRayCircle, this.size);
+	var size = armLength * 0.69;
 	var COS = Math.cos(angle);
 	var SIN = Math.sin(angle);
 	var posShoulderX = COS * lRayCircle;
@@ -113,12 +119,22 @@ MonsterIntroLeg.prototype.Update = function (delta, amp) {
 	var posElbowX = posShoulderX + size * (COS * 0.5 + amp * Math.cos(lTime2 * 0.01 + decay * 1.5) * SIN);
 	var posElbowY = posShoulderY + size * (SIN * size * 0.5 + amp * Math.cos(lTime2 * 0.01 + decay * 1.5) * -COS);
 
-	this.coeffMove += 0.7 * this.speed * delta;
+	this.coeffMove += 0.6 * this.speed * delta;
 	this.coeffMove = Math.min(1.000001, this.coeffMove);
-	var actualCoeffMove = Math.sin(this.coeffMove * Math.PI * 0.5);
-	actualCoeffMove * actualCoeffMove;
+
+	function smoothstep(t) {
+		return t * t * t * (t * (t * 6 - 15) + 10);
+	}
+
+	var actualCoeffMove = smoothstep(this.coeffMove);
 
 	switch (this.state) {
+		case LegStates.REST:
+			posElbowX = posShoulderX + size * (COS * 0.5 + amp * Math.cos(lTime2 * 0.01 + decay * 1.5) * SIN);
+			posElbowY = posShoulderY + size * (SIN * 0.5 + amp * Math.cos(lTime2 * 0.01 + decay * 2.1) * -COS);
+			this.posHandTarget.x = posShoulderX + size * (COS * 0.6 + amp * Math.sin(lTime1 + decay * 2.) * SIN);
+			this.posHandTarget.y = posShoulderY + size * (SIN * 0.6 + amp * Math.sin(lTime1 + decay * 2.3) * COS);
+			break;
 		case LegStates.IDLE:
 			this.posHandTarget.x = posShoulderX + size * (COS * size + 1.5 * amp * Math.sin(lTime1 + decay * 2.) * SIN);
 			this.posHandTarget.y = posShoulderY + size * (SIN * size + 1.5 * amp * Math.sin(lTime1 + decay * 2.) * COS);
@@ -126,7 +142,7 @@ MonsterIntroLeg.prototype.Update = function (delta, amp) {
 		case LegStates.SCRATCH:
 			this.scratchCoeff += delta;
 			this.scratchCoeff = Math.min(1, this.scratchCoeff);
-			var rub = Math.sin(globalThis.sMonsterScratchTimer * 2.);
+			var rub = Math.sin(this.monsterIntro.scratchTimer * 2.);
 			this.posHandTarget.x = lRayCircle * Math.cos(0.4 + rub * 0.2) * this.scratchCoeff + (1 - this.scratchCoeff) * (posElbowX + lRayCircle * 0.5);
 			this.posHandTarget.y = lRayCircle * Math.sin(0.4 + rub * 0.2) * this.scratchCoeff + (1 - this.scratchCoeff) * (posElbowY + lRayCircle * Math.sin(this.scratchCoeff * Math.PI));
 			break;

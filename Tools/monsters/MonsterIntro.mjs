@@ -8,16 +8,13 @@ import { LegStates, MonsterIntroLeg } from './MonsterIntroLeg.mjs';
 
 export { LegStates } from './MonsterIntroLeg.mjs';
 
-const PI2 = -Math.PI * 1.99;
+const PI2 = -Math.PI * 1.999;
 const DEFAULT_RAY_CIRCLE = 0.3;
 
 function ensureMonsterIntroState() {
 	if (globalThis.sPutALetter == null) globalThis.sPutALetter = 0;
 	if (globalThis.sEnd == null) globalThis.sEnd = false;
-	if (globalThis.sMonsterLineWidth == null) globalThis.sMonsterLineWidth = 0.01;
 	if (globalThis.sTimerClose == null) globalThis.sTimerClose = 0;
-	if (globalThis.sMonsterScratchTimer == null) globalThis.sMonsterScratchTimer = 0;
-	if (globalThis.sMonsterScratchLegIndex == null) globalThis.sMonsterScratchLegIndex = 1;
 }
 
 ensureMonsterIntroState();
@@ -93,9 +90,79 @@ function drawArm(context, leg) {
 		return;
 	}
 
+	var restCurlBlend = leg.restCurlBlend || 0;
+	if (restCurlBlend > 0.001) {
+		drawRestArm(context, leg, restCurlBlend);
+		return;
+	}
+
 	context.beginPath();
 	context.moveTo(legPose.posHandX, legPose.posHandY);
 	context.quadraticCurveTo(legPose.posElbowX, legPose.posElbowY, legPose.posShoulderX, legPose.posShoulderY);
+	context.stroke();
+}
+
+function getQuadraticPoint(startX, startY, controlX, controlY, endX, endY, t) {
+	var invT = 1 - t;
+	return {
+		x: invT * invT * startX + 2 * invT * t * controlX + t * t * endX,
+		y: invT * invT * startY + 2 * invT * t * controlY + t * t * endY,
+	};
+}
+
+function drawRestArm(context, leg, blend) {
+	var legPose = leg.pose;
+	var count = 60;
+	var points = [];
+	var angle = leg.angle;
+	var phase = (globalThis.sGeneralTimer || 0) + leg.random * Math.PI * 2;
+	var shoulderX = legPose.posShoulderX;
+	var shoulderY = legPose.posShoulderY;
+	var handX = legPose.posHandX;
+	var handY = legPose.posHandY;
+	var dx = handX - shoulderX;
+	var dy = handY - shoulderY;
+	var length = Math.max(0.001, Math.sqrt(dx * dx + dy * dy));
+	var px = shoulderX;
+	var py = shoulderY;
+	var theta = 0;
+
+	points.push({ x: px, y: py });
+	for (var i = 1; i <= count; i++) {
+		var t = i / count;
+		theta += Math.sin(phase + t * Math.PI * 2.227217823) * i * 0.01;
+		px += Math.cos(theta + angle) * length / count;
+		py += Math.sin(theta + angle) * length / count;
+		points.push({ x: px, y: py });
+	}
+
+	var endOffsetX = handX - points[count].x;
+	var endOffsetY = handY - points[count].y;
+
+	context.beginPath();
+	for (var j = 0; j <= count; j++) {
+		var progress = j / count;
+		var curlPoint = points[j];
+		var basePoint = getQuadraticPoint(
+			shoulderX,
+			shoulderY,
+			legPose.posElbowX,
+			legPose.posElbowY,
+			handX,
+			handY,
+			progress
+		);
+		var correctedCurlX = curlPoint.x + endOffsetX * progress;
+		var correctedCurlY = curlPoint.y + endOffsetY * progress;
+		var x = basePoint.x + (correctedCurlX - basePoint.x) * blend;
+		var y = basePoint.y + (correctedCurlY - basePoint.y) * blend;
+
+		if (j === 0) {
+			context.moveTo(x, y);
+		} else {
+			context.lineTo(x, y);
+		}
+	}
 	context.stroke();
 }
 
@@ -104,6 +171,7 @@ export function MonsterIntro(positionCenter, width, particleGroupMonster) {
 	var scene = globalThis.scene;
 
 	this.particleGroupMonster = particleGroupMonster;
+	this.monsterLineWidth = 0.015;
 	this.rayCircle = DEFAULT_RAY_CIRCLE;
 	this.rayCircleTarget = DEFAULT_RAY_CIRCLE;
 	this.legs = [];
@@ -112,8 +180,9 @@ export function MonsterIntro(positionCenter, width, particleGroupMonster) {
 	}
 	this.UpdateLegAngles();
 	this.scratchLegIndex = 0;
+	this.scratchTimer = 0;
 	this.phaseScratchTimer = 0;
-	this.scratchDuration = 1.0;
+	this.scratchDuration = 0.6;
 	this.minEatDuration = 1.0;
 	this.eatingTimer = 0;
 	this.eatingLegActivationDelays = [];
@@ -249,10 +318,8 @@ MonsterIntro.prototype.SetIntroMode = function (mode) {
 	if (mode === 'scratching') {
 		this.phaseScratchTimer = 0;
 		this.scratchTimer = 0;
-		globalThis.sMonsterScratchTimer = 0;
 		if (this.legs.length > 0) {
 			this.scratchLegIndex = Math.min(0, this.legs.length - 1);
-			globalThis.sMonsterScratchLegIndex = this.scratchLegIndex;
 			this.legs[this.scratchLegIndex].SetState(LegStates.SCRATCH);
 		}
 	}
@@ -349,7 +416,6 @@ MonsterIntro.prototype.Update = function (delta) {
 	globalThis.sTime2 += 1.5 * animDelta;
 	if (this.introMode === 'scratching') {
 		this.scratchTimer += animDelta;
-		globalThis.sMonsterScratchTimer = this.scratchTimer;
 	}
 
 	this.rayCircle += (this.rayCircleTarget - this.rayCircle) * animDelta * 0.5;
@@ -363,7 +429,7 @@ MonsterIntro.prototype.Update = function (delta) {
 };
 
 MonsterIntro.prototype.programMonster = function (context) {
-	context.lineWidth = globalThis.sMonsterLineWidth;
+	context.lineWidth = this.monsterLineWidth;
 
 	for (var i = 0; i < this.legs.length; i++) {
 		drawArm(context, this.legs[i]);
@@ -371,7 +437,7 @@ MonsterIntro.prototype.programMonster = function (context) {
 
 	var centerX = 0.;
 	var centerY = 0.;
-	context.lineWidth = context.lineWidth * 2;
+	// context.lineWidth = context.lineWidth * 2;
 	context.beginPath();
 	context.arc(centerX, centerY, this.rayCircle, 0, PI2, true);
 	context.closePath();
