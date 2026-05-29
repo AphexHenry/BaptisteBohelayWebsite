@@ -1,36 +1,71 @@
 /**
  * Main site bootstrap (formerly inline in index.html).
- * Loaded deferred so ES module Template globals are registered first.
+ * Loaded as an ES module after Template / particle globals are registered.
  */
+(function () {
+	function expose(name, get, set) {
+		Object.defineProperty(globalThis, name, {
+			get: get,
+			set: set,
+			enumerable: true,
+			configurable: true,
+		});
+	}
 
-	var container; 							// WebGL canvas container.
+	var container; // WebGL canvas container.
 	var camera, scene, projector, renderer; // three.js components.
-	var sceneInfo; 							// scene to display static informations.
-	var cameraManager;						// camera manager.
+	var sceneInfo; // scene to display static informations.
+	var cameraManager; // camera manager.
 
 	var mousePosition = new THREE.Vector3(); // position of the mouse.
-	var cameraTarget = new THREE.Vector3();	// where the camera needs to go in the end.
-	var cameraTargetCurrent = new THREE.Vector3();	// where the camera needs to go next frame.
+	var cameraTarget = new THREE.Vector3(); // where the camera needs to go in the end.
+	var cameraTargetCurrent = new THREE.Vector3(); // where the camera needs to go next frame.
 	var cameraPosition = new THREE.Vector3(); // where the camera is.
-	var canInteract = true;						// if false, the user can't interact with the website (like for animations states).		
-	var SELECTED = null;					// current bubble selected.
-	var Organigram = new Organigram();		// tree of relations between "pages" or actually group of bubbles.
-	var isRoot = false;						// if true, we actually are at the home "page".
+	var canInteract = true; // if false, the user can't interact with the website (like for animations states).
+	var SELECTED = null; // current bubble selected.
+	var Organigram = new Organigram(); // tree of relations between "pages" or actually group of bubbles.
+	var isRoot = false; // if true, we actually are at the home "page".
 	var sMinLoading = 1.;
 
-	var sProjectsToRandom = [];				// container for projects, used to get a random one.
-	// var sProjectsLast;						// last project added.
+	var sProjectsToRandom = []; // container for projects, used to get a random one.
+	// var sProjectsLast; // last project added.
 
-	var infoDisplay;						// common text display in 3d.
+	var infoDisplay; // common text display in 3d.
 	var sDrawScene = true;
 	var sDrawSpeed = 0.2;
 
-	var clock = new THREE.Clock();			// clock
+	var clock = new THREE.Clock(); // clock
 
-	var PI2 = -Math.PI * 1.99;					// PI2
+	var PI2 = -Math.PI * 1.99; // PI2
 
 	var mouse = { x: 0, y: 0 }, INTERSECTED;
 	var sCoeffCameraMove = 0;
+
+	expose('container', function () { return container; }, function (v) { container = v; });
+	expose('camera', function () { return camera; }, function (v) { camera = v; });
+	expose('scene', function () { return scene; }, function (v) { scene = v; });
+	expose('sceneInfo', function () { return sceneInfo; }, function (v) { sceneInfo = v; });
+	expose('projector', function () { return projector; }, function (v) { projector = v; });
+	expose('renderer', function () { return renderer; }, function (v) { renderer = v; });
+	expose('cameraManager', function () { return cameraManager; }, function (v) { cameraManager = v; });
+	expose('mousePosition', function () { return mousePosition; }, function (v) { mousePosition = v; });
+	expose('cameraTarget', function () { return cameraTarget; }, function (v) { cameraTarget = v; });
+	expose('cameraTargetCurrent', function () { return cameraTargetCurrent; }, function (v) { cameraTargetCurrent = v; });
+	expose('cameraPosition', function () { return cameraPosition; }, function (v) { cameraPosition = v; });
+	expose('canInteract', function () { return canInteract; }, function (v) { canInteract = v; });
+	expose('SELECTED', function () { return SELECTED; }, function (v) { SELECTED = v; });
+	expose('Organigram', function () { return Organigram; }, function (v) { Organigram = v; });
+	expose('isRoot', function () { return isRoot; }, function (v) { isRoot = v; });
+	expose('sMinLoading', function () { return sMinLoading; }, function (v) { sMinLoading = v; });
+	expose('sProjectsToRandom', function () { return sProjectsToRandom; }, function (v) { sProjectsToRandom = v; });
+	expose('infoDisplay', function () { return infoDisplay; }, function (v) { infoDisplay = v; });
+	expose('sDrawScene', function () { return sDrawScene; }, function (v) { sDrawScene = v; });
+	expose('sDrawSpeed', function () { return sDrawSpeed; }, function (v) { sDrawSpeed = v; });
+	expose('clock', function () { return clock; }, function (v) { clock = v; });
+	expose('PI2', function () { return PI2; }, function (v) { PI2 = v; });
+	expose('mouse', function () { return mouse; }, function (v) { mouse = v; });
+	expose('INTERSECTED', function () { return INTERSECTED; }, function (v) { INTERSECTED = v; });
+	expose('sCoeffCameraMove', function () { return sCoeffCameraMove; }, function (v) { sCoeffCameraMove = v; });
 
 	init();
 	animate();
@@ -330,3 +365,4 @@
 		renderer.render(scene, camera);
 
 	}
+})();
