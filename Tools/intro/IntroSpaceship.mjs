@@ -1,6 +1,19 @@
 /**
  * Small physics spaceship for the intro: left/right rotate, up fires the engine.
  */
+function programGravityDebugCross(context) {
+	context.lineWidth = 0.1;
+	context.beginPath();
+	context.moveTo(-0.55, 0);
+	context.lineTo(0.55, 0);
+	context.moveTo(0, -0.55);
+	context.lineTo(0, 0.55);
+	context.stroke();
+	context.beginPath();
+	context.arc(0, 0, 0.18, 0, Math.PI * 2, true);
+	context.stroke();
+}
+
 export function IntroSpaceship(position, size) {
 	var THREE = globalThis.THREE;
 	var scene = globalThis.scene;
@@ -9,7 +22,8 @@ export function IntroSpaceship(position, size) {
 	this.angle = 0;
 	this.rotationSpeed = 3.4;
 	this.thrust = size * 7.5;
-	this.gravity = size * 2.3;
+	this.gravity = size * 20.3;
+	this.planetGravity = size * window.innerWidth * 3650;
 	this.drag = 0.993;
 	this.bounce = 0.42;
 	this.maxSpeed = size * 4.5;
@@ -36,6 +50,9 @@ export function IntroSpaceship(position, size) {
 	this.particle.rotation.z = 0;
 	this.particle.boundRadiusScale = 0.7;
 	scene.add(this.particle);
+
+	this.showGravityDebug = true;
+	this.gravityDebugMarkers = [];
 
 	window.addEventListener('keydown', this.onKeyDown, false);
 	window.addEventListener('keyup', this.onKeyUp, false);
@@ -96,15 +113,82 @@ IntroSpaceship.prototype.limitSpeed = function () {
 	this.speed.y *= ratio;
 };
 
-IntroSpaceship.prototype.Update = function (delta, bounds) {
+IntroSpaceship.prototype.updateGravityDebugMarkers = function (gravityBodies) {
+	if (!this.showGravityDebug || !globalThis.scene) {
+		return;
+	}
+
+	var THREE = globalThis.THREE;
+	var scene = globalThis.scene;
+	var markerSize = this.size * 0.35;
+
+	while (this.gravityDebugMarkers.length < gravityBodies.length) {
+		var marker = new THREE.Particle(
+			new THREE.ParticleCanvasMaterial({
+				color: 0xff3dff,
+				program: programGravityDebugCross,
+				transparent: true,
+				opacity: 0.95,
+			})
+		);
+		marker.scale.x = marker.scale.y = markerSize;
+		scene.add(marker);
+		this.gravityDebugMarkers.push(marker);
+	}
+
+	while (this.gravityDebugMarkers.length > gravityBodies.length) {
+		scene.remove(this.gravityDebugMarkers.pop());
+	}
+
+	for (var i = 0; i < gravityBodies.length; i++) {
+		var body = gravityBodies[i];
+		var marker = this.gravityDebugMarkers[i];
+		marker.position.x = body.x;
+		marker.position.y = body.y;
+		marker.position.z = body.z + 1;
+		marker.scale.x = marker.scale.y = markerSize * (0.6 + body.mass * 0.35);
+	}
+};
+
+IntroSpaceship.prototype.applyPlanetGravity = function (delta, gravityBodies) {
+	if (!gravityBodies || gravityBodies.length === 0) {
+		return;
+	}
+
+	var softening = this.size * 20.2;
+	var softeningSq = softening;
+	var maxBodyAcceleration = this.gravity * 2.4;
+	for (var i = 0; i < gravityBodies.length; i++) {
+		var body = gravityBodies[i];
+		var dx = body.x - this.particle.position.x;
+		var dy = body.y - this.particle.position.y;
+		var distanceSq = dx * dx + dy * dy + softeningSq;
+		var distance = distanceSq;
+		if (distance < 0.001) {
+			continue;
+		}
+		var acceleration = this.planetGravity * body.mass / distanceSq;
+		acceleration = Math.min(acceleration, maxBodyAcceleration);
+
+		this.speed.x += dx / distance * acceleration * delta;
+		this.speed.y += dy / distance * acceleration * delta;
+	}
+};
+
+IntroSpaceship.prototype.Update = function (delta, bounds, gravityBodies) {
 	delta = Math.min(delta, 0.05);
+
+	if (gravityBodies) {
+		this.updateGravityDebugMarkers(gravityBodies);
+	}
 
 	var turn = 0;
 	if (this.controls.left) turn += 1;
 	if (this.controls.right) turn -= 1;
 	this.angle += turn * this.rotationSpeed * delta;
 
-	this.speed.y -= this.gravity * delta;
+	// this.speed.y -= this.gravity * delta;
+	this.applyPlanetGravity(delta, gravityBodies);
 	if (this.controls.up) {
 		this.speed.x += Math.sin(this.angle) * this.thrust * delta;
 		this.speed.y -= Math.cos(this.angle) * this.thrust * delta;
@@ -128,7 +212,11 @@ IntroSpaceship.prototype.Destroy = function () {
 	window.removeEventListener('keyup', this.onKeyUp, false);
 	if (globalThis.scene) {
 		globalThis.scene.remove(this.particle);
+		for (var i = 0; i < this.gravityDebugMarkers.length; i++) {
+			globalThis.scene.remove(this.gravityDebugMarkers[i]);
+		}
 	}
+	this.gravityDebugMarkers = [];
 };
 
 IntroSpaceship.prototype.programSpaceship = function (context) {

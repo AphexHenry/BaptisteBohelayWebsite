@@ -86,6 +86,7 @@
 		lIntro.AddParticle(programmingMonster);
 		// lIntro.AddParticle(randomLastProject);
 		lIntro.AddParticle(aboutMe);
+		lIntro.InitSpaceshipPlayfield(lMenuPosition);
 
 		// creations type
 		var flyer = [];
