@@ -19,7 +19,6 @@ export function MonsterIntroLeg(monsterIntro) {
 	this.state = LegStates.REST;
 	this.size = 0;
 	this.sizeMax = 2.;
-	this.sizeRest = 0.95;
 	this.posHandCurrent = new THREE.Vector2();
 	this.posHandTarget = new THREE.Vector2();
 	this.posHandInit = new THREE.Vector2();
@@ -28,7 +27,6 @@ export function MonsterIntroLeg(monsterIntro) {
 	this.speed = 0.9 + Math.random() * 0.2;
 	this.pose = null;
 	this.scratchCoeff = 0;
-	this.restCurlBlend = 0;
 }
 
 MonsterIntroLeg.prototype.SetAngle = function (angle) {
@@ -100,9 +98,7 @@ MonsterIntroLeg.prototype.Update = function (delta, amp) {
 	var angle = this.angle;
 	var gotObject = this.gotObject;
 	var isRest = this.state === LegStates.REST;
-	var sizeTarget = isRest ? this.sizeRest : this.sizeMax;
-	var restCurlTarget = isRest && this.monsterIntro.introMode === 'resting' ? 1 : 0;
-	this.restCurlBlend += (restCurlTarget - this.restCurlBlend) * Math.min(1, delta * 0.7);
+	var sizeTarget = isRest ? 0 : this.sizeMax;
 
 	this.size += (sizeTarget - this.size) * delta * 0.5;
 	if (this.size < 0.05) {

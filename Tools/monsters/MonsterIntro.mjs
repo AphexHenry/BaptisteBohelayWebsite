@@ -90,79 +90,9 @@ function drawArm(context, leg) {
 		return;
 	}
 
-	var restCurlBlend = leg.restCurlBlend || 0;
-	if (restCurlBlend > 0.001) {
-		drawRestArm(context, leg, restCurlBlend);
-		return;
-	}
-
 	context.beginPath();
 	context.moveTo(legPose.posHandX, legPose.posHandY);
 	context.quadraticCurveTo(legPose.posElbowX, legPose.posElbowY, legPose.posShoulderX, legPose.posShoulderY);
-	context.stroke();
-}
-
-function getQuadraticPoint(startX, startY, controlX, controlY, endX, endY, t) {
-	var invT = 1 - t;
-	return {
-		x: invT * invT * startX + 2 * invT * t * controlX + t * t * endX,
-		y: invT * invT * startY + 2 * invT * t * controlY + t * t * endY,
-	};
-}
-
-function drawRestArm(context, leg, blend) {
-	var legPose = leg.pose;
-	var count = 60;
-	var points = [];
-	var angle = leg.angle;
-	var phase = (globalThis.sGeneralTimer || 0) + leg.random * Math.PI * 2;
-	var shoulderX = legPose.posShoulderX;
-	var shoulderY = legPose.posShoulderY;
-	var handX = legPose.posHandX;
-	var handY = legPose.posHandY;
-	var dx = handX - shoulderX;
-	var dy = handY - shoulderY;
-	var length = Math.max(0.001, Math.sqrt(dx * dx + dy * dy));
-	var px = shoulderX;
-	var py = shoulderY;
-	var theta = 0;
-
-	points.push({ x: px, y: py });
-	for (var i = 1; i <= count; i++) {
-		var t = i / count;
-		theta += Math.sin(phase + t * Math.PI * 2.227217823) * i * 0.01;
-		px += Math.cos(theta + angle) * length / count;
-		py += Math.sin(theta + angle) * length / count;
-		points.push({ x: px, y: py });
-	}
-
-	var endOffsetX = handX - points[count].x;
-	var endOffsetY = handY - points[count].y;
-
-	context.beginPath();
-	for (var j = 0; j <= count; j++) {
-		var progress = j / count;
-		var curlPoint = points[j];
-		var basePoint = getQuadraticPoint(
-			shoulderX,
-			shoulderY,
-			legPose.posElbowX,
-			legPose.posElbowY,
-			handX,
-			handY,
-			progress
-		);
-		var correctedCurlX = curlPoint.x + endOffsetX * progress;
-		var correctedCurlY = curlPoint.y + endOffsetY * progress;
-		var x = basePoint.x + (correctedCurlX - basePoint.x) * blend;
-		var y = basePoint.y + (correctedCurlY - basePoint.y) * blend;
-
-		if (j === 0) {
-			context.moveTo(x, y);
-		} else {
-			context.lineTo(x, y);
-		}
-	}
 	context.stroke();
 }
 

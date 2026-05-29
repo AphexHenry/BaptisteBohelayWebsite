@@ -5,6 +5,7 @@
  * classic scripts in order, use registerParticleGroupMonsterGlobals.mjs (main site).
  */
 import { MonsterIntro } from '../monsters/MonsterIntro.mjs';
+import { IntroSpaceship } from './IntroSpaceship.mjs';
 
 var lIndexStates = 0;
 export var ResumeStates = {
@@ -13,6 +14,7 @@ export var ResumeStates = {
 };
 
 export function ParticleGroupMonster(positionCenter, name) {
+	var THREE = globalThis.THREE;
 	var sTools = globalThis.sTools;
 
 	this.width = (window.innerWidth + window.innerHeight) * 0.5 * 0.3;
@@ -40,6 +42,14 @@ export function ParticleGroupMonster(positionCenter, name) {
 	this.nextIntroStringIndex = 0;
 
 	this.monster = new MonsterIntro(positionCenter, this.width, this);
+	this.spaceship = new IntroSpaceship(
+		new THREE.Vector3(
+			positionCenter.x - window.innerWidth * 0.32,
+			positionCenter.y - window.innerHeight * 0.18,
+			positionCenter.z + 1
+		),
+		this.width * 0.18
+	);
 	this.monsterEndPosition = null;
 	this.monsterEndScale = null;
 	// this.monsterPathProgress = 0;
@@ -229,7 +239,7 @@ ParticleGroupMonster.prototype.AddString = function (aText, aPosition, aTextSize
 		if (char !== ' ') {
 			var isMonsterEndTarget = aText == "BAPTISTE BOHELAY" && char == "O";
 			var slotIndex = this.nextIntroLetterSlotIndex++;
-			var isFinalPosition = i == 0 || i % 3 != 0 || isMonsterEndTarget;
+			var isFinalPosition = i == 0 || i % 4 != 0 || isMonsterEndTarget;
 			if (!isFinalPosition && maxToMove <= 0) {
 				isFinalPosition = true;
 			}
@@ -528,6 +538,15 @@ ParticleGroupMonster.prototype.GetCameraPosition = function () {
 	);
 }
 
+ParticleGroupMonster.prototype.GetSpaceshipBounds = function () {
+	return {
+		minX: this.positionCenter.x - window.innerWidth * 0.48,
+		maxX: this.positionCenter.x + window.innerWidth * 0.48,
+		minY: this.positionCenter.y - window.innerHeight * 0.42,
+		maxY: this.positionCenter.y + window.innerHeight * 0.42,
+	};
+}
+
 ParticleGroupMonster.prototype.AreIntroLettersSettled = function () {
 	for (var i = 0; i < this.foodArray.length; i++) {
 		var target = this.foodArray[i].TargetObject.positionTarget;
@@ -723,6 +742,7 @@ ParticleGroupMonster.prototype.Update = function (delta) {
 
 	this.UpdateFood(delta);
 
+	this.spaceship.Update(delta, this.GetSpaceshipBounds());
 	this.monster.Update(delta);
 	this.UpdateMenuParticles(delta);
 	this.UpdateNavigatorsRotation();
@@ -749,6 +769,9 @@ ParticleGroupMonster.prototype.Terminate = function()
 	// {
 	// 	scene.remove(this.foodArray[i]);
 	// }
+	if (this.spaceship) {
+		this.spaceship.Destroy();
+	}
 }
 
 ParticleGroupMonster.prototype.UpdateIntersectPlane = function () {
