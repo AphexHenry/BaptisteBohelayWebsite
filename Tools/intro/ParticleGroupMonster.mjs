@@ -5,6 +5,7 @@
  * classic scripts in order, use registerParticleGroupMonsterGlobals.mjs (main site).
  */
 import { MonsterIntro } from '../monsters/MonsterIntro.mjs';
+import { Navigation } from '../Navigation.mjs';
 import { IntroSpaceship } from './IntroSpaceship.mjs';
 
 var lIndexStates = 0;
@@ -459,8 +460,6 @@ ParticleGroupMonster.prototype.SelectMenuParticle = function (aParticle) {
 	var isdefined = globalThis.isdefined;
 	var programStroke = globalThis.programStroke;
 	var OPACITY_INFO = globalThis.OPACITY_INFO;
-	var GoToIndex = globalThis.GoToIndex;
-	var CirclesToHtml = globalThis.CirclesToHtml;
 	var GoToURL = globalThis.GoToURL;
 	var ImageFrontCtx = globalThis.ImageFrontCtx;
 
@@ -475,11 +474,11 @@ ParticleGroupMonster.prototype.SelectMenuParticle = function (aParticle) {
 	aParticle.TargetObject.info.material.opacity = OPACITY_INFO;
 	if(typeof aParticle.TargetObject.target != "undefined")
 	{
-		GoToIndex(aParticle.TargetObject.target);
+		Navigation.goToIndex(aParticle.TargetObject.target);
 	}
 	else if(typeof aParticle.TargetObject.targetHTML != "undefined")
 	{
-		CirclesToHtml(aParticle.TargetObject.targetHTML);
+		Navigation.circlesToHtml(aParticle.TargetObject.targetHTML);
 	}
 	else if(typeof aParticle.TargetObject.targetURL != "undefined")
 	{

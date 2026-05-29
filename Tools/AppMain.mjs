@@ -2,6 +2,8 @@
  * Main site bootstrap (formerly inline in index.html).
  * Loaded as an ES module after Template / particle globals are registered.
  */
+import { Navigation } from './Navigation.mjs';
+
 (function () {
 	function expose(name, get, set) {
 		Object.defineProperty(globalThis, name, {
@@ -23,7 +25,7 @@
 	var cameraPosition = new THREE.Vector3(); // where the camera is.
 	var canInteract = true; // if false, the user can't interact with the website (like for animations states).
 	var SELECTED = null; // current bubble selected.
-	var Organigram = new Organigram(); // tree of relations between "pages" or actually group of bubbles.
+	var organigram = new globalThis.Organigram(); // tree of relations between "pages" or actually group of bubbles.
 	var isRoot = false; // if true, we actually are at the home "page".
 	var sMinLoading = 1.;
 
@@ -54,7 +56,8 @@
 	expose('cameraPosition', function () { return cameraPosition; }, function (v) { cameraPosition = v; });
 	expose('canInteract', function () { return canInteract; }, function (v) { canInteract = v; });
 	expose('SELECTED', function () { return SELECTED; }, function (v) { SELECTED = v; });
-	expose('Organigram', function () { return Organigram; }, function (v) { Organigram = v; });
+	// Organigram.js already defines the constructor on globalThis; replace with the live instance.
+	globalThis.Organigram = organigram;
 	expose('isRoot', function () { return isRoot; }, function (v) { isRoot = v; });
 	expose('sMinLoading', function () { return sMinLoading; }, function (v) { sMinLoading = v; });
 	expose('sProjectsToRandom', function () { return sProjectsToRandom; }, function (v) { sProjectsToRandom = v; });
@@ -159,12 +162,12 @@
 			if (lHTMLToGo[0] == "#" + sTools.ParticleGroups[i].name) {
 				lGroupToGo = i;
 				if (lHTMLToGo.length > 1) {
-					CirclesToHtmlEncoded(lHTMLToGo[1]);
+					Navigation.circlesToHtmlEncoded(lHTMLToGo[1]);
 				}
 				break;
 			}
 		}
-		if (!sIsInHTML) {
+		if (!Navigation.isInHTML) {
 			sTools.FadeIn();
 		}
 		if (sGroupCurrent != sTools.ParticleGroup.PART_INTRO) {
@@ -186,7 +189,7 @@
 		camera.position = cameraPosition.clone();
 		cameraManager.SetPositionPixel(cameraPosition);
 		cameraManager.LookAt(cameraTarget);
-		GoToIndex(lGroupToGo);
+		Navigation.goToIndex(lGroupToGo);
 		if (lGroupToGo === sTools.ParticleGroup.PART_INTRO || lGroupToGo === sTools.ParticleGroup.PART_PROGRAMMING) {
 			cameraManager.SetControlMode(sTools.CameraControlType.NONE);
 		}
@@ -227,17 +230,17 @@
 	}
 
 	window.onhashchange = function () {
-		if (!sIsInHTML) {
+		if (!Navigation.isInHTML) {
 			for (var i in sTools.ParticleGroups) {
-				if (GetHashGroup() == sTools.ParticleGroups[i].name) {
-					GoToIndex(i);
+				if (Navigation.getHashGroup() == sTools.ParticleGroups[i].name) {
+					Navigation.goToIndex(i);
 					return;
 				}
 			}
 		}
 		else {
-			SetHashGroup(sTools.ParticleGroups[sGroupCurrent].name);
-			HtmlToCircles();
+			Navigation.setHashGroup(sTools.ParticleGroups[sGroupCurrent].name);
+			Navigation.htmlToCircles();
 		}
 	}
 
@@ -306,8 +309,8 @@
 			sMinLoading -= 0.02;
 			if (sMinLoading <= 0) {
 				sMinLoading = -2;
-				if (!sIsInHTML)
-					LoadedInitDisplay()
+				if (!Navigation.isInHTML)
+					Navigation.loadedInitDisplay()
 			}
 			return;
 		}
