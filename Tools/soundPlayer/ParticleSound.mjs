@@ -191,8 +191,8 @@ export function ParticleSound(aPositionHome, volume, aTargetObject) {
 	);
 	particle.mParent = this;
 	particle.position = aPositionHome.clone();
-	particle.position.x += myRandom() * window.innerWidth * 0.05;
-	particle.position.y += myRandom() * window.innerHeight * 0.05;
+	// particle.position.x += myRandom() * window.innerWidth * 0.05;
+	// particle.position.y += myRandom() * window.innerHeight * 0.05;
 
 	this.mPositionCenter = particle.position.clone();
 
@@ -204,7 +204,7 @@ export function ParticleSound(aPositionHome, volume, aTargetObject) {
 	}
 
 	var infoText = [];
-	infoText.push({ string: this.name, size: 2 });
+	infoText.push({ string: this.name, size: 3 });
 	var drawInfoText = function (context, text) {
 		context.fillStyle = '#000000';
 		context.textAlign = 'left';
@@ -354,8 +354,8 @@ ParticleSound.prototype.Update = function (delta) {
 	}
 
 	this.mSpeedTimer += delta * 0.5;
-	this.mParticle.position.x += this.mSpeed.x * delta;
-	this.mParticle.position.y += this.mSpeed.y * delta;
+	// this.mParticle.position.x += this.mSpeed.x * delta;
+	// this.mParticle.position.y += this.mSpeed.y * delta;
 	this.mSpeed.x +=
 		globalThis.myRandom() * delta +
 		Math.cos(this.mSpeedTimer + this.mAngleDecay) * 0.2 +

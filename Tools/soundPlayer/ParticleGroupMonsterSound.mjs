@@ -45,7 +45,10 @@ export function ParticleGroupMonsterSound(positionCenter, name) {
 	this.name = name;
 	this.timer = 0;
 
-	this.monster = new MonsterSound(positionCenter, this.width);
+	this.monster = new MonsterSound(
+		new THREE.Vector3(positionCenter.x, positionCenter.y - window.innerHeight * 1.05, positionCenter.z),
+		this.width * 2
+	);
 	this.InitFood(this.width);
 	this.InitSurface(this.width);
 }
@@ -78,149 +81,34 @@ ParticleGroupMonsterSound.prototype.InitSurface = function (width) {
 
 ParticleGroupMonsterSound.prototype.InitFood = function (aName, position, size, url) {
 	var THREE = globalThis.THREE;
-	var myRandom = globalThis.myRandom;
 
-	var randAngle = myRandom() * Math.PI;
+	var rowSpacing = window.innerHeight * 0.2;
+	var colTopY = this.positionCenter.y + window.innerHeight * 0.8;
+	var leftX = this.positionCenter.x - window.innerWidth * 1;
+	var rightX = this.positionCenter.x - window.innerWidth * .5;
+	var z = this.positionCenter.z;
+
 	this.positionHomeMonsters = [];
 	this.positionHomeMonsters[0] = {
-		pos: new THREE.Vector3(
-			this.positionCenter.y - window.innerWidth * 0.7,
-			this.positionCenter.y + window.innerHeight * 0.5,
-			this.positionCenter.z
-		),
+		pos: new THREE.Vector3(leftX, colTopY, z),
 		name: 'sound monsters',
 	};
-	this.AddFood(
-		'tripouille',
-		new THREE.Vector3(
-			this.positionHomeMonsters[0].pos.x,
-			this.positionHomeMonsters[0].pos.y + window.innerHeight * 0.2,
-			this.positionHomeMonsters[0].pos.z
-		),
-		1.,
-		'data/sound/Monsters/Tripouille.mp3',
-		0.7
-	);
-	this.AddFood(
-		'elevator song',
-		new THREE.Vector3(
-			this.positionHomeMonsters[0].pos.x + window.innerWidth * 0.3,
-			this.positionHomeMonsters[0].pos.y,
-			this.positionHomeMonsters[0].pos.z
-		),
-		1.,
-		'data/sound/Monsters/ElevatorSong.mp3',
-		1.
-	);
-	this.AddFood(
-		'raw cut',
-		new THREE.Vector3(
-			this.positionHomeMonsters[0].pos.x + window.innerWidth * 0.6,
-			this.positionHomeMonsters[0].pos.y + window.innerHeight * 0.2,
-			this.positionHomeMonsters[0].pos.z
-		),
-		1.,
-		'data/sound/Monsters/RawCut.mp3',
-		0.4
-	);
-	this.AddFood(
-		'good bye Rowan',
-		new THREE.Vector3(
-			this.positionHomeMonsters[0].pos.x + window.innerWidth * 0.9,
-			this.positionHomeMonsters[0].pos.y,
-			this.positionHomeMonsters[0].pos.z
-		),
-		1.,
-		'data/sound/Monsters/GoodByeRowan.mp3',
-		1.2
-	);
+	this.AddFood('tripouille', new THREE.Vector3(leftX, colTopY, z), 1., 'data/sound/Monsters/Tripouille.mp3', 0.7);
+	this.AddFood('elevator song', new THREE.Vector3(leftX, colTopY - rowSpacing, z), 1., 'data/sound/Monsters/ElevatorSong.mp3', 1.);
+	this.AddFood('raw cut', new THREE.Vector3(leftX, colTopY - rowSpacing * 2, z), 1., 'data/sound/Monsters/RawCut.mp3', 0.4);
+	this.AddFood('good bye Rowan', new THREE.Vector3(leftX, colTopY - rowSpacing * 3, z), 1., 'data/sound/Monsters/GoodByeRowan.mp3', 1.2);
 
-	randAngle += Math.PI + myRandom() * 0.3;
 	this.positionHomeMonsters[1] = {
-		pos: new THREE.Vector3(
-			this.positionCenter.y - window.innerWidth * 0.7,
-			this.positionCenter.y - window.innerHeight * 0.7,
-			this.positionCenter.z
-		),
+		pos: new THREE.Vector3(rightX, colTopY, z),
 		name: "lulu's soundtrack",
 	};
-	this.AddFood(
-		'bycicle',
-		new THREE.Vector3(
-			this.positionHomeMonsters[1].pos.x,
-			this.positionHomeMonsters[1].pos.y + window.innerHeight * 0.2,
-			this.positionHomeMonsters[1].pos.z
-		),
-		1.,
-		'data/sound/Lulu/bycicle.mp3',
-		1.
-	);
-	this.AddFood(
-		'theatre',
-		new THREE.Vector3(
-			this.positionHomeMonsters[1].pos.x + window.innerWidth * 0.2,
-			this.positionHomeMonsters[1].pos.y,
-			this.positionHomeMonsters[1].pos.z
-		),
-		1.,
-		'data/sound/Lulu/intro.mp3',
-		1.
-	);
-	this.AddFood(
-		'love',
-		new THREE.Vector3(
-			this.positionHomeMonsters[1].pos.x + window.innerWidth * 0.4,
-			this.positionHomeMonsters[1].pos.y + window.innerHeight * 0.2,
-			this.positionHomeMonsters[1].pos.z
-		),
-		1.,
-		'data/sound/Lulu/love.mp3',
-		1.
-	);
-	this.AddFood(
-		'morvan',
-		new THREE.Vector3(
-			this.positionHomeMonsters[1].pos.x + window.innerWidth * 0.6,
-			this.positionHomeMonsters[1].pos.y,
-			this.positionHomeMonsters[1].pos.z
-		),
-		1.,
-		'data/sound/Lulu/morvan.mp3',
-		1.
-	);
-	this.AddFood(
-		'yokais',
-		new THREE.Vector3(
-			this.positionHomeMonsters[1].pos.x + window.innerWidth * 0.8,
-			this.positionHomeMonsters[1].pos.y + window.innerHeight * 0.2,
-			this.positionHomeMonsters[1].pos.z
-		),
-		1.,
-		'data/sound/Lulu/musicAphex3.mp3',
-		1.
-	);
-	this.AddFood(
-		'raclement',
-		new THREE.Vector3(
-			this.positionHomeMonsters[1].pos.x + window.innerWidth * 1.,
-			this.positionHomeMonsters[1].pos.y,
-			this.positionHomeMonsters[1].pos.z
-		),
-		1.,
-		'data/sound/Lulu/raclement.mp3',
-		1.
-	);
-	this.AddFood(
-		'scutigerus',
-		new THREE.Vector3(
-			this.positionHomeMonsters[1].pos.x + window.innerWidth * 1.2,
-			this.positionHomeMonsters[1].pos.y + window.innerHeight * 0.2,
-			this.positionHomeMonsters[1].pos.z
-		),
-		1.,
-		'data/sound/Lulu/tripouille.mp3',
-		1.
-	);
+	this.AddFood('bycicle', new THREE.Vector3(rightX, colTopY, z), 1., 'data/sound/Lulu/bycicle.mp3', 1.);
+	this.AddFood('theatre', new THREE.Vector3(rightX, colTopY - rowSpacing, z), 1., 'data/sound/Lulu/intro.mp3', 1.);
+	this.AddFood('love', new THREE.Vector3(rightX, colTopY - rowSpacing * 2, z), 1., 'data/sound/Lulu/love.mp3', 1.);
+	this.AddFood('morvan', new THREE.Vector3(rightX, colTopY - rowSpacing * 3, z), 1., 'data/sound/Lulu/morvan.mp3', 1.);
+	this.AddFood('yokais', new THREE.Vector3(rightX, colTopY - rowSpacing * 4, z), 1., 'data/sound/Lulu/musicAphex3.mp3', 1.);
+	this.AddFood('raclement', new THREE.Vector3(rightX, colTopY - rowSpacing * 5, z), 1., 'data/sound/Lulu/raclement.mp3', 1.);
+	this.AddFood('scutigerus', new THREE.Vector3(rightX, colTopY - rowSpacing * 6, z), 1., 'data/sound/Lulu/tripouille.mp3', 1.);
 };
 
 ParticleGroupMonsterSound.prototype.AddFood = function (aName, position, size, url, volume) {
@@ -285,13 +173,13 @@ ParticleGroupMonsterSound.prototype.MouseDown = function () {
 ParticleGroupMonsterSound.prototype.UpdateCamera = function (delta) {
 	var sPlayingSound = globalThis.sPlayingSound;
 
-	if (sPlayingSound) {
-		this.timer += delta * 0.2;
-		this.cameraDistance = window.innerWidth * 0.4;
-	} else {
+	// if (sPlayingSound) {
+		// this.timer += delta * 0.2;
+		// this.cameraDistance = window.innerWidth * 0.4;
+	// } else {
 		this.timer = 0.;
 		this.cameraDistance = window.innerWidth * 0.99;
-	}
+	// }
 	globalThis.cameraTarget = this.positionCenter;
 	globalThis.cameraPosition.x = this.positionCenter.x + Math.sin(this.timer) * this.cameraDistance;
 	globalThis.cameraPosition.y = this.positionCenter.y + Math.sin(this.timer) * this.cameraDistance;
@@ -375,8 +263,8 @@ ParticleGroupMonsterSound.prototype.UpdateIntersectPlane = function () {
 	var THREE = globalThis.THREE;
 	var mouse = globalThis.mouse;
 
-	var i = mouse.y < 0 ? 1 : 0;
-	if (Math.abs(mouse.y) < 0.3) {
+	var i = mouse.x < 0 ? 0 : 1;
+	if (Math.abs(mouse.x) < 0.3) {
 		globalThis.infoDisplay.FadeOut();
 		return;
 	}

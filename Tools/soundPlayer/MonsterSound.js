@@ -88,19 +88,18 @@ programMonsterSound = function ( context )
 DrawBodySound = function(context)
 {
 	context.beginPath();
+	context.lineWidth = 0.007;
 	if(sWaveFormData.length == 0)
 	{
 		sRayCircle = 0.3;
 	    var centerX = 0.;
 	    var centerY = 0.;
-	    context.lineWidth = 0.02;
 	    context.arc( centerX, centerY, sRayCircle, 0, PI2, true );
 	}
 	else
 	{
 		sRayCircle = 0.3 + sLengthLegsSound.right * 0.3;
 		var radius = sRayCircle;
-		var lastradius = sRayCircle;
 		var angleDecay = 2 * Math.PI / (sWaveFormData.length + 1);
 		var firstpoint = 0.5 * 0.3 * (parseFloat(sWaveFormData[0]) + parseFloat(sWaveFormData[sWaveFormData.length - 1]))
 		context.moveTo((firstpoint + 1) * sRayCircle, 0);
