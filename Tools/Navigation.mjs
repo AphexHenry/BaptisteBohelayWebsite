@@ -1,10 +1,17 @@
 /**
  * Site navigation: particle groups, hash routing, and HTML overlay transitions.
  * Uses globalThis for app state shared with classic scripts (camera, sTools, etc.).
+ * Active particle group index lives in module state; exposed as Navigation.groupCurrent
+ * and legacy globalThis.sGroupCurrent (setter routes through goToIndex).
  */
 
 let isInHTML = false;
 let currentGroup;
+let groupCurrent = globalThis.sTools?.ParticleGroup?.PART_INTRO ?? 1;
+
+function setGroupCurrentIndex(index) {
+	groupCurrent = +index;
+}
 
 export const Navigation = {
 	get isInHTML() {
@@ -12,6 +19,10 @@ export const Navigation = {
 	},
 	set isInHTML(value) {
 		isInHTML = value;
+	},
+
+	get groupCurrent() {
+		return groupCurrent;
 	},
 
 	goToIndex(index) {
@@ -27,21 +38,21 @@ export const Navigation = {
 			return;
 		}
 
-		var prevIndex = globalThis.sGroupCurrent;
+		var prevIndex = groupCurrent;
 		logNav('enter (from ' + (groups?.[prevIndex]?.name ?? prevIndex) + ')');
 
-		if (index != globalThis.sGroupCurrent) {
-			if (globalThis.sGroupCurrent >= 0) {
+		if (index != groupCurrent) {
+			if (groupCurrent >= 0) {
 				this.globalGroupTerminate();
 			}
-			globalThis.sGroupCurrent = index;
+			setGroupCurrentIndex(index);
 			this.globalGroupInit();
 
-			this.setHashGroup(globalThis.sTools.ParticleGroups[globalThis.sGroupCurrent].name);
+			this.setHashGroup(globalThis.sTools.ParticleGroups[groupCurrent].name);
 			globalThis.SELECTED = globalThis.INTERSECTED = null;
 			globalThis.sCoeffCameraMove = 0;
 			globalThis.sButtonsBack.OnChange();
-			var prev = globalThis.Organigram.GetFather(globalThis.sGroupCurrent);
+			var prev = globalThis.Organigram.GetFather(groupCurrent);
 			if (prev < 0) {
 				globalThis.isRoot = true;
 				this.setBackButton(false);
@@ -61,11 +72,11 @@ export const Navigation = {
 	},
 
 	goBack() {
-		this.goToIndex(globalThis.Organigram.GetFather(globalThis.sGroupCurrent));
+		this.goToIndex(globalThis.Organigram.GetFather(groupCurrent));
 	},
 
 	globalGroupInit() {
-		currentGroup = globalThis.sTools.ParticleGroups[globalThis.sGroupCurrent];
+		currentGroup = globalThis.sTools.ParticleGroups[groupCurrent];
 		currentGroup.Init();
 
 		if (globalThis.isdefined(currentGroup.particles)) {
@@ -78,7 +89,7 @@ export const Navigation = {
 	},
 
 	globalGroupTerminate() {
-		currentGroup = globalThis.sTools.ParticleGroups[globalThis.sGroupCurrent];
+		currentGroup = globalThis.sTools.ParticleGroups[groupCurrent];
 		currentGroup.Terminate();
 
 		if (globalThis.isdefined(currentGroup.particles)) {
@@ -109,8 +120,8 @@ export const Navigation = {
 		this.setBackButton(true);
 		globalThis.sButtonsBack.OnChange();
 		this.setHashHTML('');
-		if (globalThis.isdefined(globalThis.sTools.ParticleGroups[globalThis.sGroupCurrent].BackFromHTML)) {
-			globalThis.sTools.ParticleGroups[globalThis.sGroupCurrent].BackFromHTML();
+		if (globalThis.isdefined(globalThis.sTools.ParticleGroups[groupCurrent].BackFromHTML)) {
+			globalThis.sTools.ParticleGroups[groupCurrent].BackFromHTML();
 		}
 	},
 
@@ -129,8 +140,8 @@ export const Navigation = {
 		globalThis.canInteract = true;
 		this.setBackButton(true);
 		this.setHashHTML('');
-		if (globalThis.isdefined(globalThis.sTools.ParticleGroups[globalThis.sGroupCurrent].BackFromHTML)) {
-			globalThis.sTools.ParticleGroups[globalThis.sGroupCurrent].BackFromHTML();
+		if (globalThis.isdefined(globalThis.sTools.ParticleGroups[groupCurrent].BackFromHTML)) {
+			globalThis.sTools.ParticleGroups[groupCurrent].BackFromHTML();
 		}
 	},
 
@@ -221,7 +232,7 @@ export const Navigation = {
 		if (isInHTML) {
 			this.htmlToCircles();
 		} else {
-			var prev = globalThis.Organigram.GetFather(globalThis.sGroupCurrent);
+			var prev = globalThis.Organigram.GetFather(groupCurrent);
 			if (prev > -1) {
 				this.goToIndex(prev);
 			}

@@ -3,9 +3,9 @@
  * Loads after EvolutionManager.js and ParticleLetter.js.
  */
 import { MonsterIntro } from '../monsters/MonsterIntro.mjs';
-import { ParticleGroupMonster, ResumeStates } from './ParticleGroupMonster.mjs';
+import { ParticleGroupIntro, ResumeStates } from './ParticleGroupIntro.mjs';
 
 globalThis.MonsterIntro = MonsterIntro;
-globalThis.ParticleGroupMonster = ParticleGroupMonster;
+globalThis.ParticleGroupIntro = ParticleGroupIntro;
 globalThis.ResumeStates = ResumeStates;
 globalThis.sCurrentResumeSate = ResumeStates.INIT;

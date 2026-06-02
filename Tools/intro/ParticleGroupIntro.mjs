@@ -2,7 +2,7 @@
  * Intro particle group: name letters, menu navigators, and the intro monster.
  *
  * Import named exports from this file in ES modules. For legacy pages that load
- * classic scripts in order, use registerParticleGroupMonsterGlobals.mjs (main site).
+ * classic scripts in order, use registerParticleGroupIntroGlobals.mjs (main site).
  */
 import { MonsterIntro } from '../monsters/MonsterIntro.mjs';
 import { Navigation } from '../Navigation.mjs';
@@ -14,7 +14,7 @@ export var ResumeStates = {
 	IDLE: lIndexStates++,
 };
 
-export function ParticleGroupMonster(positionCenter, name) {
+export function ParticleGroupIntro(positionCenter, name) {
 	var THREE = globalThis.THREE;
 	var sTools = globalThis.sTools;
 
@@ -62,7 +62,7 @@ export function ParticleGroupMonster(positionCenter, name) {
 }
 
 
-ParticleGroupMonster.prototype.InitSurface = function (width) {
+ParticleGroupIntro.prototype.InitSurface = function (width) {
 	var THREE = globalThis.THREE;
 	var scene = globalThis.scene;
 	var programStroke = globalThis.programStroke;
@@ -85,7 +85,7 @@ ParticleGroupMonster.prototype.InitSurface = function (width) {
 	scene.add(this.plane);
 };
 
-ParticleGroupMonster.prototype.AddFood = function (
+ParticleGroupIntro.prototype.AddFood = function (
 	aName,
 	position,
 	speed,
@@ -172,14 +172,14 @@ function permuteIntroLetterSlots(slots) {
 	return permuted;
 }
 
-ParticleGroupMonster.prototype.IsIntroSlotFree = function (slotIndex) {
+ParticleGroupIntro.prototype.IsIntroSlotFree = function (slotIndex) {
 	if (slotIndex == null || slotIndex < 0) {
 		return true;
 	}
 	return !this.introSlotOccupants[slotIndex];
 }
 
-ParticleGroupMonster.prototype.CaptureIntroLetter = function (particle) {
+ParticleGroupIntro.prototype.CaptureIntroLetter = function (particle) {
 	if (particle.introCurrentSlotIndex != null && this.introSlotOccupants[particle.introCurrentSlotIndex] === particle) {
 		this.introSlotOccupants[particle.introCurrentSlotIndex] = null;
 	}
@@ -188,7 +188,7 @@ ParticleGroupMonster.prototype.CaptureIntroLetter = function (particle) {
 	particle.isMovable = false;
 }
 
-ParticleGroupMonster.prototype.CanPlaceIntroLetter = function (particle) {
+ParticleGroupIntro.prototype.CanPlaceIntroLetter = function (particle) {
 	if (particle.introDestinationIndex == null) {
 		return true;
 	}
@@ -196,7 +196,7 @@ ParticleGroupMonster.prototype.CanPlaceIntroLetter = function (particle) {
 	return !occupant || occupant === particle;
 }
 
-ParticleGroupMonster.prototype.PlaceIntroLetter = function (particle) {
+ParticleGroupIntro.prototype.PlaceIntroLetter = function (particle) {
 	var target = particle.TargetObject.positionTarget;
 	particle.position.x = target.x;
 	particle.position.y = target.y;
@@ -211,7 +211,7 @@ ParticleGroupMonster.prototype.PlaceIntroLetter = function (particle) {
 	particle.isMovable = false;
 }
 
-ParticleGroupMonster.prototype.AddString = function (aText, aPosition, aTextSize = 0.03, aTextColor = 0x000000) {
+ParticleGroupIntro.prototype.AddString = function (aText, aPosition, aTextSize = 0.03, aTextColor = 0x000000) {
 	var THREE = globalThis.THREE;
 	var myRandom = globalThis.myRandom;
 
@@ -317,17 +317,17 @@ ParticleGroupMonster.prototype.AddString = function (aText, aPosition, aTextSize
 	}
 }
 
-ParticleGroupMonster.prototype.InitFood = function(width)
+ParticleGroupIntro.prototype.InitFood = function(width)
 {
 	this.AddString("BAPTISTE BOHELAY", new THREE.Vector3(-window.innerWidth * .4, window.innerHeight * 0.3, 0));
 	this.AddString("Developer & Designer", new THREE.Vector3(-window.innerWidth * .4, window.innerHeight * 0.3 - window.innerWidth * 0.08, 0), 0.023, 0x666666);
 }
 
-ParticleGroupMonster.prototype.MouseUp = function () {
+ParticleGroupIntro.prototype.MouseUp = function () {
 	globalThis.SELECTED = false;
 };
 
-ParticleGroupMonster.prototype.GetMenuPositionCenter = function () {
+ParticleGroupIntro.prototype.GetMenuPositionCenter = function () {
 	var THREE = globalThis.THREE;
 
 	// Push z toward the camera so the particles are ~w*0.27 in front of it,
@@ -337,7 +337,7 @@ ParticleGroupMonster.prototype.GetMenuPositionCenter = function () {
 	return this.positionCenter.clone().addSelf(new THREE.Vector3(window.innerWidth * 0.0, window.innerHeight * 0.0, zOffset));
 }
 
-ParticleGroupMonster.prototype.SetMenuParticleVisible = function (aParticle, aVisible) {
+ParticleGroupIntro.prototype.SetMenuParticleVisible = function (aParticle, aVisible) {
 	var isdefined = globalThis.isdefined;
 
 	aParticle.visible = aVisible;
@@ -351,7 +351,7 @@ ParticleGroupMonster.prototype.SetMenuParticleVisible = function (aParticle, aVi
 	}
 }
 
-ParticleGroupMonster.prototype.AddParticle = function (aParticleObject) {
+ParticleGroupIntro.prototype.AddParticle = function (aParticleObject) {
 	var isdefined = globalThis.isdefined;
 	var Organigram = globalThis.Organigram;
 
@@ -377,7 +377,7 @@ ParticleGroupMonster.prototype.AddParticle = function (aParticleObject) {
 	}
 }
 
-ParticleGroupMonster.prototype.GetParticleThatLeadTo = function(aTarget)
+ParticleGroupIntro.prototype.GetParticleThatLeadTo = function(aTarget)
 {
 	for(var i = 0; i < this.particles.length; i++)
 	{
@@ -388,7 +388,7 @@ ParticleGroupMonster.prototype.GetParticleThatLeadTo = function(aTarget)
 	}
 }
 
-ParticleGroupMonster.prototype.UpdateMenuParticles = function (delta) {
+ParticleGroupIntro.prototype.UpdateMenuParticles = function (delta) {
 	var isdefined = globalThis.isdefined;
 
 	for (var j = 0; j < this.menuParticlesToUpdate.length; j++) {
@@ -399,7 +399,7 @@ ParticleGroupMonster.prototype.UpdateMenuParticles = function (delta) {
 	}
 }
 
-ParticleGroupMonster.prototype.UpdateNavigatorsRotation = function () {
+ParticleGroupIntro.prototype.UpdateNavigatorsRotation = function () {
 	var isdefined = globalThis.isdefined;
 	var mouse = globalThis.mouse;
 
@@ -445,7 +445,7 @@ ParticleGroupMonster.prototype.UpdateNavigatorsRotation = function () {
 	}
 }
 
-ParticleGroupMonster.prototype.IsMenuParticle = function(aParticle)
+ParticleGroupIntro.prototype.IsMenuParticle = function(aParticle)
 {
 	for(var i = 0; i < this.menuParticles.length; i++)
 	{
@@ -457,7 +457,7 @@ ParticleGroupMonster.prototype.IsMenuParticle = function(aParticle)
 	return false;
 }
 
-ParticleGroupMonster.prototype.SelectMenuParticle = function (aParticle) {
+ParticleGroupIntro.prototype.SelectMenuParticle = function (aParticle) {
 	var isdefined = globalThis.isdefined;
 	var programStroke = globalThis.programStroke;
 	var OPACITY_INFO = globalThis.OPACITY_INFO;
@@ -489,7 +489,7 @@ ParticleGroupMonster.prototype.SelectMenuParticle = function (aParticle) {
 	}
 }
 
-ParticleGroupMonster.prototype.MouseDown = function () {
+ParticleGroupIntro.prototype.MouseDown = function () {
 	var IS_PHONE = globalThis.IS_PHONE;
 	var INTERSECTED = globalThis.INTERSECTED;
 
@@ -510,7 +510,7 @@ ParticleGroupMonster.prototype.MouseDown = function () {
 	}
 };
 
-ParticleGroupMonster.prototype.UpdateCamera = function (delta) {
+ParticleGroupIntro.prototype.UpdateCamera = function (delta) {
 	var sTools = globalThis.sTools;
 
 	this.cameraZTimer += delta;
@@ -529,7 +529,7 @@ ParticleGroupMonster.prototype.UpdateCamera = function (delta) {
 	this.positionCenter.y = this.positionCenterInitial.y - t * window.innerHeight * 0.3;
 }
 
-ParticleGroupMonster.prototype.GetCameraPosition = function () {
+ParticleGroupIntro.prototype.GetCameraPosition = function () {
 	var THREE = globalThis.THREE;
 
 	return new THREE.Vector3(
@@ -539,7 +539,7 @@ ParticleGroupMonster.prototype.GetCameraPosition = function () {
 	);
 };
 
-ParticleGroupMonster.prototype.InitSpaceshipPlayfield = function (menuPosition) {
+ParticleGroupIntro.prototype.InitSpaceshipPlayfield = function (menuPosition) {
 	this.spaceshipPlayfieldCenter = menuPosition.clone();
 	var shipPosition = this.spaceship.particle.position;
 	shipPosition.x = menuPosition.x - window.innerWidth * 0.28;
@@ -548,7 +548,7 @@ ParticleGroupMonster.prototype.InitSpaceshipPlayfield = function (menuPosition) 
 	this.spaceship.speed = { x: 0, y: 0 };
 };
 
-ParticleGroupMonster.prototype.GetSpaceshipBounds = function () {
+ParticleGroupIntro.prototype.GetSpaceshipBounds = function () {
 	var center = this.spaceshipPlayfieldCenter || this.NavigatorsCenter || this.positionCenter;
 	return {
 		minX: center.x - window.innerWidth * 0.48,
@@ -558,7 +558,7 @@ ParticleGroupMonster.prototype.GetSpaceshipBounds = function () {
 	};
 };
 
-ParticleGroupMonster.prototype.GetSpaceshipGravityBodies = function () {
+ParticleGroupIntro.prototype.GetSpaceshipGravityBodies = function () {
 	var bodies = [];
 	for (var i = 0; i < this.menuParticles.length; i++) {
 		var particle = this.menuParticles[i];
@@ -573,7 +573,7 @@ ParticleGroupMonster.prototype.GetSpaceshipGravityBodies = function () {
 	return bodies;
 };
 
-ParticleGroupMonster.prototype.AreIntroLettersSettled = function () {
+ParticleGroupIntro.prototype.AreIntroLettersSettled = function () {
 	for (var i = 0; i < this.foodArray.length; i++) {
 		var target = this.foodArray[i].TargetObject.positionTarget;
 		var dx = target.x - this.foodArray[i].position.x;
@@ -589,7 +589,7 @@ ParticleGroupMonster.prototype.AreIntroLettersSettled = function () {
 /*
 * update the position of the letters.
 */
-ParticleGroupMonster.prototype.UpdateFood = function (delta) {
+ParticleGroupIntro.prototype.UpdateFood = function (delta) {
 	var monsterParticle = this.monster.particle;
 	var isdefined = globalThis.isdefined;
 
@@ -609,11 +609,11 @@ ParticleGroupMonster.prototype.UpdateFood = function (delta) {
 	}
 }
 
-ParticleGroupMonster.prototype.SwitchNextState = function () {
+ParticleGroupIntro.prototype.SwitchNextState = function () {
 	globalThis.sCurrentResumeSate = ResumeStates.IDLE;
 };
 
-ParticleGroupMonster.prototype.Update = function (delta) {
+ParticleGroupIntro.prototype.Update = function (delta) {
 	var sChallenge = globalThis.sChallenge;
 	var isdefined = globalThis.isdefined;
 	var sCurrentResumeSate = globalThis.sCurrentResumeSate;
@@ -648,7 +648,7 @@ ParticleGroupMonster.prototype.Update = function (delta) {
 	this.UpdateIntersectPlane();
 }
 
-ParticleGroupMonster.prototype.Init = function()
+ParticleGroupIntro.prototype.Init = function()
 {
 	if(!this.menuParticles.length)
 	{
@@ -662,7 +662,7 @@ ParticleGroupMonster.prototype.Init = function()
 	}
 	this.isIntro = false;
 };
-ParticleGroupMonster.prototype.Terminate = function()
+ParticleGroupIntro.prototype.Terminate = function()
 {
 	// for(var i = 0; i < this.foodArray.length; i++)
 	// {
@@ -673,7 +673,7 @@ ParticleGroupMonster.prototype.Terminate = function()
 	}
 }
 
-ParticleGroupMonster.prototype.UpdateIntersectPlane = function () {
+ParticleGroupIntro.prototype.UpdateIntersectPlane = function () {
 	if (globalThis.IS_PHONE) return;
 
 	if (this.menuParticles.length > 0 || globalThis.sEnd)
@@ -682,7 +682,7 @@ ParticleGroupMonster.prototype.UpdateIntersectPlane = function () {
 	}
 }
 
-ParticleGroupMonster.prototype.UpdatePointer = function () {
+ParticleGroupIntro.prototype.UpdatePointer = function () {
 	var THREE = globalThis.THREE;
 	var mouse = globalThis.mouse;
 	var projector = globalThis.projector;

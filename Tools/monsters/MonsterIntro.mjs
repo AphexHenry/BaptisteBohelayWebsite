@@ -2,7 +2,7 @@
  * Intro monster: canvas-drawn creature that collects letter particles.
  *
  * Import named exports from this file in ES modules. For legacy pages that load
- * classic scripts in order, use registerParticleGroupMonsterGlobals.mjs (main site).
+ * classic scripts in order, use registerParticleGroupIntroGlobals.mjs (main site).
  */
 import { LegStates, MonsterIntroLeg } from './MonsterIntroLeg.mjs';
 

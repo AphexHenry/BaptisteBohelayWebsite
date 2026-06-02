@@ -42,3 +42,14 @@ Object.defineProperty(globalThis, 'sIsInHTML', {
 	enumerable: true,
 	configurable: true,
 });
+
+Object.defineProperty(globalThis, 'sGroupCurrent', {
+	get() {
+		return Navigation.groupCurrent;
+	},
+	set(value) {
+		Navigation.goToIndex(value);
+	},
+	enumerable: true,
+	configurable: true,
+});

@@ -105,7 +105,7 @@ import { Navigation } from './Navigation.mjs';
 
 		// Let's get all the particles group initialized each group at a time.
 		// Monster
-		var lIntro = new ParticleGroupMonster(new THREE.Vector3(-500, -1000, -1000), "home");
+		var lIntro = new ParticleGroupIntro(new THREE.Vector3(-500, -1000, -1000), "home");
 		sTools.ParticleGroups[sTools.ParticleGroup.PART_INTRO] = lIntro;
 		sTools.ParticleGroups[sTools.ParticleGroup.PART_CREA_LULU] = lIntro;
 		// This will define the position of those different particles relatively to the center.
@@ -170,7 +170,7 @@ import { Navigation } from './Navigation.mjs';
 		if (!Navigation.isInHTML) {
 			sTools.FadeIn();
 		}
-		if (sGroupCurrent != sTools.ParticleGroup.PART_INTRO) {
+		if (Navigation.groupCurrent != sTools.ParticleGroup.PART_INTRO) {
 			sTools.ParticleGroups[sTools.ParticleGroup.PART_INTRO].Terminate();
 		}
 
@@ -249,14 +249,14 @@ import { Navigation } from './Navigation.mjs';
 			}
 		}
 		else {
-			Navigation.setHashGroup(sTools.ParticleGroups[sGroupCurrent].name);
+			Navigation.setHashGroup(sTools.ParticleGroups[Navigation.groupCurrent].name);
 			Navigation.htmlToCircles();
 		}
 	}
 
 	function onDocumentMouseUp(event) {
 		if (canInteract) {
-			sTools.ParticleGroups[sGroupCurrent].MouseUp(event);
+			sTools.ParticleGroups[Navigation.groupCurrent].MouseUp(event);
 		}
 	}
 
@@ -273,7 +273,7 @@ import { Navigation } from './Navigation.mjs';
 	function onDocumentMouseDown(event) {
 		event.preventDefault();
 		if (canInteract) {
-			sTools.ParticleGroups[sGroupCurrent].MouseDown(event);
+			sTools.ParticleGroups[Navigation.groupCurrent].MouseDown(event);
 		}
 	}
 
@@ -293,16 +293,16 @@ import { Navigation } from './Navigation.mjs';
 		mouse.x = (event.touches[0].clientX / window.innerWidth) * 2 - 1;
 		mouse.y = - (event.touches[0].clientY / window.innerHeight) * 2 + 1;
 
-		sTools.ParticleGroups[sGroupCurrent].Update(0);
+		sTools.ParticleGroups[Navigation.groupCurrent].Update(0);
 
 		if (canInteract) {
-			sTools.ParticleGroups[sGroupCurrent].MouseDown(event);
+			sTools.ParticleGroups[Navigation.groupCurrent].MouseDown(event);
 		}
 	}
 
 	function onDocumentTouchEnd(event) {
 		if (canInteract) {
-			sTools.ParticleGroups[sGroupCurrent].MouseUp(event);
+			sTools.ParticleGroups[Navigation.groupCurrent].MouseUp(event);
 		}
 	}
 
@@ -325,7 +325,7 @@ import { Navigation } from './Navigation.mjs';
 			return;
 		}
 
-		var radius = sTools.ParticleGroups[sGroupCurrent].cameraDistance;
+		var radius = sTools.ParticleGroups[Navigation.groupCurrent].cameraDistance;
 		var delta = Math.max(Math.min(clock.getDelta(), 0.06), 0.001);
 
 		$("#framerate").html("framerate:" + Math.round(1 / delta))
@@ -349,7 +349,7 @@ import { Navigation } from './Navigation.mjs';
 		sGeneralTimer += delta;
 
 		if (canInteract) {
-			sTools.ParticleGroups[sGroupCurrent].Update(delta);
+			sTools.ParticleGroups[Navigation.groupCurrent].Update(delta);
 		}
 
 		infoDisplay.Update(delta);
@@ -358,7 +358,7 @@ import { Navigation } from './Navigation.mjs';
 
 		if (!SELECTED) {
 			cameraManager.UpdateAutoControl(
-				sTools.ParticleGroups[sGroupCurrent], radius, sGeneralTimer, mouse,
+				sTools.ParticleGroups[Navigation.groupCurrent], radius, sGeneralTimer, mouse,
 				cameraPosition, cameraTarget
 			);
 		}

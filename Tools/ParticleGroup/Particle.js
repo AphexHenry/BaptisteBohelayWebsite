@@ -4,8 +4,6 @@ var CONSERVATION_OF_VELOCITY = 0.95;
 var sShowPartPosition = new THREE.Vector3(0., 0., 0.);
 var sFrameRate = 1.;
 
-var sGroupCurrent = sTools.ParticleGroup.PART_INTRO;
-
 function GetReference(aName, aDescription, aPath, aChromeOnly, aCPUUse, aOtherPage)
 {
 	if(!aOtherPage)

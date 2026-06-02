@@ -107,9 +107,10 @@ CameraManager.prototype.logState = function(tag) {
 		return;
 	}
 	var g = globalThis;
-	var groupName = g.sGroupCurrent;
-	if (g.sTools && g.sTools.ParticleGroups && g.sTools.ParticleGroups[g.sGroupCurrent]) {
-		groupName = g.sTools.ParticleGroups[g.sGroupCurrent].name + ' (' + g.sGroupCurrent + ')';
+	var groupIndex = g.Navigation ? g.Navigation.groupCurrent : g.sGroupCurrent;
+	var groupName = groupIndex;
+	if (g.sTools && g.sTools.ParticleGroups && g.sTools.ParticleGroups[groupIndex]) {
+		groupName = g.sTools.ParticleGroups[groupIndex].name + ' (' + groupIndex + ')';
 	}
 	console.log('[Camera]', tag, {
 		group: groupName,

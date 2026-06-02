@@ -39,9 +39,7 @@ ParticleGroupVideos.prototype.MouseDown = function()
 	{
 		if(typeof INTERSECTED.TargetObject.target != "undefined")
 		{
-			sGroupCurrent = INTERSECTED.TargetObject.target;
-			SELECTED = INTERSECTED = null;
-			sCoeffCameraMove = 0;
+			GoToIndex(INTERSECTED.TargetObject.target);
 		}
 		else if(typeof INTERSECTED.TargetObject.targetHTML != "undefined")
 		{
