@@ -238,15 +238,136 @@ function ParticleAboutMe_saveDescriptionPanelDefault() {
 	}
 }
 
+var ParticleAboutMe_descriptionTvNoiseState = {
+	rafId: 0,
+	timeoutId: 0,
+	canvas: null,
+	$textarea: null,
+};
+
+function ParticleAboutMe_stopDescriptionPanelTvNoise(restoreText) {
+	var state = ParticleAboutMe_descriptionTvNoiseState;
+	if (state.rafId) {
+		cancelAnimationFrame(state.rafId);
+		state.rafId = 0;
+	}
+	if (state.timeoutId) {
+		clearTimeout(state.timeoutId);
+		state.timeoutId = 0;
+	}
+	if (state.canvas && state.canvas.parentNode) {
+		state.canvas.parentNode.removeChild(state.canvas);
+	}
+	state.canvas = null;
+	if (restoreText !== false && state.$textarea && state.$textarea.length) {
+		state.$textarea.css("visibility", "");
+	}
+	state.$textarea = null;
+}
+
+function ParticleAboutMe_drawDescriptionPanelTvNoiseFrame(context, width, height) {
+	context.clearRect(0, 0, width, height);
+
+	var lineCount = 3 + (Math.random() * 6 | 0);
+	for (var line = 0; line < lineCount; line++) {
+		var lineY = Math.random() * height | 0;
+		var lineWidth = width * (0.01 + Math.random() * 0.19);
+		var lineX = Math.random() * Math.max(1, width - lineWidth);
+		var lineShade = Math.random() > 0.5 ? 12 : 228;
+		context.fillStyle = "rgba(" + lineShade + "," + lineShade + "," + lineShade + "," + (0.18 + Math.random() * 0.42) + ")";
+		context.fillRect(lineX, lineY, lineWidth, 1 + (Math.random() * 2 | 0));
+	}
+
+	var dotCount = Math.max(180, (width * height / 55) | 0);
+	for (var i = 0; i < dotCount; i++) {
+		var dotShade = Math.random() * 255 | 0;
+		context.fillStyle = "rgba(" + dotShade + "," + dotShade + "," + dotShade + "," + (0.35 + Math.random() * 0.55) + ")";
+		context.fillRect(Math.random() * width | 0, Math.random() * height | 0, 1 + (Math.random() * 2 | 0), 1);
+	}
+}
+
+function ParticleAboutMe_layoutDescriptionPanelTvNoiseCanvas(canvas, $container, $textarea) {
+	var containerRect = $container[0].getBoundingClientRect();
+	var areaRect = $textarea[0].getBoundingClientRect();
+	var width = Math.max(1, areaRect.width | 0);
+	var height = Math.max(1, areaRect.height | 0);
+	canvas.style.left = (areaRect.left - containerRect.left) + "px";
+	canvas.style.top = (areaRect.top - containerRect.top) + "px";
+	canvas.style.width = width + "px";
+	canvas.style.height = height + "px";
+	return { width: width, height: height };
+}
+
+function ParticleAboutMe_playDescriptionPanelTvNoise(durationMs) {
+	if (
+		typeof sTextDescriptionDOMController === "undefined" ||
+		!sTextDescriptionDOMController.$container.length ||
+		!sTextDescriptionDOMController.$textarea.length
+	) {
+		return;
+	}
+
+	ParticleAboutMe_stopDescriptionPanelTvNoise(false);
+
+	var $container = sTextDescriptionDOMController.$container;
+	var $textarea = sTextDescriptionDOMController.$textarea;
+	var state = ParticleAboutMe_descriptionTvNoiseState;
+	state.$textarea = $textarea;
+	$textarea.css("visibility", "hidden");
+	var canvas = document.createElement("canvas");
+	canvas.className = "about-description__tv-noise";
+	canvas.setAttribute("aria-hidden", "true");
+	$container.append(canvas);
+	state.canvas = canvas;
+
+	var context = canvas.getContext("2d");
+	var startedAt = performance.now();
+	var duration = durationMs != null ? durationMs : 300;
+
+	function resizeCanvas() {
+		var size = ParticleAboutMe_layoutDescriptionPanelTvNoiseCanvas(canvas, $container, $textarea);
+		var dpr = window.devicePixelRatio || 1;
+		canvas.width = size.width * dpr;
+		canvas.height = size.height * dpr;
+		context.setTransform(dpr, 0, 0, dpr, 0, 0);
+		return size;
+	}
+
+	function tick(now) {
+		if (!state.canvas) {
+			return;
+		}
+		var size = resizeCanvas();
+		ParticleAboutMe_drawDescriptionPanelTvNoiseFrame(context, size.width, size.height);
+		if (now - startedAt < duration) {
+			state.rafId = requestAnimationFrame(tick);
+			return;
+		}
+		ParticleAboutMe_stopDescriptionPanelTvNoise();
+	}
+
+	state.rafId = requestAnimationFrame(tick);
+	state.timeoutId = setTimeout(ParticleAboutMe_stopDescriptionPanelTvNoise, duration + 50);
+}
+
 function ParticleAboutMe_setDescriptionPanelHtml(html) {
 	if (typeof sTextDescriptionDOMController === "undefined" || !sTextDescriptionDOMController.$textarea.length) {
 		return;
 	}
-	if (typeof sTextDescriptionDOMController.setHtml === "function") {
-		sTextDescriptionDOMController.setHtml(html);
-		return;
+	var nextHtml = html != null ? String(html) : "";
+	var currentHtml = sTextDescriptionDOMController.$textarea.html();
+	var changed = nextHtml !== currentHtml;
+	if (changed) {
+		sTextDescriptionDOMController.$textarea.css("visibility", "hidden");
 	}
-	sTextDescriptionDOMController.$textarea.html(html != null ? String(html) : "");
+	if (typeof sTextDescriptionDOMController.setHtml === "function") {
+		sTextDescriptionDOMController.setHtml(nextHtml);
+	} else {
+		sTextDescriptionDOMController.$textarea.html(nextHtml);
+	}
+	if (changed) {
+		ParticleAboutMe_playDescriptionPanelTvNoise(200);
+	}
 }
 
 function ParticleAboutMe_updateDescriptionPanel(particle) {
@@ -449,13 +570,13 @@ ParticleGroupAboutMe.prototype.MouseDown = function()
 			ParticleAboutMe_updateDescriptionPanel(INTERSECTED);
 		}
 	}
-	else if (SELECTED)
-	{
-		SELECTED.material.program = ParticleAboutMe_particleStrokeProgram(SELECTED.TargetObject);
-		ParticleAboutMe_resetInfo(SELECTED);
-		SELECTED = null;
-		ParticleAboutMe_updateDescriptionPanel(null);
-	}
+	// else if (SELECTED)
+	// {
+	// 	SELECTED.material.program = ParticleAboutMe_particleStrokeProgram(SELECTED.TargetObject);
+	// 	ParticleAboutMe_resetInfo(SELECTED);
+	// 	SELECTED = null;
+	// 	ParticleAboutMe_updateDescriptionPanel(null);
+	// }
 }
 
 ParticleGroupAboutMe.prototype.MouseUp = function()
@@ -515,6 +636,7 @@ ParticleGroupAboutMe.prototype.Terminate = function()
 {
 	this.htmlDisplayed = false;
 	ParticleAboutMe_hideHoverAnimations(this);
+	ParticleAboutMe_stopDescriptionPanelTvNoise();
 	$("#roundCorner").slideUp(400);
 	if (typeof sTextDescriptionDOMController !== "undefined")
 	{

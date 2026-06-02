@@ -3,6 +3,21 @@ var CAMERA_DISTANCE_SECURITY = 0.4;
 var CAMERA_DEPTH = 3000;
 var DefaultDuration = 1.5;
 
+function formatCameraVec(v) {
+	if (!v || typeof v.x !== 'number') {
+		return String(v);
+	}
+	return '(' + v.x.toFixed(1) + ', ' + v.y.toFixed(1) + ', ' + v.z.toFixed(1) + ')';
+}
+
+function shouldLogCamera(tag) {
+	if (globalThis.DEBUG_CAMERA) {
+		return true;
+	}
+	var t = tag || '';
+	return /^nav\//.test(t) || /intro|home|hashchange|syncCamera/i.test(t);
+}
+
 function CameraManager(a_camera) 
 {
 	 this.camera = a_camera;
@@ -87,6 +102,27 @@ CameraManager.prototype.Update = function(aTimeInterval)
 	this.camera.rotation.x += this.rotationAdd.x;
 }
 
+CameraManager.prototype.logState = function(tag) {
+	if (!shouldLogCamera(tag)) {
+		return;
+	}
+	var g = globalThis;
+	var groupName = g.sGroupCurrent;
+	if (g.sTools && g.sTools.ParticleGroups && g.sTools.ParticleGroups[g.sGroupCurrent]) {
+		groupName = g.sTools.ParticleGroups[g.sGroupCurrent].name + ' (' + g.sGroupCurrent + ')';
+	}
+	console.log('[Camera]', tag, {
+		group: groupName,
+		controlMode: this.controlMode,
+		cameraPosition: formatCameraVec(g.cameraPosition),
+		cameraTarget: formatCameraVec(g.cameraTarget),
+		camera_position: formatCameraVec(this.camera.position),
+		mgr_mTarget: formatCameraVec(this.mTarget),
+		mgr_lookAt: formatCameraVec(this.mCameraLookAt),
+		mgr_lookAtTarget: formatCameraVec(this.mCameraLookAtTarget),
+	});
+};
+
 CameraManager.prototype.GoTo = function(aPosition, aLookAt, aDuration)
 {
 	this.mTarget = aPosition;
@@ -96,6 +132,9 @@ CameraManager.prototype.GoTo = function(aPosition, aLookAt, aDuration)
 
 	this.mCameraMovementTimer = 0.;
 	this.mCameraDuration = Math.max(aDuration, 0.01);
+	if (globalThis.DEBUG_CAMERA) {
+		this.logState('GoTo duration=' + aDuration);
+	}
 }
 
 CameraManager.prototype.UpdateGoTo = function(aPosition, aLookAt)
@@ -120,6 +159,9 @@ CameraManager.prototype.LookAt = function(aPosition)
 	this.mCameraLookAtInit = aPosition;
 	this.mCameraLookAtTarget = aPosition;
 	this.mCameraLookAt = aPosition;
+	if (globalThis.DEBUG_CAMERA) {
+		this.logState('LookAt');
+	}
 }
 
 CameraManager.prototype.GetCamera = function()
@@ -162,6 +204,9 @@ CameraManager.prototype.SetPositionPixel = function(position)
 	this.mTarget = position.clone();
 	this.mPositionInit = position.clone();
 	this.camera.position = position.clone();
+	if (globalThis.DEBUG_CAMERA) {
+		this.logState('SetPositionPixel');
+	}
 }
 
 CameraManager.prototype.SetMovementType = function(aType)
@@ -172,6 +217,9 @@ CameraManager.prototype.SetMovementType = function(aType)
 CameraManager.prototype.SetControlMode = function(aMode)
 {
 	this.controlMode = aMode;
+	if (globalThis.DEBUG_CAMERA) {
+		this.logState('SetControlMode=' + aMode);
+	}
 }
 
 CameraManager.prototype.UpdateAutoControl = function(particleGroup, radius, generalTimer, mouse, cameraPosition, cameraTarget)
@@ -205,3 +253,10 @@ CameraManager.prototype.UpdateAutoControl = function(particleGroup, radius, gene
 		this.SetMovementType(this.movementTypeGroup.PHYSICS);
 	}
 }
+
+/** Console: logCameraState('my tag') or DEBUG_CAMERA = true for all transitions */
+globalThis.logCameraState = function (tag) {
+	if (globalThis.cameraManager) {
+		globalThis.cameraManager.logState(tag);
+	}
+};

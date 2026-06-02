@@ -1,17 +1,28 @@
 /**
  * Resume landmarks for the About Me particle scene.
- * Each entry: company, title, years, place, description (HTML panel via ParticleResume_descriptionHtml), importance (number, e.g. 1 = big, 0.4 = small), type, yearStart (for chronological path), xOffset (optional, relative to path scale), calloutAngle (optional degrees for small-entry hover label).
+ * Each entry: company, title, years, place, description (HTML panel via ParticleResume_descriptionHtml; optional companyUrl for linked title + icon), importance (number, e.g. 1 = big, 0.4 = small), type, yearStart (for chronological path), xOffset (optional, relative to path scale), calloutAngle (optional degrees for small-entry hover label).
  */
 
 var ParticleResume = {};
 
-function ParticleResume_descriptionHtml(company, title, years, place, paragraphs) {
+var ParticleResume_externalLinkIconSvg =
+	'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>';
+
+function ParticleResume_descriptionHtml(company, title, years, place, paragraphs, companyUrl) {
 	var taglineParts = [];
 	if (title) taglineParts.push(title);
 	if (years) taglineParts.push(years);
 	if (place) taglineParts.push(place);
 	var html = '<header class="about-description__header">';
-	html += '<h2 class="about-description__name">' + company + '</h2>';
+	if (companyUrl) {
+		html += '<h2 class="about-description__name about-description__name--has-link">';
+		html += '<a class="about-description__name-link" href="' + companyUrl + '" target="_blank" rel="noopener noreferrer">';
+		html += '<span class="about-description__name-text">' + company + '</span>';
+		html += '<span class="about-description__name-link-icon">' + ParticleResume_externalLinkIconSvg + '</span>';
+		html += '</a></h2>';
+	} else {
+		html += '<h2 class="about-description__name">' + company + '</h2>';
+	}
 	if (taglineParts.length > 0) {
 		html += '<p class="about-description__tagline">' + taglineParts.join(' · ') + '</p>';
 	}
@@ -34,7 +45,11 @@ ParticleResume.ENTRIES = [
 			"Master's degree — Science of Music",
 			"2008–2009",
 			"Paris, France",
-			["Graduate studies at IRCAM."]
+			[
+				"Graduate studies at IRCAM, Master ATIAM.",
+				"Coursework covered acoustic physics and audio processing applied to music.",
+			],
+			"https://www.ircam.fr/"
 		),
 		importance: 1.1,
 		type: "study",

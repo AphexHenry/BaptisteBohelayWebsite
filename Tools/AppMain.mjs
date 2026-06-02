@@ -222,6 +222,8 @@ import { Navigation } from './Navigation.mjs';
 
 		infoDisplay = new InfoDisplay(1., 1.5);
 
+
+
 		THREEx.WindowResize(renderer, cameraManager.GetCamera());
 	}
 
@@ -230,9 +232,17 @@ import { Navigation } from './Navigation.mjs';
 	}
 
 	window.onhashchange = function () {
+		var hashGroup = Navigation.getHashGroup();
+		if (!hashGroup) {
+			if (Navigation.isInHTML) {
+				Navigation.htmlToCircles();
+			}
+			Navigation.goToIndex(sTools.ParticleGroup.PART_INTRO);
+			return;
+		}
 		if (!Navigation.isInHTML) {
 			for (var i in sTools.ParticleGroups) {
-				if (Navigation.getHashGroup() == sTools.ParticleGroups[i].name) {
+				if (hashGroup == sTools.ParticleGroups[i].name) {
 					Navigation.goToIndex(i);
 					return;
 				}

@@ -283,6 +283,7 @@
 	}
 
 	#textDescriptionArea.about-description {
+		position: relative;
 		flex: 0 1 auto;
 		width: 100%;
 		max-width: 30rem;
@@ -305,6 +306,15 @@
 		text-align: justify;
 	}
 
+	.about-description__tv-noise {
+		position: absolute;
+		left: 0;
+		top: 0;
+		pointer-events: none;
+		z-index: 3;
+		opacity: 1;
+	}
+
 	.about-description__header {
 		margin-bottom: clamp(1.25rem, 3vh, 1.85rem);
 	}
@@ -318,6 +328,38 @@
 		letter-spacing: 0.04em;
 		font-variant-numeric: lining-nums;
 		color: #0f0310;
+	}
+
+	.about-description__name--has-link .about-description__name-link {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.12em;
+		color: inherit;
+		text-decoration: none;
+	}
+
+	.about-description__name--has-link .about-description__name-link:hover,
+	.about-description__name--has-link .about-description__name-link:focus-visible {
+		color: rgba(15, 3, 16, 0.72);
+	}
+
+	.about-description__name-link-icon {
+		flex-shrink: 0;
+		display: inline-flex;
+		align-items: center;
+		opacity: 0.42;
+		transition: opacity 0.15s ease;
+	}
+
+	.about-description__name--has-link .about-description__name-link:hover .about-description__name-link-icon,
+	.about-description__name--has-link .about-description__name-link:focus-visible .about-description__name-link-icon {
+		opacity: 0.8;
+	}
+
+	.about-description__name-link-icon svg {
+		display: block;
+		width: 0.72em;
+		height: 0.72em;
 	}
 
 	.about-description__tagline {

@@ -15,12 +15,21 @@ export const Navigation = {
 	},
 
 	goToIndex(index) {
+		index = +index;
+		var groups = globalThis.sTools?.ParticleGroups;
+		var targetName = groups?.[index]?.name ?? String(index);
+		var logNav = function (phase) {
+			globalThis.cameraManager?.logState('nav/goToIndex ' + targetName + ' ' + phase);
+		};
+
 		if (isInHTML) {
 			this.htmlToCircles();
 			return;
 		}
 
-		globalThis.cameraManager.SetControlMode(globalThis.sTools.CameraControlType.SATTELITE);
+		var prevIndex = globalThis.sGroupCurrent;
+		logNav('enter (from ' + (groups?.[prevIndex]?.name ?? prevIndex) + ')');
+
 		if (index != globalThis.sGroupCurrent) {
 			if (globalThis.sGroupCurrent >= 0) {
 				this.globalGroupTerminate();
@@ -41,6 +50,14 @@ export const Navigation = {
 				this.setBackButton(true);
 			}
 		}
+
+		var intro = globalThis.sTools.ParticleGroup.PART_INTRO;
+		var programming = globalThis.sTools.ParticleGroup.PART_PROGRAMMING;
+		if (index !== intro && index !== programming) {
+			globalThis.cameraManager.SetControlMode(globalThis.sTools.CameraControlType.SATTELITE);
+		}
+
+		logNav(index !== prevIndex ? 'exit (changed)' : 'exit (same group)');
 	},
 
 	goBack() {
