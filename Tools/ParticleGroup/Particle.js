@@ -172,7 +172,7 @@ ParticleGroupWebExperiment.prototype.Update = function()
 	}
 }
 
-function ParticleGroupIntro(positionCenter, flyer, name, id) 
+function ParticleGroupFlyer(positionCenter, flyer, name, id) 
 {
 	this.name = name;
 	this.id = id;
@@ -221,13 +221,13 @@ function ParticleGroupIntro(positionCenter, flyer, name, id)
 	}
 }
 
-ParticleGroupIntro.prototype.SetShortDistance = function()
+ParticleGroupFlyer.prototype.SetShortDistance = function()
 {
 	this.cameraDistance = window.innerWidth * 0.27;
 	this.cameraDistanceNormal = this.cameraDistance;
 }
 
-ParticleGroupIntro.prototype.MouseDown = function()
+ParticleGroupFlyer.prototype.MouseDown = function()
 {
 	if(INTERSECTED)
 	{
@@ -267,7 +267,7 @@ ParticleGroupIntro.prototype.MouseDown = function()
 	}
 }
 
-ParticleGroupIntro.prototype.AddParticle = function(aParticleObject)
+ParticleGroupFlyer.prototype.AddParticle = function(aParticleObject)
 {
 	this.particles.push(aParticleObject.particle);
 	this.particlesToUpdate.push(aParticleObject);
@@ -280,17 +280,17 @@ ParticleGroupIntro.prototype.AddParticle = function(aParticleObject)
 	}
 }
 
-ParticleGroupIntro.prototype.MouseUp = function()
+ParticleGroupFlyer.prototype.MouseUp = function()
 {
 
 }
 
-ParticleGroupIntro.prototype.BackFromHTML = function()
+ParticleGroupFlyer.prototype.BackFromHTML = function()
 {
 	this.cameraDistance = this.cameraDistanceNormal;
 }
 
-ParticleGroupIntro.prototype.GetParticleThatLeadTo = function(aTarget)
+ParticleGroupFlyer.prototype.GetParticleThatLeadTo = function(aTarget)
 {
 	for(var i = 0; i< this.particles.length; i++)
 	{
@@ -301,7 +301,7 @@ ParticleGroupIntro.prototype.GetParticleThatLeadTo = function(aTarget)
 	}
 }
 
-ParticleGroupIntro.prototype.Init = function()
+ParticleGroupFlyer.prototype.Init = function()
 {
 	for(var i in this.particles)
 	{
@@ -312,7 +312,7 @@ ParticleGroupIntro.prototype.Init = function()
 	}
 };
 
-ParticleGroupIntro.prototype.Terminate = function()
+ParticleGroupFlyer.prototype.Terminate = function()
 {
 	if(INTERSECTED && !isdefined(INTERSECTED.TargetObject.isAutonomous))
 	{
@@ -320,7 +320,7 @@ ParticleGroupIntro.prototype.Terminate = function()
 	}
 }
 
-ParticleGroupIntro.prototype.Update = function()
+ParticleGroupFlyer.prototype.Update = function()
 {
 	controlAuto = sTools.CameraControlType.MOUSE_MOVE;
 

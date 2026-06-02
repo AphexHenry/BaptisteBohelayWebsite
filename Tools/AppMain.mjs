@@ -100,7 +100,7 @@ import { Navigation } from './Navigation.mjs';
 		flyer.push({ name: "interactive dance", targetHTML: "html/other/InteractiveDance.html" });
 		flyer.push({ name: "PIP - interactive installation", targetHTML: "html/other/pip.html" });
 		// sProjectsLast = { name: "last project", targetHTML: "html/other/Cocoons.html" };
-		var lBProjects = new ParticleGroupIntro(new THREE.Vector3(0, 2000, 2000), flyer, "projects", sTools.ParticleGroup.PART_OTHER);
+		var lBProjects = new ParticleGroupFlyer(new THREE.Vector3(0, 2000, 2000), flyer, "projects", sTools.ParticleGroup.PART_OTHER);
 		lBProjects.mAngleAmplitude = Math.PI * .4;
 
 		// Let's get all the particles group initialized each group at a time.
@@ -128,7 +128,7 @@ import { Navigation } from './Navigation.mjs';
 
 		// creations type
 		var flyer = [];
-		var lFunky = new ParticleGroupIntro(lMenuPosition.clone().addSelf(new THREE.Vector3(600, 1300, -1700)), flyer, "funkyCreation", sTools.ParticleGroup.PART_FUNKY_CREATION);
+		var lFunky = new ParticleGroupFlyer(lMenuPosition.clone().addSelf(new THREE.Vector3(600, 1300, -1700)), flyer, "funkyCreation", sTools.ParticleGroup.PART_FUNKY_CREATION);
 		var particleWebExp = { particle: new ParticleCircleNavigate(lFunky.positionCenter.clone().addSelf(new THREE.Vector3(sWIDTH * 1., sWIDTH * 0.5, 0.)), { name: "web exploration", target: sTools.ParticleGroup.PART_WEB }) };
 		var monsterNoise = new MonsterNoise(lFunky.positionCenter.clone().addSelf(new THREE.Vector3(-sWIDTH * 1.6, 0., 0.)), window.innerWidth * 0.06, { name: "sound monsters", target: sTools.ParticleGroup.PART_SOUND_MONSTER });
 		var monsterVideo = new MonsterVideo(lFunky.positionCenter.clone().addSelf(new THREE.Vector3(0, -sWIDTH * .3, sWIDTH * 1.6)), window.innerWidth * 0.06, { name: "comics", target: sTools.ParticleGroup.PART_COMICS });

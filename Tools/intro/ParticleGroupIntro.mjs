@@ -358,8 +358,7 @@ ParticleGroupIntro.prototype.AddParticle = function (aParticleObject) {
 	var particle = aParticleObject.particle;
 	particle.positionTargetIntro = particle.position.clone();
 	particle.SetPosition(particle.positionTargetIntro.clone());
-	if(isdefined(this.NavigatorsCenter))
-	{
+	if (this.NavigatorsCenter) {
 		particle.navigatorOffset = particle.positionTargetIntro.clone().subSelf(this.NavigatorsCenter);
 	}
 	this.SetMenuParticleVisible(particle, true);
@@ -403,7 +402,7 @@ ParticleGroupIntro.prototype.UpdateNavigatorsRotation = function () {
 	var isdefined = globalThis.isdefined;
 	var mouse = globalThis.mouse;
 
-	if (!isdefined(this.NavigatorsCenter) || this.menuParticles.length === 0) return;
+	if (!this.NavigatorsCenter || this.menuParticles.length === 0) return;
 
 	var theta = -mouse.x * this.navigatorsAngleAmplitude;
 	var phi = mouse.y * this.navigatorsVerticalAngleAmplitude;
