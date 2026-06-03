@@ -5,8 +5,7 @@
 ArtWork/.DS_Store
 ArtWork/bitmapslice/.DS_Store
 build/.DS_Store
-data/.DS_Store
-data/sound/.DS_Store
+data/
 html/.DS_Store
 js/.DS_Store
 Tools/.DS_Store
