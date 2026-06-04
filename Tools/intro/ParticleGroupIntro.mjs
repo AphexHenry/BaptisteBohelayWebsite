@@ -6,7 +6,6 @@
  */
 import { MonsterIntro } from '../monsters/MonsterIntro.mjs';
 import { Navigation } from '../Navigation.mjs';
-import { IntroSpaceship } from './IntroSpaceship.mjs';
 
 var lIndexStates = 0;
 export var ResumeStates = {
@@ -44,10 +43,6 @@ export function ParticleGroupIntro(positionCenter, name) {
 
 	this.monster = new MonsterIntro(positionCenter, this.width, this);
 	this.spaceshipPlayfieldCenter = null;
-	this.spaceship = new IntroSpaceship(
-		new THREE.Vector3(positionCenter.x, positionCenter.y, positionCenter.z + 1),
-		this.width * 0.18
-	);
 	this.monsterEndPosition = null;
 	this.monsterEndScale = null;
 	// this.monsterPathProgress = 0;
@@ -540,21 +535,16 @@ ParticleGroupIntro.prototype.GetCameraPosition = function () {
 
 ParticleGroupIntro.prototype.InitSpaceshipPlayfield = function (menuPosition) {
 	this.spaceshipPlayfieldCenter = menuPosition.clone();
-	var shipPosition = this.spaceship.particle.position;
-	shipPosition.x = menuPosition.x - window.innerWidth * 0.28;
-	shipPosition.y = menuPosition.y + window.innerHeight * 0.12;
-	shipPosition.z = menuPosition.z + 1;
-	this.spaceship.speed = { x: 0, y: 0 };
 };
 
-ParticleGroupIntro.prototype.GetSpaceshipBounds = function () {
-	var center = this.spaceshipPlayfieldCenter || this.NavigatorsCenter || this.positionCenter;
-	return {
-		minX: center.x - window.innerWidth * 0.48,
-		maxX: center.x + window.innerWidth * 0.48,
-		minY: center.y - window.innerHeight * 0.42,
-		maxY: center.y + window.innerHeight * 0.42,
-	};
+ParticleGroupIntro.prototype.GetSpaceshipPlayfieldCenter = function () {
+	if (this.spaceshipPlayfieldCenter) {
+		return this.spaceshipPlayfieldCenter.clone();
+	}
+	if (this.NavigatorsCenter) {
+		return this.NavigatorsCenter.clone();
+	}
+	return this.positionCenter.clone();
 };
 
 ParticleGroupIntro.prototype.GetSpaceshipGravityBodies = function () {
@@ -642,7 +632,6 @@ ParticleGroupIntro.prototype.Update = function (delta) {
 	this.monster.Update(delta);
 	this.UpdateMenuParticles(delta);
 	this.UpdateNavigatorsRotation();
-	this.spaceship.Update(delta, this.GetSpaceshipBounds(), this.GetSpaceshipGravityBodies());
 
 	this.UpdateIntersectPlane();
 }
@@ -667,9 +656,6 @@ ParticleGroupIntro.prototype.Terminate = function()
 	// {
 	// 	scene.remove(this.foodArray[i]);
 	// }
-	if (this.spaceship) {
-		this.spaceship.Destroy();
-	}
 }
 
 ParticleGroupIntro.prototype.UpdateIntersectPlane = function () {

@@ -37,10 +37,22 @@ MonsterIntroLeg.prototype.SetState = function (state) {
 	if (this.state === state) {
 		return;
 	}
-	this.state = state;
+	var lRayCircle = this.monsterIntro.rayCircle;
 	this.posHandInit.x = this.posHandCurrent.x;
 	this.posHandInit.y = this.posHandCurrent.y;
+	// REST legs shrink away during scratch and skip Update, so posHandCurrent stays at (0,0).
+	// Start the next transition on the body circle (shoulder) to avoid a pop at the center.
+	if (this.posHandInit.lengthSq() < 1e-8) {
+		this.posHandInit.x = Math.cos(this.angle) * lRayCircle;
+		this.posHandInit.y = Math.sin(this.angle) * lRayCircle;
+		this.posHandCurrent.x = this.posHandInit.x;
+		this.posHandCurrent.y = this.posHandInit.y;
+	}
+	this.state = state;
 	this.coeffMove = 0.;
+	if (state === LegStates.SCRATCH) {
+		this.scratchCoeff = 0;
+	}
 };
 
 MonsterIntroLeg.prototype.TryGrabFood = function (closeStuff) {

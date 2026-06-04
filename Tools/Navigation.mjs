@@ -4,6 +4,7 @@
  * Active particle group index lives in module state; exposed as Navigation.groupCurrent
  * and legacy globalThis.sGroupCurrent (setter routes through goToIndex).
  */
+import { introSpaceshipController } from './intro/IntroSpaceshipController.mjs';
 
 let isInHTML = false;
 let currentGroup;
@@ -43,6 +44,7 @@ export const Navigation = {
 
 		if (index != groupCurrent) {
 			if (groupCurrent >= 0) {
+				introSpaceshipController.onGroupWillChange(groups[groupCurrent]);
 				this.globalGroupTerminate();
 			}
 			setGroupCurrentIndex(index);
@@ -67,6 +69,8 @@ export const Navigation = {
 		if (index !== intro && index !== programming) {
 			globalThis.cameraManager.SetControlMode(globalThis.sTools.CameraControlType.SATTELITE);
 		}
+
+		introSpaceshipController.onGroupDidChange(groups[groupCurrent], index === prevIndex);
 
 		logNav(index !== prevIndex ? 'exit (changed)' : 'exit (same group)');
 	},

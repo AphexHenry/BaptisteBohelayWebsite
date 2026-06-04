@@ -1,6 +1,47 @@
 /**
  * Small physics spaceship for the intro: left/right rotate, up fires the engine.
+ * Physics and bounds run in the camera view plane so controls stay 2D while the camera orbits.
  */
+function vec3Dot(a, b) {
+	return a.x * b.x + a.y * b.y + a.z * b.z;
+}
+
+export function getViewPlaneBasis(anchor) {
+	var THREE = globalThis.THREE;
+	var camera = globalThis.camera;
+	var mgr = globalThis.cameraManager;
+	var viewDir = new THREE.Vector3();
+
+	if (mgr && mgr.mCameraLookAt) {
+		viewDir.copy(mgr.mCameraLookAt).subSelf(camera.position);
+	} else if (globalThis.cameraTarget) {
+		viewDir.copy(globalThis.cameraTarget).subSelf(camera.position);
+	} else {
+		viewDir.copy(anchor).subSelf(camera.position);
+	}
+
+	var viewLen = viewDir.length();
+	if (viewLen < 0.001) {
+		viewDir.set(0, 0, -1);
+	} else {
+		viewDir.multiplyScalar(1 / viewLen);
+	}
+
+	var worldUp = new THREE.Vector3(0, 1, 0);
+	// viewDir × worldUp = camera screen-right (worldUp × viewDir is left)
+	var right = new THREE.Vector3().cross(viewDir, worldUp);
+	if (right.lengthSq() < 1e-6) {
+		right.set(1, 0, 0);
+	} else {
+		right.normalize();
+	}
+
+	// right × viewDir = screen-up (viewDir × right is down); matches speed.y -= cos thrust
+	var up = new THREE.Vector3().cross(right, viewDir).normalize();
+
+	return { viewDir: viewDir, right: right, up: up };
+}
+
 function programGravityDebugCross(context) {
 	context.lineWidth = 0.1;
 	context.beginPath();
@@ -27,7 +68,10 @@ export function IntroSpaceship(position, size) {
 	this.drag = 0.993;
 	this.bounce = 0.42;
 	this.maxSpeed = size * 4.5;
+	// speed.x / speed.y = velocity along camera right / up (screen plane)
 	this.speed = { x: 0, y: 0 };
+	this._basisRight = null;
+	this._basisUp = null;
 	this.controls = {
 		left: false,
 		right: false,
@@ -82,23 +126,56 @@ IntroSpaceship.prototype.onKeyUp = function (event) {
 	if (event.keyCode === 38) this.controls.up = false;
 };
 
-IntroSpaceship.prototype.applyBounds = function (bounds) {
-	var particle = this.particle;
-	if (particle.position.x < bounds.minX) {
-		particle.position.x = bounds.minX;
+IntroSpaceship.prototype.snapToViewPlane = function (anchor, basis) {
+	var pos = this.particle.position;
+	var dx = pos.x - anchor.x;
+	var dy = pos.y - anchor.y;
+	var dz = pos.z - anchor.z;
+	var alongView = vec3Dot({ x: dx, y: dy, z: dz }, basis.viewDir);
+	pos.x -= basis.viewDir.x * alongView;
+	pos.y -= basis.viewDir.y * alongView;
+	pos.z -= basis.viewDir.z * alongView;
+};
+
+IntroSpaceship.prototype.setPlaneOffset = function (anchor, basis, offsetRight, offsetUp) {
+	var pos = this.particle.position;
+	pos.x = anchor.x + basis.right.x * offsetRight + basis.up.x * offsetUp;
+	pos.y = anchor.y + basis.right.y * offsetRight + basis.up.y * offsetUp;
+	pos.z = anchor.z + basis.right.z * offsetRight + basis.up.z * offsetUp;
+	this.snapToViewPlane(anchor, basis);
+};
+
+IntroSpaceship.prototype.getPlaneCoords = function (anchor, basis) {
+	var pos = this.particle.position;
+	var dx = pos.x - anchor.x;
+	var dy = pos.y - anchor.y;
+	var dz = pos.z - anchor.z;
+	return {
+		right: vec3Dot({ x: dx, y: dy, z: dz }, basis.right),
+		up: vec3Dot({ x: dx, y: dy, z: dz }, basis.up),
+	};
+};
+
+IntroSpaceship.prototype.applyPlaneBounds = function (anchor, basis, bounds) {
+	var coords = this.getPlaneCoords(anchor, basis);
+	var pos = this.particle.position;
+
+	if (coords.right < -bounds.halfRight) {
+		this.setPlaneOffset(anchor, basis, -bounds.halfRight, coords.up);
 		this.speed.x = Math.abs(this.speed.x) * this.bounce;
 	}
-	else if (particle.position.x > bounds.maxX) {
-		particle.position.x = bounds.maxX;
+	else if (coords.right > bounds.halfRight) {
+		this.setPlaneOffset(anchor, basis, bounds.halfRight, coords.up);
 		this.speed.x = -Math.abs(this.speed.x) * this.bounce;
 	}
 
-	if (particle.position.y < bounds.minY) {
-		particle.position.y = bounds.minY;
+	coords = this.getPlaneCoords(anchor, basis);
+	if (coords.up < -bounds.halfUp) {
+		this.setPlaneOffset(anchor, basis, coords.right, -bounds.halfUp);
 		this.speed.y = Math.abs(this.speed.y) * this.bounce;
 	}
-	else if (particle.position.y > bounds.maxY) {
-		particle.position.y = bounds.maxY;
+	else if (coords.up > bounds.halfUp) {
+		this.setPlaneOffset(anchor, basis, coords.right, bounds.halfUp);
 		this.speed.y = -Math.abs(this.speed.y) * this.bounce;
 	}
 };
@@ -150,7 +227,7 @@ IntroSpaceship.prototype.updateGravityDebugMarkers = function (gravityBodies) {
 	}
 };
 
-IntroSpaceship.prototype.applyPlanetGravity = function (delta, gravityBodies) {
+IntroSpaceship.prototype.applyPlanetGravity = function (delta, gravityBodies, basis) {
 	if (!gravityBodies || gravityBodies.length === 0) {
 		return;
 	}
@@ -158,11 +235,15 @@ IntroSpaceship.prototype.applyPlanetGravity = function (delta, gravityBodies) {
 	var softening = this.size * 20.2;
 	var softeningSq = softening;
 	var maxBodyAcceleration = this.gravity * 2.4;
+	var pos = this.particle.position;
 	for (var i = 0; i < gravityBodies.length; i++) {
 		var body = gravityBodies[i];
-		var dx = body.x - this.particle.position.x;
-		var dy = body.y - this.particle.position.y;
-		var distanceSq = dx * dx + dy * dy + softeningSq;
+		var wx = body.x - pos.x;
+		var wy = body.y - pos.y;
+		var wz = body.z - pos.z;
+		var planeR = vec3Dot({ x: wx, y: wy, z: wz }, basis.right);
+		var planeU = vec3Dot({ x: wx, y: wy, z: wz }, basis.up);
+		var distanceSq = planeR * planeR + planeU * planeU + softeningSq;
 		var distance = distanceSq;
 		if (distance < 0.001) {
 			continue;
@@ -170,13 +251,36 @@ IntroSpaceship.prototype.applyPlanetGravity = function (delta, gravityBodies) {
 		var acceleration = this.planetGravity * body.mass / distanceSq;
 		acceleration = Math.min(acceleration, maxBodyAcceleration);
 
-		this.speed.x += dx / distance * acceleration * delta;
-		this.speed.y += dy / distance * acceleration * delta;
+		this.speed.x += planeR / distance * acceleration * delta;
+		this.speed.y += planeU / distance * acceleration * delta;
 	}
 };
 
-IntroSpaceship.prototype.Update = function (delta, bounds, gravityBodies) {
+IntroSpaceship.prototype.reprojectSpeedToBasis = function (basis) {
+	if (!this._basisRight || !this._basisUp) {
+		this._basisRight = basis.right.clone();
+		this._basisUp = basis.up.clone();
+		return;
+	}
+
+	var vx = this._basisRight.x * this.speed.x + this._basisUp.x * this.speed.y;
+	var vy = this._basisRight.y * this.speed.x + this._basisUp.y * this.speed.y;
+	var vz = this._basisRight.z * this.speed.x + this._basisUp.z * this.speed.y;
+	this.speed.x = vec3Dot({ x: vx, y: vy, z: vz }, basis.right);
+	this.speed.y = vec3Dot({ x: vx, y: vy, z: vz }, basis.up);
+	this._basisRight.copy(basis.right);
+	this._basisUp.copy(basis.up);
+};
+
+IntroSpaceship.prototype.Update = function (delta, planeBounds, gravityBodies, planeAnchor) {
 	delta = Math.min(delta, 0.05);
+
+	if (!planeAnchor) {
+		return;
+	}
+
+	var basis = getViewPlaneBasis(planeAnchor);
+	this.reprojectSpeedToBasis(basis);
 
 	if (gravityBodies) {
 		this.updateGravityDebugMarkers(gravityBodies);
@@ -187,8 +291,7 @@ IntroSpaceship.prototype.Update = function (delta, bounds, gravityBodies) {
 	if (this.controls.right) turn -= 1;
 	this.angle += turn * this.rotationSpeed * delta;
 
-	// this.speed.y -= this.gravity * delta;
-	this.applyPlanetGravity(delta, gravityBodies);
+	this.applyPlanetGravity(delta, gravityBodies, basis);
 	if (this.controls.up) {
 		this.speed.x += Math.sin(this.angle) * this.thrust * delta;
 		this.speed.y -= Math.cos(this.angle) * this.thrust * delta;
@@ -198,12 +301,18 @@ IntroSpaceship.prototype.Update = function (delta, bounds, gravityBodies) {
 	this.speed.y *= Math.pow(this.drag, delta * 60);
 	this.limitSpeed();
 
-	this.particle.position.x += this.speed.x * delta;
-	this.particle.position.y += this.speed.y * delta;
+	var pos = this.particle.position;
+	pos.x += basis.right.x * this.speed.x * delta + basis.up.x * this.speed.y * delta;
+	pos.y += basis.right.y * this.speed.x * delta + basis.up.y * this.speed.y * delta;
+	pos.z += basis.right.z * this.speed.x * delta + basis.up.z * this.speed.y * delta;
+	this.snapToViewPlane(planeAnchor, basis);
+
+	// CanvasRenderer applies rotation in screen space; angle is heading in the view plane.
 	this.particle.rotation.z = -this.angle;
 
-	if (bounds) {
-		this.applyBounds(bounds);
+	if (planeBounds) {
+		this.applyPlaneBounds(planeAnchor, basis, planeBounds);
+		this.snapToViewPlane(planeAnchor, basis);
 	}
 };
 

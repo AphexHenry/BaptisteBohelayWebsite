@@ -3,6 +3,7 @@
  * Loaded as an ES module after Template / particle globals are registered.
  */
 import { Navigation } from './Navigation.mjs';
+import { introSpaceshipController } from './intro/IntroSpaceshipController.mjs';
 
 (function () {
 	function expose(name, get, set) {
@@ -125,6 +126,7 @@ import { Navigation } from './Navigation.mjs';
 		// lIntro.AddParticle(randomLastProject);
 		lIntro.AddParticle(aboutMe);
 		lIntro.InitSpaceshipPlayfield(lMenuPosition);
+		introSpaceshipController.init(lIntro);
 
 		// creations type
 		var flyer = [];
@@ -370,6 +372,10 @@ import { Navigation } from './Navigation.mjs';
 		cameraManager.UpdateGoTo(cameraPosition, cameraTarget);
 
 		camera.updateMatrixWorld();
+
+		if (canInteract) {
+			introSpaceshipController.update(delta);
+		}
 
 		// rotate camera
 		renderer.clear(true, true, true);
