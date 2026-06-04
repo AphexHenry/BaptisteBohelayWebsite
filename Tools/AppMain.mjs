@@ -4,6 +4,8 @@
  */
 import { Navigation } from './Navigation.mjs';
 import { introSpaceshipController } from './intro/IntroSpaceshipController.mjs';
+import { ParticleGroupFunkyCreation, ParticleGroupFlyer } from './ParticleGroup/ParticleGroupFunkyCreation.mjs';
+import { ParticleGroupWebExperiment } from './ParticleGroup/ParticleGroupWebExperiment.mjs';
 
 (function () {
 	function expose(name, get, set) {
@@ -130,7 +132,7 @@ import { introSpaceshipController } from './intro/IntroSpaceshipController.mjs';
 
 		// creations type
 		var flyer = [];
-		var lFunky = new ParticleGroupFlyer(lMenuPosition.clone().addSelf(new THREE.Vector3(600, 1300, -1700)), flyer, "funkyCreation", sTools.ParticleGroup.PART_FUNKY_CREATION);
+		var lFunky = new ParticleGroupFunkyCreation(lMenuPosition.clone().addSelf(new THREE.Vector3(600, 1300, -1700)), flyer, "funkyCreation", sTools.ParticleGroup.PART_FUNKY_CREATION);
 		var particleWebExp = { particle: new ParticleCircleNavigate(lFunky.positionCenter.clone().addSelf(new THREE.Vector3(sWIDTH * 1., sWIDTH * 0.5, 0.)), { name: "web exploration", target: sTools.ParticleGroup.PART_WEB }) };
 		var monsterNoise = new MonsterNoise(lFunky.positionCenter.clone().addSelf(new THREE.Vector3(-sWIDTH * 1.6, 0., 0.)), window.innerWidth * 0.06, { name: "sound monsters", target: sTools.ParticleGroup.PART_SOUND_MONSTER });
 		var monsterVideo = new MonsterVideo(lFunky.positionCenter.clone().addSelf(new THREE.Vector3(0, -sWIDTH * .3, sWIDTH * 1.6)), window.innerWidth * 0.06, { name: "comics", target: sTools.ParticleGroup.PART_COMICS });
