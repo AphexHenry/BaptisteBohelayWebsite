@@ -34,6 +34,16 @@ function getPlayfieldZ(group, center) {
 	return center.z;
 }
 
+function getSpawnPlaneOffset(group) {
+	if (group && typeof group.GetSpaceshipSpawnPlaneOffset === 'function') {
+		return group.GetSpaceshipSpawnPlaneOffset();
+	}
+	return {
+		right: -window.innerWidth * 0.28,
+		up: -window.innerHeight * 0.12,
+	};
+}
+
 function getGravityBodies(group) {
 	if (!group) {
 		return [];
@@ -101,7 +111,7 @@ export const introSpaceshipController = {
 			this.revealTimer = 0;
 			this.playfieldLerp = 1;
 			this.playfieldCenter = this.playfieldCenterTarget.clone();
-			this.placeAtBottomLeft(group);
+			this.placeAtSpawn(group);
 			return;
 		}
 		this.hidden = true;
@@ -123,7 +133,7 @@ export const introSpaceshipController = {
 		this.spaceship._basisUp = null;
 	},
 
-	placeAtBottomLeft(group) {
+	placeAtSpawn(group) {
 		var center = this.playfieldCenter || getPlayfieldCenter(group);
 		if (!center) {
 			return;
@@ -131,7 +141,8 @@ export const introSpaceshipController = {
 		var anchor = center.clone();
 		anchor.z = getPlayfieldZ(group, center);
 		var basis = getViewPlaneBasis(anchor);
-		this.spaceship.setPlaneOffset(anchor, basis, -window.innerWidth * 0.28, -window.innerHeight * 0.12);
+		var offset = getSpawnPlaneOffset(group);
+		this.spaceship.setPlaneOffset(anchor, basis, offset.right, offset.up);
 		this.spaceship.speed = { x: 0, y: 0 };
 		this.spaceship._basisRight = null;
 		this.spaceship._basisUp = null;
@@ -157,7 +168,7 @@ export const introSpaceshipController = {
 			this.hidden = false;
 			this.playfieldLerp = 0;
 			this.playfieldCenter = this.playfieldCenterFrom.clone();
-			this.placeAtBottomLeft(this.activeGroup);
+			this.placeAtSpawn(this.activeGroup);
 		}
 
 		if (this.playfieldCenterTarget && this.playfieldCenterFrom && this.playfieldLerp < 1) {

@@ -573,6 +573,14 @@ ParticleGroupIntro.prototype.GetSpaceshipPlayfieldCenter = function () {
 	return this.positionCenter.clone();
 };
 
+// Spawn near the playfield anchor (e.g. creations bubble), not at a screen-corner offset.
+ParticleGroupIntro.prototype.GetSpaceshipSpawnPlaneOffset = function () {
+	return {
+		right: -window.innerWidth * 0.12,
+		up: window.innerHeight * 0.06,
+	};
+};
+
 ParticleGroupIntro.prototype.GetSpaceshipGravityBodies = function () {
 	var bodies = [];
 	for (var i = 0; i < this.menuParticles.length; i++) {

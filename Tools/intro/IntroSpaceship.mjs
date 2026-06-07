@@ -95,7 +95,8 @@ export function IntroSpaceship(position, size) {
 	this.particle.boundRadiusScale = 0.7;
 	scene.add(this.particle);
 
-	this.showGravityDebug = true;
+	// Console: DEBUG_SPACESHIP_GRAVITY = true to show gravity-body crosshairs on particles.
+	this.showGravityDebug = !!globalThis.DEBUG_SPACESHIP_GRAVITY;
 	this.gravityDebugMarkers = [];
 
 	window.addEventListener('keydown', this.onKeyDown, false);
@@ -191,7 +192,11 @@ IntroSpaceship.prototype.limitSpeed = function () {
 };
 
 IntroSpaceship.prototype.updateGravityDebugMarkers = function (gravityBodies) {
+	this.showGravityDebug = !!globalThis.DEBUG_SPACESHIP_GRAVITY;
 	if (!this.showGravityDebug || !globalThis.scene) {
+		while (this.gravityDebugMarkers.length > 0) {
+			globalThis.scene.remove(this.gravityDebugMarkers.pop());
+		}
 		return;
 	}
 
@@ -199,19 +204,19 @@ IntroSpaceship.prototype.updateGravityDebugMarkers = function (gravityBodies) {
 	var scene = globalThis.scene;
 	var markerSize = this.size * 0.35;
 
-	while (this.gravityDebugMarkers.length < gravityBodies.length) {
-		var marker = new THREE.Particle(
-			new THREE.ParticleCanvasMaterial({
-				color: 0xff3dff,
-				program: programGravityDebugCross,
-				transparent: true,
-				opacity: 0.95,
-			})
-		);
-		marker.scale.x = marker.scale.y = markerSize;
-		scene.add(marker);
-		this.gravityDebugMarkers.push(marker);
-	}
+	// while (this.gravityDebugMarkers.length < gravityBodies.length) {
+	// 	var marker = new THREE.Particle(
+	// 		new THREE.ParticleCanvasMaterial({
+	// 			color: 0xff3dff,
+	// 			program: programGravityDebugCross,
+	// 			transparent: true,
+	// 			opacity: 0.95,
+	// 		})
+	// 	);
+	// 	marker.scale.x = marker.scale.y = markerSize;
+	// 	scene.add(marker);
+	// 	this.gravityDebugMarkers.push(marker);
+	// }
 
 	while (this.gravityDebugMarkers.length > gravityBodies.length) {
 		scene.remove(this.gravityDebugMarkers.pop());

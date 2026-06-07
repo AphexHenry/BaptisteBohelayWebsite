@@ -46,7 +46,8 @@ ParticleResume.ENTRIES = [
 			"2008–2009",
 			"Paris, France",
 			[
-				"Graduate studies at IRCAM, Master ATIAM.",
+				"IRCAM is a leading French research institute for music, sound, and acoustics.",
+				"Graduate studies, Master ATIAM.",
 				"Coursework covered acoustic physics and audio processing applied to music.",
 			],
 			"https://www.ircam.fr/"
@@ -68,7 +69,7 @@ ParticleResume.ENTRIES = [
 			"2008",
 			"Paris, France",
 			[
-				"Work on <em>Horse Life 2</em> PC: programming of the sound manager; recording and processing of 70% of the game's sounds. Game released November 2008.",
+				"Developement and Sounc Design for <em>Horse Life 2</em> PC: programming of the sound manager; recording and processing of 70% of the game's sounds. Game released November 2008.",
 			]
 		),
 		importance: 0.45,
@@ -90,7 +91,7 @@ ParticleResume.ENTRIES = [
 			"2009",
 			"Paris, France",
 			[
-				"Spoken voice real-time transformation: C++ implementation of analysis/synthesis for real-time use; improved the algorithm so users could adjust synthesis parameters to control voice quality.",
+				"Spoken voice real-time transformation based on a throat/glottis model: Pure Data implementation of analysis/synthesis for real-time use; improved the algorithm so users could adjust synthesis parameters to control voice quality.",
 			]
 		),
 		importance: 0.4,

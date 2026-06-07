@@ -118,7 +118,7 @@ import { ParticleGroupWebExperiment } from './ParticleGroup/ParticleGroupWebExpe
 		// var aboutMeTarget = { name: "about me", target: sTools.ParticleGroup.PART_ABOUT_ME, size: 0.9 };
 		var programmingPos = lMenuPosition.clone().addSelf(new THREE.Vector3(window.innerWidth * 0.35, -window.innerHeight * 0.5, 0));
 		var aboutMePos = lMenuPosition.clone().addSelf(new THREE.Vector3(sWIDTH * 3.75, sWIDTH / getRatio() * -1.8, 0));
-		var funkyCreationPos = lMenuPosition.clone().addSelf(new THREE.Vector3(window.innerWidth * 0.05, -window.innerWidth * 0.2, 0));
+		var funkyCreationPos = lMenuPosition.clone().addSelf(new THREE.Vector3(window.innerWidth * 0.15, -window.innerWidth * 0.2, 0));
 
 		var aboutMe = new MonsterTournicoti(aboutMePos, window.innerWidth * 0.1, { name: "About Me", target: sTools.ParticleGroup.PART_ABOUT_ME, size: 1. }, 1, false, 0xf97316);
 		var programmingTarget = { name: "programming", target: sTools.ParticleGroup.PART_PROGRAMMING, size: 0.9 };
@@ -132,7 +132,7 @@ import { ParticleGroupWebExperiment } from './ParticleGroup/ParticleGroupWebExpe
 		// lIntro.AddParticle(randomLastProject);
 		lIntro.AddParticle(aboutMe);
 		lIntro.InitNavigatorsCenter();
-		lIntro.InitSpaceshipPlayfield(lMenuPosition);
+		lIntro.InitSpaceshipPlayfield(funkyCreationPos);
 		introSpaceshipController.init(lIntro);
 
 		// creations type
