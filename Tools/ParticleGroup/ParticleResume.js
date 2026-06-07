@@ -101,16 +101,20 @@ ParticleResume.ENTRIES = [
 	},
 	{
 		company: "Lulu's Exploration",
-		title: "Video Game",
+		title: "Experimental Video Game",
 		displayShort: "Lulu's Unreal Exploration",
 		years: "2009-2013",
 		place: "France - Canada",
 		description: ParticleResume_descriptionHtml(
-			"Lulu's Exploration",
-			"Video Game",
+			"Lulu's Unreal Exploration",
+			"Experimental Video Game",
 			"2009–2013",
 			"France · Canada",
-			["Video game for iPhone."]
+			[
+				"Experimental iPhone video game — solo project covering programming, graphics, gameplay, and sound design.",
+				"Follow Lulu through a strange, eerie world, meeting and playing as different creatures. Acts are improvised and spontaneous; the story stays deconstructed so players fill in the gaps. Minimalist visuals inspired by shadow puppets and expressionism. no rules, no score, just exploration.",
+			],
+			"html/Lulu.html"
 		),
 		importance: 0.6,
 		type: "art",
