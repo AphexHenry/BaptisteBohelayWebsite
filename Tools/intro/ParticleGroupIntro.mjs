@@ -199,6 +199,11 @@ ParticleGroupIntro.prototype.CanPlaceIntroLetter = function (particle) {
 	return !occupant || occupant === particle;
 }
 
+/** Spaceship-pushed letters re-enter the pool without the lift arc before placement. */
+ParticleGroupIntro.prototype.ShouldSkipIntroLetterLift = function (particle) {
+	return !!particle.introDirectPlacement;
+};
+
 ParticleGroupIntro.prototype.PlaceIntroLetter = function (particle) {
 	var target = particle.TargetObject.positionTarget;
 	particle.position.x = target.x;
@@ -215,6 +220,7 @@ ParticleGroupIntro.prototype.PlaceIntroLetter = function (particle) {
 	particle.introSpaceshipDislodged = false;
 	particle.introSpaceshipIdleTimer = 0;
 	particle.introSpaceshipVel = null;
+	particle.introDirectPlacement = false;
 }
 
 ParticleGroupIntro.prototype.IsIntroLetterHeldByMonster = function (particle) {
@@ -249,10 +255,10 @@ ParticleGroupIntro.prototype.DislodgeIntroLetter = function (particle) {
 		this.ReleaseIntroLetterFromMonster(particle);
 	}
 
+	if (particle.introCurrentSlotIndex != null && this.introSlotOccupants[particle.introCurrentSlotIndex] === particle) {
+		this.introSlotOccupants[particle.introCurrentSlotIndex] = null;
+	}
 	if (particle.isTarget || particle.isEaten) {
-		if (particle.introCurrentSlotIndex != null && this.introSlotOccupants[particle.introCurrentSlotIndex] === particle) {
-			this.introSlotOccupants[particle.introCurrentSlotIndex] = null;
-		}
 		if (particle.introDestinationIndex != null && this.introSlotOccupants[particle.introDestinationIndex] === particle) {
 			this.introSlotOccupants[particle.introDestinationIndex] = null;
 		}
@@ -261,9 +267,12 @@ ParticleGroupIntro.prototype.DislodgeIntroLetter = function (particle) {
 		particle.isMovable = true;
 	}
 
+	particle.introCurrentSlotIndex = null;
+	particle.introOriginPosition = particle.position.clone();
 	particle.introLifted = false;
 	particle.introSpaceshipDislodged = true;
 	particle.introSpaceshipIdleTimer = 0;
+	particle.introDirectPlacement = false;
 
 	if (this.monster.introMode === 'resting') {
 		this.monster.SetIntroMode('eating');
@@ -279,17 +288,11 @@ ParticleGroupIntro.prototype.ReturnIntroLetterToPool = function (particle) {
 		this.introSlotOccupants[particle.introDestinationIndex] = null;
 	}
 
-	var poolPosition = particle.introOriginPosition
-		? particle.introOriginPosition.clone()
-		: particle.introSlotPosition.clone();
-	particle.position.x = poolPosition.x;
-	particle.position.y = poolPosition.y;
+	// Stay where the push left the letter; pool origin is for monster pickup, not spawn layout.
+	particle.introOriginPosition = particle.position.clone();
+	particle.introOriginPosition.z = this.positionCenter.z;
 	particle.position.z = this.positionCenter.z;
-
-	particle.introCurrentSlotIndex = particle.introOriginIndex >= 0 ? particle.introOriginIndex : null;
-	if (particle.introCurrentSlotIndex != null && particle.introCurrentSlotIndex >= 0) {
-		this.introSlotOccupants[particle.introCurrentSlotIndex] = particle;
-	}
+	particle.introCurrentSlotIndex = null;
 
 	particle.isTarget = false;
 	particle.isEaten = false;
@@ -298,6 +301,7 @@ ParticleGroupIntro.prototype.ReturnIntroLetterToPool = function (particle) {
 	particle.introSpaceshipDislodged = false;
 	particle.introSpaceshipIdleTimer = 0;
 	particle.introSpaceshipVel = null;
+	particle.introDirectPlacement = true;
 };
 
 ParticleGroupIntro.prototype.UpdateSpaceshipLetterInteractions = function (spaceship, planeAnchor, delta) {

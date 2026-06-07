@@ -184,7 +184,15 @@ MonsterIntroLeg.prototype.Update = function (delta, amp) {
 		case LegStates.GRABBING_FOOD:
 			if (this.coeffMove >= 1) {
 				this.monsterIntro.particleGroupMonster.CaptureIntroLetter(gotObject.particle);
-				this.SetState(LegStates.LIFTING_FOOD);
+				if (this.monsterIntro.particleGroupMonster.ShouldSkipIntroLetterLift(gotObject.particle)) {
+					if (this.monsterIntro.particleGroupMonster.CanPlaceIntroLetter(gotObject.particle)) {
+						this.SetState(LegStates.PLACING_FOOD);
+					} else {
+						this.SetState(LegStates.CHECKING_FOOD_DESTINATION);
+					}
+				} else {
+					this.SetState(LegStates.LIFTING_FOOD);
+				}
 			}
 			break;
 		case LegStates.LIFTING_FOOD:
