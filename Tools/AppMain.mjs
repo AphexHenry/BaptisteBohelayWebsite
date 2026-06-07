@@ -263,15 +263,41 @@ import { ParticleGroupWebExperiment } from './ParticleGroup/ParticleGroupWebExpe
 		}
 	}
 
+	function isSelectableDomTarget(event) {
+		var el = event.target;
+		if (!el || el.nodeType !== 1 || typeof el.closest !== 'function') {
+			return false;
+		}
+		return !!(
+			el.closest('#textDescription') ||
+			el.closest('#comicsViewer') ||
+			el.closest('a, input, textarea, button, select, [contenteditable="true"]')
+		);
+	}
+
+	function shouldPreserveNativeMouseBehavior(event) {
+		if (isSelectableDomTarget(event)) {
+			return true;
+		}
+		if (event.type === 'mousemove' && (event.buttons & 1)) {
+			var sel = window.getSelection && window.getSelection();
+			if (sel && sel.rangeCount > 0 && !sel.isCollapsed) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	function onDocumentMouseUp(event) {
-		if (canInteract) {
+		if (canInteract && !isSelectableDomTarget(event)) {
 			sTools.ParticleGroups[Navigation.groupCurrent].MouseUp(event);
 		}
 	}
 
 	function onDocumentMouseMove(event) {
-
-		event.preventDefault();
+		if (!shouldPreserveNativeMouseBehavior(event)) {
+			event.preventDefault();
+		}
 
 		mousePosition = new THREE.Vector2(event.clientX, event.clientY, 1000);
 
@@ -280,6 +306,9 @@ import { ParticleGroupWebExperiment } from './ParticleGroup/ParticleGroupWebExpe
 	}
 
 	function onDocumentMouseDown(event) {
+		if (shouldPreserveNativeMouseBehavior(event)) {
+			return;
+		}
 		event.preventDefault();
 		if (canInteract) {
 			sTools.ParticleGroups[Navigation.groupCurrent].MouseDown(event);

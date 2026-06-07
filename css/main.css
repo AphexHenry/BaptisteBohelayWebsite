@@ -294,6 +294,8 @@
 		overflow-y: auto;
 		overflow-x: hidden;
 		-webkit-overflow-scrolling: touch;
+		user-select: text;
+		-webkit-user-select: text;
 		background: transparent;
 		color: #0f0310;
 		font-family: Georgia, "Times New Roman", Times, serif;
