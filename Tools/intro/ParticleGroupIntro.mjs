@@ -8,8 +8,7 @@ import { MonsterIntro } from '../monsters/MonsterIntro.mjs';
 import { Navigation } from '../Navigation.mjs';
 import { getViewPlaneBasis } from './IntroSpaceship.mjs';
 import {
-	planeNormalToWorld,
-	planeVelocityToWorld,
+	computeSpaceshipLetterPushVelocity,
 	testSpaceshipLetterCollision,
 	updateIntroLetterCollisionDebug,
 } from './IntroSpaceshipLetterCollision.mjs';
@@ -311,9 +310,6 @@ ParticleGroupIntro.prototype.UpdateSpaceshipLetterInteractions = function (space
 		updateIntroLetterCollisionDebug(this, spaceship, planeAnchor, basis);
 		return;
 	}
-	var pushStrength = spaceship.size * 7.5;
-	var shipVel = planeVelocityToWorld(basis, spaceship.speed.x, spaceship.speed.y);
-
 	for (var i = 0; i < this.foodArray.length; i++) {
 		var particle = this.foodArray[i];
 		if (this.IsIntroLetterHeldByMonster(particle)) {
@@ -324,14 +320,7 @@ ParticleGroupIntro.prototype.UpdateSpaceshipLetterInteractions = function (space
 		if (hit) {
 			this.DislodgeIntroLetter(particle);
 
-			if (!particle.introSpaceshipVel) {
-				particle.introSpaceshipVel = { x: 0, y: 0 };
-			}
-
-			var worldNormal = planeNormalToWorld(basis, hit.nx, hit.ny);
-			var impulse = pushStrength + hit.depth * 12;
-			particle.introSpaceshipVel.x += worldNormal.x * impulse + shipVel.x * 0.4;
-			particle.introSpaceshipVel.y += worldNormal.y * impulse + shipVel.y * 0.4;
+			particle.introSpaceshipVel = computeSpaceshipLetterPushVelocity(spaceship, particle, basis);
 			particle.introSpaceshipIdleTimer = 0;
 		} else if (particle.introSpaceshipDislodged) {
 			particle.introSpaceshipIdleTimer = (particle.introSpaceshipIdleTimer || 0) + delta;
@@ -782,7 +771,7 @@ ParticleGroupIntro.prototype.UpdateFood = function (delta) {
 		particle.position.y += particle.introSpaceshipVel.y * delta;
 		particle.position.z = this.positionCenter.z;
 
-		var drag = Math.pow(0.9, delta * 60);
+		var drag = Math.pow(0.96, delta * 60);
 		particle.introSpaceshipVel.x *= drag;
 		particle.introSpaceshipVel.y *= drag;
 	}

@@ -409,3 +409,40 @@ export function testSpaceshipLetterCollision(spaceship, particle, planeAnchor, b
 	var shipPlane = worldToPlane(basis, planeAnchor, spaceship.particle.position);
 	return testPolygonAabbCollision(polygon, aabb, shipPlane.right, shipPlane.up);
 }
+
+/**
+ * Push velocity in world XY: ship speed along ship-center → letter-center,
+ * scaled by cos(angle) between ship velocity and that push direction.
+ */
+export function computeSpaceshipLetterPushVelocity(spaceship, particle, basis) {
+	var shipPos = spaceship.particle.position;
+	var letterAabb = getLetterWorldAabb(particle);
+	var pushX = letterAabb.centerX - shipPos.x;
+	var pushY = letterAabb.centerY - shipPos.y;
+	var pushLen = Math.sqrt(pushX * pushX + pushY * pushY);
+
+	if (pushLen < 1e-6) {
+		pushX = Math.sin(spaceship.angle);
+		pushY = -Math.cos(spaceship.angle);
+		pushLen = 1;
+	}
+
+	var pushNx = pushX / pushLen;
+	var pushNy = pushY / pushLen;
+
+	var shipVel = planeVelocityToWorld(basis, spaceship.speed.x, spaceship.speed.y);
+	var shipSpeed = Math.sqrt(shipVel.x * shipVel.x + shipVel.y * shipVel.y);
+	if (shipSpeed < 1e-6) {
+		return { x: 0, y: 0 };
+	}
+
+	var velNx = shipVel.x / shipSpeed;
+	var velNy = shipVel.y / shipSpeed;
+	var alignment = Math.max(0, velNx * pushNx + velNy * pushNy);
+	var pushSpeed = shipSpeed * alignment;
+
+	return {
+		x: pushNx * pushSpeed,
+		y: pushNy * pushSpeed,
+	};
+}
