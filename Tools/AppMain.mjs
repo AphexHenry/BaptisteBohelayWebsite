@@ -124,12 +124,10 @@ import { ParticleGroupWebExperiment } from './ParticleGroup/ParticleGroupWebExpe
 		var programmingTarget = { name: "programming", target: sTools.ParticleGroup.PART_PROGRAMMING, size: 0.9 };
 		var programmingMonster = new MonsterRandom(programmingPos, window.innerWidth * 0.06, programmingTarget);
 		
-
 		// var randomLastProject = new MonsterTournicoti(new THREE.Vector3(lMenuPosition.x + sWIDTH * 1., lMenuPosition.y - 1. * sWIDTH / getRatio(), lMenuPosition.z + sWIDTH * 0.3), window.innerWidth * 0.06, sProjectsLast, 1);
 		var funkyCreation = new MonsterTournicoti(funkyCreationPos, window.innerWidth * 0.1, { name: "creations", target: sTools.ParticleGroup.PART_FUNKY_CREATION, size: 1.5 }, -1, false, 0xf97316);
 		lIntro.AddParticle(funkyCreation);
 		lIntro.AddParticle(programmingMonster);
-		// lIntro.AddParticle(randomLastProject);
 		lIntro.AddParticle(aboutMe);
 		lIntro.InitNavigatorsCenter();
 		lIntro.InitSpaceshipPlayfield(funkyCreationPos);

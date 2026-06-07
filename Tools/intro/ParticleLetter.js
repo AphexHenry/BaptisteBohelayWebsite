@@ -24,7 +24,8 @@ function ParticleLetter(position, aLetter, aPositionTarget, aSize, aLetterColor)
 	// scene.add( this.particleClear );
 	// this.particleClear.position = info.position;
 	particle.TargetObject = {positionTarget:aPositionTarget};
-	
+	particle.introLetterChar = letter;
+
 	var size = 1;
 
 

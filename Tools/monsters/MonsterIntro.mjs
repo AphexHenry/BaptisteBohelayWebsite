@@ -177,7 +177,7 @@ MonsterIntro.prototype.GetCloseFood = function () {
 	var sizeLegsMax = this.legs.length > 0 ? this.legs[0].sizeMax : 0;
 
 	for (var i = 0; i < lFoodArray.length; i++) {
-		if (lFoodArray[i].isTarget) {
+		if (lFoodArray[i].isTarget || lFoodArray[i].introSpaceshipDislodged) {
 			continue;
 		}
 		var distance = lFoodArray[i].position.distanceTo(sMonster.position);

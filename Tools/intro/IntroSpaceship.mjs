@@ -42,6 +42,16 @@ export function getViewPlaneBasis(anchor) {
 	return { viewDir: viewDir, right: right, up: up };
 }
 
+/** Normalized canvas outline used for letter collision (matches programSpaceship). */
+export const SPACESHIP_SHAPE_VERTICES = [
+	{ x: 0, y: -0.55 },
+	{ x: 0.36, y: 0.34 },
+	{ x: 0.13, y: 0.22 },
+	{ x: 0, y: 0.42 },
+	{ x: -0.13, y: 0.22 },
+	{ x: -0.36, y: 0.34 },
+];
+
 function programGravityDebugCross(context) {
 	context.lineWidth = 0.1;
 	context.beginPath();
@@ -96,6 +106,7 @@ export function IntroSpaceship(position, size) {
 	scene.add(this.particle);
 
 	// Console: DEBUG_SPACESHIP_GRAVITY = true to show gravity-body crosshairs on particles.
+	// Console: DEBUG_SPACESHIP_LETTER_COLLISION = true to show ship/letter hit boxes.
 	this.showGravityDebug = !!globalThis.DEBUG_SPACESHIP_GRAVITY;
 	this.gravityDebugMarkers = [];
 

@@ -44,6 +44,16 @@ function getSpawnPlaneOffset(group) {
 	};
 }
 
+function getPlayfieldBounds(group) {
+	if (group && typeof group.GetSpaceshipPlayfieldBounds === 'function') {
+		return group.GetSpaceshipPlayfieldBounds();
+	}
+	return {
+		halfRight: window.innerWidth * 0.48,
+		halfUp: window.innerHeight * 0.42,
+	};
+}
+
 function getGravityBodies(group) {
 	if (!group) {
 		return [];
@@ -149,10 +159,7 @@ export const introSpaceshipController = {
 	},
 
 	getBounds() {
-		return {
-			halfRight: window.innerWidth * 0.48,
-			halfUp: window.innerHeight * 0.42,
-		};
+		return getPlayfieldBounds(this.activeGroup);
 	},
 
 	update(delta) {
@@ -186,5 +193,9 @@ export const introSpaceshipController = {
 			return;
 		}
 		this.spaceship.Update(delta, this.getBounds(), getGravityBodies(this.activeGroup), anchor);
+
+		if (typeof this.activeGroup.UpdateSpaceshipLetterInteractions === 'function') {
+			this.activeGroup.UpdateSpaceshipLetterInteractions(this.spaceship, anchor, delta);
+		}
 	},
 };

@@ -6,6 +6,15 @@
  */
 import { MonsterIntro } from '../monsters/MonsterIntro.mjs';
 import { Navigation } from '../Navigation.mjs';
+import { getViewPlaneBasis } from './IntroSpaceship.mjs';
+import {
+	planeNormalToWorld,
+	planeVelocityToWorld,
+	testSpaceshipLetterCollision,
+	updateIntroLetterCollisionDebug,
+} from './IntroSpaceshipLetterCollision.mjs';
+
+var INTRO_LETTER_RETURN_TO_POOL_SEC = 1.0;
 
 var lIndexStates = 0;
 export var ResumeStates = {
@@ -204,7 +213,136 @@ ParticleGroupIntro.prototype.PlaceIntroLetter = function (particle) {
 	particle.isEaten = true;
 	particle.isTarget = true;
 	particle.isMovable = false;
+	particle.introSpaceshipDislodged = false;
+	particle.introSpaceshipIdleTimer = 0;
+	particle.introSpaceshipVel = null;
 }
+
+ParticleGroupIntro.prototype.IsIntroLetterHeldByMonster = function (particle) {
+	if (particle.introLifted) {
+		return true;
+	}
+	var legs = this.monster.legs;
+	for (var i = 0; i < legs.length; i++) {
+		if (legs[i].gotObject && legs[i].gotObject.particle === particle) {
+			return true;
+		}
+	}
+	return false;
+};
+
+ParticleGroupIntro.prototype.ReleaseIntroLetterFromMonster = function (particle) {
+	var LegStates = globalThis.IntroLegStates;
+	var legs = this.monster.legs;
+	for (var i = 0; i < legs.length; i++) {
+		if (legs[i].gotObject && legs[i].gotObject.particle === particle) {
+			legs[i].gotObject = null;
+			if (LegStates) {
+				legs[i].SetState(LegStates.IDLE);
+			}
+		}
+	}
+	particle.isTarget = false;
+};
+
+ParticleGroupIntro.prototype.DislodgeIntroLetter = function (particle) {
+	if (this.IsIntroLetterHeldByMonster(particle)) {
+		this.ReleaseIntroLetterFromMonster(particle);
+	}
+
+	if (particle.isTarget || particle.isEaten) {
+		if (particle.introCurrentSlotIndex != null && this.introSlotOccupants[particle.introCurrentSlotIndex] === particle) {
+			this.introSlotOccupants[particle.introCurrentSlotIndex] = null;
+		}
+		if (particle.introDestinationIndex != null && this.introSlotOccupants[particle.introDestinationIndex] === particle) {
+			this.introSlotOccupants[particle.introDestinationIndex] = null;
+		}
+		particle.isTarget = false;
+		particle.isEaten = false;
+		particle.isMovable = true;
+	}
+
+	particle.introLifted = false;
+	particle.introSpaceshipDislodged = true;
+	particle.introSpaceshipIdleTimer = 0;
+
+	if (this.monster.introMode === 'resting') {
+		this.monster.SetIntroMode('eating');
+	}
+	this.monster.WakeUp(1.2);
+};
+
+ParticleGroupIntro.prototype.ReturnIntroLetterToPool = function (particle) {
+	if (particle.introCurrentSlotIndex != null && this.introSlotOccupants[particle.introCurrentSlotIndex] === particle) {
+		this.introSlotOccupants[particle.introCurrentSlotIndex] = null;
+	}
+	if (particle.introDestinationIndex != null && this.introSlotOccupants[particle.introDestinationIndex] === particle) {
+		this.introSlotOccupants[particle.introDestinationIndex] = null;
+	}
+
+	var poolPosition = particle.introOriginPosition
+		? particle.introOriginPosition.clone()
+		: particle.introSlotPosition.clone();
+	particle.position.x = poolPosition.x;
+	particle.position.y = poolPosition.y;
+	particle.position.z = this.positionCenter.z;
+
+	particle.introCurrentSlotIndex = particle.introOriginIndex >= 0 ? particle.introOriginIndex : null;
+	if (particle.introCurrentSlotIndex != null && particle.introCurrentSlotIndex >= 0) {
+		this.introSlotOccupants[particle.introCurrentSlotIndex] = particle;
+	}
+
+	particle.isTarget = false;
+	particle.isEaten = false;
+	particle.introLifted = false;
+	particle.isMovable = true;
+	particle.introSpaceshipDislodged = false;
+	particle.introSpaceshipIdleTimer = 0;
+	particle.introSpaceshipVel = null;
+};
+
+ParticleGroupIntro.prototype.UpdateSpaceshipLetterInteractions = function (spaceship, planeAnchor, delta) {
+	if (!spaceship || !planeAnchor) {
+		return;
+	}
+
+	var basis = getViewPlaneBasis(planeAnchor);
+	if (globalThis.sEnd) {
+		updateIntroLetterCollisionDebug(this, spaceship, planeAnchor, basis);
+		return;
+	}
+	var pushStrength = spaceship.size * 7.5;
+	var shipVel = planeVelocityToWorld(basis, spaceship.speed.x, spaceship.speed.y);
+
+	for (var i = 0; i < this.foodArray.length; i++) {
+		var particle = this.foodArray[i];
+		if (this.IsIntroLetterHeldByMonster(particle)) {
+			continue;
+		}
+
+		var hit = testSpaceshipLetterCollision(spaceship, particle, planeAnchor, basis);
+		if (hit) {
+			this.DislodgeIntroLetter(particle);
+
+			if (!particle.introSpaceshipVel) {
+				particle.introSpaceshipVel = { x: 0, y: 0 };
+			}
+
+			var worldNormal = planeNormalToWorld(basis, hit.nx, hit.ny);
+			var impulse = pushStrength + hit.depth * 12;
+			particle.introSpaceshipVel.x += worldNormal.x * impulse + shipVel.x * 0.4;
+			particle.introSpaceshipVel.y += worldNormal.y * impulse + shipVel.y * 0.4;
+			particle.introSpaceshipIdleTimer = 0;
+		} else if (particle.introSpaceshipDislodged) {
+			particle.introSpaceshipIdleTimer = (particle.introSpaceshipIdleTimer || 0) + delta;
+			if (particle.introSpaceshipIdleTimer >= INTRO_LETTER_RETURN_TO_POOL_SEC) {
+				this.ReturnIntroLetterToPool(particle);
+			}
+		}
+	}
+
+	updateIntroLetterCollisionDebug(this, spaceship, planeAnchor, basis);
+};
 
 ParticleGroupIntro.prototype.AddString = function (aText, aPosition, aTextSize = 0.03, aTextColor = 0x000000) {
 	var THREE = globalThis.THREE;
@@ -328,7 +466,7 @@ ParticleGroupIntro.prototype.GetMenuPositionCenter = function () {
 	// Push z toward the camera so the particles are ~w*0.27 in front of it,
 	// matching the apparent scale they had in the old PART_CREA_LULU group
 	// (which used cameraDistance = w*0.27, vs the intro's much larger (w+h)*0.45).
-	var zOffset = this.cameraDistance - window.innerWidth * 0.27;
+	var zOffset = 0;
 	return this.positionCenter.clone().addSelf(new THREE.Vector3(window.innerWidth * 0.0, window.innerHeight * 0.0, zOffset));
 }
 
@@ -581,6 +719,13 @@ ParticleGroupIntro.prototype.GetSpaceshipSpawnPlaneOffset = function () {
 	};
 };
 
+ParticleGroupIntro.prototype.GetSpaceshipPlayfieldBounds = function () {
+	return {
+		halfRight: window.innerWidth * 0.65,
+		halfUp: window.innerHeight * 0.55,
+	};
+};
+
 ParticleGroupIntro.prototype.GetSpaceshipGravityBodies = function () {
 	var bodies = [];
 	for (var i = 0; i < this.menuParticles.length; i++) {
@@ -616,19 +761,30 @@ ParticleGroupIntro.prototype.UpdateFood = function (delta) {
 	var monsterParticle = this.monster.particle;
 	var isdefined = globalThis.isdefined;
 
-	var prevMonsterX = monsterParticle.position.x;
-	var prevMonsterY = monsterParticle.position.y;
-
-	if(isdefined(this.monsterEndPosition))
-	{
-
+	if (isdefined(this.monsterEndPosition)) {
 		monsterParticle.position = this.monsterEndPosition.clone();
 		monsterParticle.position.z += -1;
 		monsterParticle.scale = this.monsterEndScale.clone();
-	}
-	else
-	{
+	} else {
 		monsterParticle.speed = { x: 0, y: 0 };
+	}
+
+	for (var i = 0; i < this.foodArray.length; i++) {
+		var particle = this.foodArray[i];
+		if (!particle.introSpaceshipDislodged || !particle.introSpaceshipVel) {
+			continue;
+		}
+		if (this.IsIntroLetterHeldByMonster(particle)) {
+			continue;
+		}
+
+		particle.position.x += particle.introSpaceshipVel.x * delta;
+		particle.position.y += particle.introSpaceshipVel.y * delta;
+		particle.position.z = this.positionCenter.z;
+
+		var drag = Math.pow(0.9, delta * 60);
+		particle.introSpaceshipVel.x *= drag;
+		particle.introSpaceshipVel.y *= drag;
 	}
 }
 
