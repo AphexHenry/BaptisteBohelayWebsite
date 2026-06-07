@@ -112,21 +112,26 @@ import { ParticleGroupWebExperiment } from './ParticleGroup/ParticleGroupWebExpe
 		sTools.ParticleGroups[sTools.ParticleGroup.PART_INTRO] = lIntro;
 		sTools.ParticleGroups[sTools.ParticleGroup.PART_CREA_LULU] = lIntro;
 		// This will define the position of those different particles relatively to the center.
+
+
 		var lMenuPosition = lIntro.GetMenuPositionCenter();
-		lMenuPosition.x += window.innerWidth * 0.25;
-		lMenuPosition.y -= window.innerWidth * 0.2;
-		// flyer.push({ name: "contact", targetHTML: "html/contact.html", size: 0.5, addRandom: false, position: new THREE.Vector3(100, 100, 0) });
-		var aboutMeTarget = { name: "about me", target: sTools.ParticleGroup.PART_ABOUT_ME, size: 0.9 };
-		var aboutMe = { target: aboutMeTarget, particle: new ParticleCircleNavigate(lMenuPosition.clone().addSelf(new THREE.Vector3(sWIDTH * 1.1, sWIDTH / getRatio() * 0.55, 0)), aboutMeTarget) };
+		// var aboutMeTarget = { name: "about me", target: sTools.ParticleGroup.PART_ABOUT_ME, size: 0.9 };
+		var programmingPos = lMenuPosition.clone().addSelf(new THREE.Vector3(window.innerWidth * 0.35, -window.innerHeight * 0.5, 0));
+		var aboutMePos = lMenuPosition.clone().addSelf(new THREE.Vector3(sWIDTH * 3.75, sWIDTH / getRatio() * -1.8, 0));
+		var funkyCreationPos = lMenuPosition.clone().addSelf(new THREE.Vector3(window.innerWidth * 0.05, -window.innerWidth * 0.2, 0));
+
+		var aboutMe = new MonsterTournicoti(aboutMePos, window.innerWidth * 0.1, { name: "About Me", target: sTools.ParticleGroup.PART_ABOUT_ME, size: 1. }, 1, false, 0xf97316);
 		var programmingTarget = { name: "programming", target: sTools.ParticleGroup.PART_PROGRAMMING, size: 0.9 };
-		var programmingMonster = new MonsterRandom(new THREE.Vector3(lMenuPosition.x - sWIDTH * 1.1, lMenuPosition.y - sWIDTH / getRatio() * 0.35, lMenuPosition.z), window.innerWidth * 0.06, programmingTarget);
+		var programmingMonster = new MonsterRandom(programmingPos, window.innerWidth * 0.06, programmingTarget);
+		
+
 		// var randomLastProject = new MonsterTournicoti(new THREE.Vector3(lMenuPosition.x + sWIDTH * 1., lMenuPosition.y - 1. * sWIDTH / getRatio(), lMenuPosition.z + sWIDTH * 0.3), window.innerWidth * 0.06, sProjectsLast, 1);
-		var funkyCreation = new MonsterTournicoti(lMenuPosition, window.innerWidth * 0.1, { name: "creations", target: sTools.ParticleGroup.PART_FUNKY_CREATION, size: 1.5 }, -1, false, 0xf97316);
-		lIntro.NavigatorsCenter = funkyCreation.particle.position.clone();
+		var funkyCreation = new MonsterTournicoti(funkyCreationPos, window.innerWidth * 0.1, { name: "creations", target: sTools.ParticleGroup.PART_FUNKY_CREATION, size: 1.5 }, -1, false, 0xf97316);
 		lIntro.AddParticle(funkyCreation);
 		lIntro.AddParticle(programmingMonster);
 		// lIntro.AddParticle(randomLastProject);
 		lIntro.AddParticle(aboutMe);
+		lIntro.InitNavigatorsCenter();
 		lIntro.InitSpaceshipPlayfield(lMenuPosition);
 		introSpaceshipController.init(lIntro);
 

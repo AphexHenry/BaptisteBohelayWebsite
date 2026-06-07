@@ -31,7 +31,7 @@ export function ParticleGroupIntro(positionCenter, name) {
 	this.menuParticlesToUpdate = [];
 	this.particles = [];
 	this.NavigatorsCenter = null;
-	this.navigatorsAngleAmplitude = Math.PI / 4;
+	this.navigatorsAngleAmplitude = Math.PI / 20;
 	this.navigatorsVerticalAngleAmplitude = Math.PI / 16;
 	// this.particleRotate = new THREE.Vector3(0, 0, 0);
 	this.particleRotateSpeed = new THREE.Vector3(0, 0, 0);
@@ -371,6 +371,31 @@ ParticleGroupIntro.prototype.AddParticle = function (aParticleObject) {
 	}
 }
 
+ParticleGroupIntro.prototype.InitNavigatorsCenter = function () {
+	var THREE = globalThis.THREE;
+	var isdefined = globalThis.isdefined;
+
+	if (this.menuParticles.length === 0) return;
+
+	var cx = 0;
+	var cy = 0;
+	var cz = 0;
+	for (var i = 0; i < this.menuParticles.length; i++) {
+		var pos = this.menuParticles[i].positionTargetIntro;
+		cx += pos.x;
+		cy += pos.y;
+		cz += pos.z;
+	}
+	var count = this.menuParticles.length;
+	this.NavigatorsCenter = new THREE.Vector3(cx / count, cy / count, cz / count);
+
+	for (var j = 0; j < this.menuParticles.length; j++) {
+		var particle = this.menuParticles[j];
+		if (!isdefined(particle.positionTargetIntro)) continue;
+		particle.navigatorOffset = particle.positionTargetIntro.clone().subSelf(this.NavigatorsCenter);
+	}
+}
+
 ParticleGroupIntro.prototype.GetParticleThatLeadTo = function(aTarget)
 {
 	for(var i = 0; i < this.particles.length; i++)
@@ -399,7 +424,8 @@ ParticleGroupIntro.prototype.UpdateNavigatorsRotation = function () {
 
 	if (!this.NavigatorsCenter || this.menuParticles.length === 0) return;
 
-	var theta = -mouse.x * this.navigatorsAngleAmplitude;
+	var theta = Math.cos(sGeneralTimer * 0.1) * this.navigatorsAngleAmplitude;
+	// var theta = -mouse.x * this.navigatorsAngleAmplitude;
 	var phi = mouse.y * this.navigatorsVerticalAngleAmplitude;
 
 	this.particleRotateSpeed.x += (phi - this.particleRotateSpeed.x) * 0.03;
