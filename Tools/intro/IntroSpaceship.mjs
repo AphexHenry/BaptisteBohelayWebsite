@@ -77,7 +77,7 @@ export function IntroSpaceship(position, size) {
 	this.planetGravity = size * window.innerWidth * 3650;
 	this.drag = 0.993;
 	this.bounce = 0.42;
-	this.maxSpeed = size * 4.5;
+	this.maxSpeed = size * 5;
 	// speed.x / speed.y = velocity along camera right / up (screen plane)
 	this.speed = { x: 0, y: 0 };
 	this._basisRight = null;

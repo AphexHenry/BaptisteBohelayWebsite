@@ -133,8 +133,10 @@ ParticleResume.ENTRIES = [
 			"2010",
 			"Paris, France · On-site",
 			[
-				"<em>Pro Evolution Soccer 2010/2011</em> for smartphones: sound manager programming and part of the GUI using Airplay cross-platform middleware; sound design.",
-			]
+				"<em>Developer on Pro Evolution Soccer 2010/2011</em> for smartphones.",
+				"programming of the audio and the GUI, sound design and implementation of the public reaction.",
+			],
+			"https://www.pocketgamer.com/pro-evolution-soccer-2010/review-9842/"
 		),
 		importance: 1,
 		type: "pro",
