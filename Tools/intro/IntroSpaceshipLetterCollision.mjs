@@ -473,7 +473,10 @@ export function computeSpaceshipLetterPushVelocity(spaceship, particle, basis) {
 
 	var velNx = shipVel.x / shipSpeed;
 	var velNy = shipVel.y / shipSpeed;
-	var alignment = Math.max(0, velNx * pushNx + velNy * pushNy);
+	var alignment = velNx * pushNx + velNy * pushNy;
+	if (alignment <= 0) {
+		return { x: 0, y: 0, angular: 0 };
+	}
 	var pushSpeed = shipSpeed * alignment;
 	var tangential = velNx * pushNy - velNy * pushNx;
 	var letterSize = Math.max(letterAabb.halfWidth, letterAabb.halfHeight, 1e-6);
