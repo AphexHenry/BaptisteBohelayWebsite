@@ -108,6 +108,40 @@ function closestPointOnPolygon(px, py, vertices) {
 /** ParticleLetter draws at local canvas (-1, 1): horizontal center + alphabetic baseline. */
 export var LETTER_GLYPH_LOCAL = { x: -1, y: 1 };
 
+function rotateVec2(x, y, angle) {
+	var cosA = Math.cos(angle);
+	var sinA = Math.sin(angle);
+	return {
+		x: x * cosA - y * sinA,
+		y: x * sinA + y * cosA,
+	};
+}
+
+export function getLetterGlyphCenterLocalOffset(particle) {
+	var char = particle.introLetterChar || 'A';
+	var metrics = getLetterProgramMetrics(char);
+	return {
+		x: LETTER_GLYPH_LOCAL.x,
+		y: LETTER_GLYPH_LOCAL.y + (metrics.ascentProg - metrics.descentProg) * 0.5,
+	};
+}
+
+/** Rotate around the glyph visual center, not the particle origin. */
+export function setIntroLetterRotationZ(particle, newRotationZ) {
+	var oldRotationZ = particle.rotation.z || 0;
+	if (newRotationZ === oldRotationZ) {
+		return;
+	}
+	var local = getLetterGlyphCenterLocalOffset(particle);
+	var pivotX = local.x * particle.scale.x;
+	var pivotY = local.y * particle.scale.y;
+	var oldOffset = rotateVec2(pivotX, pivotY, oldRotationZ);
+	var newOffset = rotateVec2(pivotX, pivotY, newRotationZ);
+	particle.position.x += newOffset.x - oldOffset.x;
+	particle.position.y += newOffset.y - oldOffset.y;
+	particle.rotation.z = newRotationZ;
+}
+
 function getMeasureContext() {
 	if (!measureCtx) {
 		var canvas = document.createElement('canvas');
@@ -379,7 +413,7 @@ function syncLetterCollisionDebugMarkers(state, foodArray) {
 		marker.position.z = particle.position.z + 1;
 		marker.scale.x = Math.max(aabb.halfWidth * 2, 1);
 		marker.scale.y = Math.max(aabb.halfHeight * 2, 1);
-		marker.rotation.z = 0;
+		marker.rotation.z = particle.rotation.z || 0;
 		marker.visible = true;
 	}
 }
@@ -413,6 +447,7 @@ export function testSpaceshipLetterCollision(spaceship, particle, planeAnchor, b
 /**
  * Push velocity in world XY: ship speed along ship-center → letter-center,
  * scaled by cos(angle) between ship velocity and that push direction.
+ * Angular velocity uses the perpendicular (sin) component, scaled by letter size.
  */
 export function computeSpaceshipLetterPushVelocity(spaceship, particle, basis) {
 	var shipPos = spaceship.particle.position;
@@ -433,16 +468,20 @@ export function computeSpaceshipLetterPushVelocity(spaceship, particle, basis) {
 	var shipVel = planeVelocityToWorld(basis, spaceship.speed.x, spaceship.speed.y);
 	var shipSpeed = Math.sqrt(shipVel.x * shipVel.x + shipVel.y * shipVel.y);
 	if (shipSpeed < 1e-6) {
-		return { x: 0, y: 0 };
+		return { x: 0, y: 0, angular: 0 };
 	}
 
 	var velNx = shipVel.x / shipSpeed;
 	var velNy = shipVel.y / shipSpeed;
 	var alignment = Math.max(0, velNx * pushNx + velNy * pushNy);
 	var pushSpeed = shipSpeed * alignment;
+	var tangential = velNx * pushNy - velNy * pushNx;
+	var letterSize = Math.max(letterAabb.halfWidth, letterAabb.halfHeight, 1e-6);
+	var spinSpeed = (shipSpeed * tangential) / letterSize;
 
 	return {
 		x: pushNx * pushSpeed,
 		y: pushNy * pushSpeed,
+		angular: spinSpeed,
 	};
 }

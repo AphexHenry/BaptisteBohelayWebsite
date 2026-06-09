@@ -17,6 +17,7 @@ function ParticleLetter(position, aLetter, aPositionTarget, aSize, aLetterColor)
 	particle.position = position;
 	particle.scale.x = aSize;
 	particle.scale.y = -aSize;
+	particle.rotation.z = 0;
 
 	// this.particleClear = new THREE.Particle( new THREE.ParticleCanvasMaterial( { color: Math.random() * 0x808080 + 0x808080, program: programStroke, opacity:0 } ) );
 	// var width = window.innerWidth * 1.5;

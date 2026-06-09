@@ -1,3 +1,5 @@
+import { setIntroLetterRotationZ } from '../intro/IntroSpaceshipLetterCollision.mjs';
+
 export var LegStates = {
 	REST: 0,
 	IDLE: 1,
@@ -93,12 +95,30 @@ MonsterIntroLeg.prototype.GetTargetHandPosition = function (particle, monster) {
 	);
 };
 
-MonsterIntroLeg.prototype.MoveHeldParticleToHand = function (posHandX, posHandY, monster) {
+MonsterIntroLeg.prototype.moveHeldParticleToHand = function (particle, posHandX, posHandY, monster) {
+	if (!particle || !particle.introDirectPlacement) {
+		this.MoveHeldParticleToHand(posHandX, posHandY, monster);
+		return;
+	}
+	// Lift/check only move position; rotation eases during placement.
+	this.MoveHeldParticleToHand(posHandX, posHandY, monster, null);
+};
+
+MonsterIntroLeg.prototype.MoveHeldParticleToHand = function (posHandX, posHandY, monster, moveProgress) {
 	if (!this.gotObject) {
 		return;
 	}
-	this.gotObject.particle.position.x = monster.position.x + posHandX * monster.scale.x;
-	this.gotObject.particle.position.y = monster.position.y + posHandY * monster.scale.y;
+	var particle = this.gotObject.particle;
+	particle.position.x = monster.position.x + posHandX * monster.scale.x;
+	particle.position.y = monster.position.y + posHandY * monster.scale.y;
+	if (moveProgress == null || particle.introPlacementRotationStart == null) {
+		return;
+	}
+
+	setIntroLetterRotationZ(
+		particle,
+		particle.introPlacementRotationStart * (1 - moveProgress)
+	);
 };
 
 MonsterIntroLeg.prototype.Update = function (delta, amp) {
@@ -196,19 +216,19 @@ MonsterIntroLeg.prototype.Update = function (delta, amp) {
 			}
 			break;
 		case LegStates.LIFTING_FOOD:
-			this.MoveHeldParticleToHand(posHandX, posHandY, monster);
+			this.moveHeldParticleToHand(gotObject.particle, posHandX, posHandY, monster);
 			if (this.coeffMove >= 1) {
 				this.SetState(LegStates.CHECKING_FOOD_DESTINATION);
 			}
 			break;
 		case LegStates.CHECKING_FOOD_DESTINATION:
-			this.MoveHeldParticleToHand(posHandX, posHandY, monster);
+			this.moveHeldParticleToHand(gotObject.particle, posHandX, posHandY, monster);
 			if (this.monsterIntro.particleGroupMonster.CanPlaceIntroLetter(gotObject.particle)) {
 				this.SetState(LegStates.PLACING_FOOD);
 			}
 			break;
 		case LegStates.PLACING_FOOD:
-			this.MoveHeldParticleToHand(posHandX, posHandY, monster);
+			this.MoveHeldParticleToHand(posHandX, posHandY, monster, actualCoeffMove);
 			if (this.coeffMove >= 1) {
 				this.monsterIntro.particleGroupMonster.PlaceIntroLetter(gotObject.particle);
 				this.gotObject = null;

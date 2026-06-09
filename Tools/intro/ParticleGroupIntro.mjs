@@ -9,6 +9,7 @@ import { Navigation } from '../Navigation.mjs';
 import { getViewPlaneBasis } from './IntroSpaceship.mjs';
 import {
 	computeSpaceshipLetterPushVelocity,
+	setIntroLetterRotationZ,
 	testSpaceshipLetterCollision,
 	updateIntroLetterCollisionDebug,
 } from './IntroSpaceshipLetterCollision.mjs';
@@ -189,6 +190,12 @@ ParticleGroupIntro.prototype.CaptureIntroLetter = function (particle) {
 	particle.introCurrentSlotIndex = null;
 	particle.introLifted = true;
 	particle.isMovable = false;
+	if (particle.introDirectPlacement) {
+		particle.introPlacementRotationStart = particle.rotation.z;
+		particle.introPlacementMoveProgress = 0;
+	} else if (particle.introPlacementRotationStart == null) {
+		particle.introPlacementRotationStart = particle.rotation.z;
+	}
 }
 
 ParticleGroupIntro.prototype.CanPlaceIntroLetter = function (particle) {
@@ -220,6 +227,10 @@ ParticleGroupIntro.prototype.PlaceIntroLetter = function (particle) {
 	particle.introSpaceshipDislodged = false;
 	particle.introSpaceshipIdleTimer = 0;
 	particle.introSpaceshipVel = null;
+	particle.introSpaceshipAngularVel = 0;
+	particle.rotation.z = 0;
+	particle.introPlacementRotationStart = null;
+	particle.introPlacementMoveProgress = 0;
 	particle.introDirectPlacement = false;
 }
 
@@ -289,10 +300,13 @@ ParticleGroupIntro.prototype.ReturnIntroLetterToPool = function (particle) {
 	}
 
 	// Stay where the push left the letter; pool origin is for monster pickup, not spawn layout.
+	var poolRotationZ = particle.rotation.z;
 	particle.introOriginPosition = particle.position.clone();
 	particle.introOriginPosition.z = this.positionCenter.z;
 	particle.position.z = this.positionCenter.z;
 	particle.introCurrentSlotIndex = null;
+	particle.introPlacementRotationStart = poolRotationZ;
+	particle.introPlacementMoveProgress = 0;
 
 	particle.isTarget = false;
 	particle.isEaten = false;
@@ -301,6 +315,7 @@ ParticleGroupIntro.prototype.ReturnIntroLetterToPool = function (particle) {
 	particle.introSpaceshipDislodged = false;
 	particle.introSpaceshipIdleTimer = 0;
 	particle.introSpaceshipVel = null;
+	particle.introSpaceshipAngularVel = 0;
 	particle.introDirectPlacement = true;
 };
 
@@ -324,7 +339,9 @@ ParticleGroupIntro.prototype.UpdateSpaceshipLetterInteractions = function (space
 		if (hit) {
 			this.DislodgeIntroLetter(particle);
 
-			particle.introSpaceshipVel = computeSpaceshipLetterPushVelocity(spaceship, particle, basis);
+			var push = computeSpaceshipLetterPushVelocity(spaceship, particle, basis);
+			particle.introSpaceshipVel = { x: push.x, y: push.y };
+			particle.introSpaceshipAngularVel = push.angular;
 			particle.introSpaceshipIdleTimer = 0;
 		} else if (particle.introSpaceshipDislodged) {
 			particle.introSpaceshipIdleTimer = (particle.introSpaceshipIdleTimer || 0) + delta;
@@ -714,8 +731,8 @@ ParticleGroupIntro.prototype.GetSpaceshipSpawnPlaneOffset = function () {
 
 ParticleGroupIntro.prototype.GetSpaceshipPlayfieldBounds = function () {
 	return {
-		halfRight: window.innerWidth * 0.65,
-		halfUp: window.innerHeight * 0.55,
+		halfRight: window.innerWidth * 1.0,
+		halfUp: window.innerHeight * 1.0,
 	};
 };
 
@@ -774,10 +791,15 @@ ParticleGroupIntro.prototype.UpdateFood = function (delta) {
 		particle.position.x += particle.introSpaceshipVel.x * delta;
 		particle.position.y += particle.introSpaceshipVel.y * delta;
 		particle.position.z = this.positionCenter.z;
+		setIntroLetterRotationZ(
+			particle,
+			(particle.rotation.z || 0) + (particle.introSpaceshipAngularVel || 0) * delta
+		);
 
 		var drag = Math.pow(0.96, delta * 60);
 		particle.introSpaceshipVel.x *= drag;
 		particle.introSpaceshipVel.y *= drag;
+		particle.introSpaceshipAngularVel = (particle.introSpaceshipAngularVel || 0) * drag;
 	}
 }
 
