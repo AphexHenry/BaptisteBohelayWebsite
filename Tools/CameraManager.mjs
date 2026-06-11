@@ -1,3 +1,7 @@
+/**
+ * Camera movement, look-at, and auto-control for the main 3D scene.
+ * Uses globalThis for shared app state (scene, sTools, cameraManager, etc.).
+ */
 
 var CAMERA_DISTANCE_SECURITY = 0.4;
 var CAMERA_DEPTH = 3000;
@@ -18,12 +22,15 @@ function shouldLogCamera(tag) {
 	return /^nav\//.test(t) || /intro|home|hashchange|syncCamera/i.test(t);
 }
 
-function CameraManager(a_camera) 
-{
+/**
+ * @constructor
+ * @param {THREE.Camera} a_camera
+ */
+export function CameraManager(a_camera) {
 	 this.camera = a_camera;
 	 // this.camera.matrixAutoUpdate = false;
 	// this.camera.position.z = 1000;
-	scene.add( this.camera );
+	globalThis.scene.add( this.camera );
 
 	this.mCameraLookAt = new THREE.Vector3(0., 0., 0.);
 	this.mCameraLookAtTarget = this.mCameraLookAt.clone();
@@ -51,7 +58,7 @@ function CameraManager(a_camera)
 	this.movementType = this.movementTypeGroup.INTERPOLATION;
 	this.movementTypeCoeff = 0.;
 
-	this.controlMode = sTools.CameraControlType.SATTELITE;
+	this.controlMode = globalThis.sTools.CameraControlType.SATTELITE;
 }
 
 /*
@@ -65,7 +72,7 @@ CameraManager.prototype.Update = function(aTimeInterval)
 
 	// lCoeffMovPos *= lCoeffMovPos;
 
-	lCoeffMovLook = 1. - (1. + Math.cos(Math.min(1., lCoeffMov) * Math.PI)) * 0.5;
+	var lCoeffMovLook = 1. - (1. + Math.cos(Math.min(1., lCoeffMov) * Math.PI)) * 0.5;
 	// lCoeffMovLook *= lCoeffMovLook;
 
 	if(this.camera.position.distanceTo(this.mTarget) > 1500)
@@ -88,10 +95,10 @@ CameraManager.prototype.Update = function(aTimeInterval)
 
 	lCamPosPHY = this.camera.position.clone().addSelf(this.mTarget.clone().subSelf(this.camera.position).multiplyScalar(2. * aTimeInterval));
 
-	lCoeffMovPos = 1. - (1. + Math.cos(Math.min(1., lCoeffMov * 0.95) * Math.PI)) * 0.5;
+	var lCoeffMovPos = 1. - (1. + Math.cos(Math.min(1., lCoeffMov * 0.95) * Math.PI)) * 0.5;
 	lCamPosINTER = this.mPositionInit.clone().addSelf(this.mTarget.clone().subSelf(this.mPositionInit).multiplyScalar(lCoeffMovPos));
 
-	this.movementTypeCoeff = myClamp(this.movementTypeCoeff,0,1)
+	this.movementTypeCoeff = globalThis.myClamp(this.movementTypeCoeff,0,1)
 	this.camera.position = lCamPosINTER.multiplyScalar(this.movementTypeCoeff).addSelf(lCamPosPHY.multiplyScalar(1 - this.movementTypeCoeff));
 
 	this.mCameraLookAt = this.mCameraLookAtInit.clone().addSelf(this.mCameraLookAtTarget.clone().subSelf(this.mCameraLookAtInit).multiplyScalar(lCoeffMovLook));
@@ -170,19 +177,14 @@ CameraManager.prototype.GetCamera = function()
 	return this.camera;
 }
 
-function GetCamera()
-{
-	return cameraManager.camera;
-}
-
 CameraManager.prototype.GetPosition = function()
 {
-	return cameraManager.camera.position;
+	return globalThis.cameraManager.camera.position;
 }
 
 CameraManager.prototype.GetPositionPixel = function()
 {
-	return cameraManager.camera.position;
+	return globalThis.cameraManager.camera.position;
 }
 
 CameraManager.prototype.SetSecurityDistance = function(aDistance)
@@ -225,6 +227,7 @@ CameraManager.prototype.SetControlMode = function(aMode)
 
 CameraManager.prototype.UpdateAutoControl = function(particleGroup, radius, generalTimer, mouse, cameraPosition, cameraTarget)
 {
+	var sTools = globalThis.sTools;
 	if (this.controlMode === sTools.CameraControlType.NONE) {
 		return;
 	}
@@ -240,6 +243,7 @@ CameraManager.prototype.UpdateAutoControl = function(particleGroup, radius, gene
 	}
 	else if (this.controlMode === sTools.CameraControlType.MOUSE_MOVE) {
 		cameraTarget.copy(center);
+		var isdefined = globalThis.isdefined;
 		var lAngleAmp = isdefined(particleGroup.mAngleAmplitude) ? particleGroup.mAngleAmplitude : Math.PI / 2.;
 		var lVerticalAmp = isdefined(particleGroup.mVerticalAngleAmplitude) ? particleGroup.mVerticalAngleAmplitude : 0.;
 		var theta = mouse.x * lAngleAmp;

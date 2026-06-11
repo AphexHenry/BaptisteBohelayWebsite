@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Louise VIP Test</title>
+	<style>
+		:root {
+			--bg: #f7f4f8;
+			--text: #3d3548;
+			--muted: #7a7088;
+			--accent: #e879a8;
+			--accent-dim: #d45f90;
+			--ok: #3cb878;
+			--fail: #e85d5d;
+			--q1: #dff8ea;
+			--q2: #dceeff;
+			--q3: #ffe4f0;
+			--q4: #ebe4ff;
+			--q5: #ffecd9;
+			--q-result: #fff6d6;
+		}
+
+		* { box-sizing: border-box; }
+
+		body {
+			margin: 0;
+			min-height: 100vh;
+			font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+			background: var(--bg);
+			color: var(--text);
+			line-height: 1.5;
+		}
+
+		.wrap {
+			max-width: 560px;
+			margin: 0 auto;
+			padding: 1.5rem 1rem 3rem;
+		}
+
+		header {
+			text-align: center;
+			margin-bottom: 2rem;
+		}
+
+		header h1 {
+			margin: 0 0 0.25rem;
+			font-size: 1.75rem;
+			letter-spacing: 0.02em;
+		}
+
+		header p {
+			margin: 0;
+			color: var(--muted);
+			font-size: 0.95rem;
+		}
+
+		.progress {
+			display: flex;
+			gap: 0.4rem;
+			justify-content: center;
+			margin-bottom: 1.5rem;
+		}
+
+		.progress span {
+			width: 2rem;
+			height: 0.35rem;
+			border-radius: 999px;
+			background: rgba(61, 53, 72, 0.12);
+		}
+
+		.progress span.done { background: var(--accent); }
+
+		.card {
+			border-radius: 1.25rem;
+			padding: 1.5rem 1.25rem;
+			box-shadow: 0 8px 28px rgba(61, 53, 72, 0.08);
+		}
+
+		.card[data-q="0"] { background: var(--q1); }
+		.card[data-q="1"] { background: var(--q2); }
+		.card[data-q="2"] { background: var(--q3); }
+		.card[data-q="3"] { background: var(--q4); }
+		.card[data-q="4"] { background: var(--q5); }
+		.card[data-q="5"],
+		.card.result { background: var(--q-result); }
+
+		.card h2 {
+			margin: 0 0 1.25rem;
+			font-size: 1.1rem;
+			font-weight: 600;
+			text-align: center;
+		}
+
+		.options {
+			display: flex;
+			flex-direction: column;
+			gap: 0.6rem;
+		}
+
+		.option {
+			display: flex;
+			align-items: center;
+			gap: 0.75rem;
+			padding: 0.65rem 0.85rem;
+			border: 2px solid rgba(61, 53, 72, 0.1);
+			border-radius: 0.75rem;
+			background: rgba(255, 255, 255, 0.45);
+			cursor: pointer;
+			transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+		}
+
+		.option:hover { border-color: rgba(232, 121, 168, 0.55); }
+
+		.option input {
+			flex-shrink: 0;
+			accent-color: var(--accent);
+		}
+
+		.option:has(input:checked) {
+			border-color: var(--accent);
+			background: rgba(255, 255, 255, 0.85);
+			box-shadow: 0 0 0 3px rgba(232, 121, 168, 0.2);
+		}
+
+		.poop-colours {
+			display: flex;
+			justify-content: center;
+			align-items: flex-start;
+			gap: 0.65rem;
+			flex-wrap: wrap;
+			margin-top: 0.5rem;
+		}
+
+		.poop-circle {
+			display: flex;
+			align-items: center;
+			cursor: pointer;
+			flex: 0 0 auto;
+		}
+
+		.poop-circle input {
+			position: absolute;
+			opacity: 0;
+			width: 0;
+			height: 0;
+		}
+
+		.poop-circle__dot {
+			width: 3.25rem;
+			height: 3.25rem;
+			border-radius: 50%;
+			border: 3px solid rgba(255, 255, 255, 0.9);
+			box-shadow: 0 2px 10px rgba(61, 53, 72, 0.12);
+			transition: transform 0.15s, box-shadow 0.15s;
+		}
+
+		.poop-circle:hover .poop-circle__dot {
+			transform: scale(1.08);
+		}
+
+		.poop-circle:has(input:checked) .poop-circle__dot {
+			box-shadow: 0 0 0 3px var(--accent), 0 4px 14px rgba(61, 53, 72, 0.18);
+			transform: scale(1.1);
+		}
+
+		.poop-circle--green .poop-circle__dot { background: #4caf50; }
+		.poop-circle--brown .poop-circle__dot { background: #795548; }
+		.poop-circle--light-brown .poop-circle__dot { background: #d4b896; }
+		.poop-circle--yellow .poop-circle__dot { background: #ffeb3b; }
+		.poop-circle--rainbow .poop-circle__dot {
+			background: linear-gradient(135deg, #f44336, #ffeb3b, #4caf50, #2196f3, #9c27b0);
+		}
+
+		.placeholder-img {
+			width: 100%;
+			max-width: 140px;
+			aspect-ratio: 1;
+			border-radius: 0.75rem;
+			border: 2px dashed rgba(61, 53, 72, 0.15);
+			background: rgba(255, 255, 255, 0.5);
+			object-fit: cover;
+		}
+
+		.pair-row {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 1rem;
+			margin-bottom: 1rem;
+		}
+
+		.pair-row figure {
+			margin: 0;
+			text-align: center;
+		}
+
+		.pair-row figcaption {
+			margin-top: 0.35rem;
+			font-size: 0.85rem;
+			color: var(--muted);
+		}
+
+		.sound-rows {
+			display: flex;
+			flex-direction: column;
+			gap: 1rem;
+		}
+
+		.sound-row {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: 1rem;
+			cursor: pointer;
+		}
+
+		.sound-play {
+			flex: 0 0 auto;
+			width: 3rem;
+			height: 3rem;
+			min-width: 3rem;
+			min-height: 3rem;
+			aspect-ratio: 1;
+			padding: 0;
+			border: none;
+			border-radius: 50%;
+			background: var(--text);
+			color: #fff;
+			cursor: pointer;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			line-height: 0;
+			transition: transform 0.15s, background 0.15s;
+		}
+
+		.sound-play:hover { transform: scale(1.06); background: var(--accent); }
+
+		.sound-play svg {
+			display: block;
+			width: 1rem;
+			height: 1rem;
+		}
+
+		.sound-play:not(.is-playing) svg {
+			margin-left: 0.12rem;
+		}
+
+		.sound-play.is-playing {
+			background: var(--accent);
+		}
+
+		.sound-row input[type="radio"] {
+			flex: 0 0 auto;
+			width: 1.25rem;
+			height: 1.25rem;
+			margin: 0;
+			accent-color: var(--accent);
+			cursor: pointer;
+		}
+
+		.sound-row audio {
+			display: none;
+		}
+
+		.picture-options .option {
+			flex-wrap: wrap;
+		}
+
+		.picture-options .option img {
+			width: 64px;
+			height: 64px;
+			border-radius: 0.5rem;
+			object-fit: cover;
+		}
+
+		.vs-row {
+			display: grid;
+			grid-template-columns: 1fr auto 1fr;
+			gap: 0.75rem;
+			align-items: center;
+			margin-bottom: 1rem;
+		}
+
+		.vs-row .vs {
+			font-weight: 700;
+			color: var(--accent);
+			font-size: 1.25rem;
+		}
+
+		.actions {
+			display: flex;
+			gap: 0.75rem;
+			margin-top: 1.25rem;
+		}
+
+		button {
+			flex: 1;
+			padding: 0.75rem 1rem;
+			border: none;
+			border-radius: 0.75rem;
+			font-size: 1rem;
+			font-weight: 600;
+			cursor: pointer;
+		}
+
+		.btn-primary {
+			background: var(--accent);
+			color: #fff;
+		}
+
+		.btn-primary:hover { background: var(--accent-dim); }
+
+		.btn-primary:disabled {
+			opacity: 0.45;
+			cursor: not-allowed;
+		}
+
+		.btn-ghost {
+			background: rgba(255, 255, 255, 0.6);
+			color: var(--muted);
+			border: 2px solid rgba(61, 53, 72, 0.12);
+		}
+
+		.screen { display: none; }
+		.screen.active { display: block; }
+
+		.result {
+			text-align: center;
+			padding: 1rem 0;
+		}
+
+		.result .score {
+			font-size: 2.5rem;
+			font-weight: 700;
+			margin: 0.5rem 0;
+		}
+
+		.result.pass .score { color: var(--ok); }
+		.result.fail .score { color: var(--fail); }
+
+		.result a {
+			display: inline-block;
+			margin-top: 1.25rem;
+			padding: 0.85rem 1.5rem;
+			background: #25d366;
+			color: #fff;
+			text-decoration: none;
+			border-radius: 0.75rem;
+			font-weight: 600;
+		}
+
+		.result a:hover { filter: brightness(1.08); }
+
+		.hint {
+			font-size: 0.8rem;
+			color: var(--muted);
+			margin-top: 0.75rem;
+			text-align: center;
+		}
+	</style>
+</head>
+<body>
+	<div class="wrap">
+		<header>
+			<h1>Louise VIP Test</h1>
+			<p>5 questions — one mistake allowed</p>
+		</header>
+
+		<div class="progress" id="progress" aria-hidden="true"></div>
+
+		<form id="quiz">
+			<!-- Q1: poop colour -->
+			<section class="screen card active" data-q="0">
+				<h2>1. Which colour is her poop?</h2>
+				<div class="poop-colours">
+					<label class="poop-circle poop-circle--green">
+						<input type="radio" name="q1" value="green" required>
+						<span class="poop-circle__dot" aria-hidden="true"></span>
+					</label>
+					<label class="poop-circle poop-circle--brown">
+						<input type="radio" name="q1" value="brown">
+						<span class="poop-circle__dot" aria-hidden="true"></span>
+					</label>
+					<label class="poop-circle poop-circle--light-brown">
+						<input type="radio" name="q1" value="light-brown">
+						<span class="poop-circle__dot" aria-hidden="true"></span>
+					</label>
+					<label class="poop-circle poop-circle--yellow">
+						<input type="radio" name="q1" value="yellow">
+						<span class="poop-circle__dot" aria-hidden="true"></span>
+					</label>
+					<label class="poop-circle poop-circle--rainbow">
+						<input type="radio" name="q1" value="rainbow">
+						<span class="poop-circle__dot" aria-hidden="true"></span>
+					</label>
+				</div>
+			</section>
+
+			<!-- Q2: louise sound -->
+			<section class="screen card" data-q="1">
+				<h2>2. Which sound is Louise?</h2>
+				<div class="sound-rows">
+					<label class="sound-row">
+						<button type="button" class="sound-play" aria-label="Play sound 1">
+							<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+						</button>
+						<input type="radio" name="q2" value="a" required>
+						<audio preload="none" src="assets/louiseVIP/placeholder-sound-a.wav"></audio>
+					</label>
+					<label class="sound-row">
+						<button type="button" class="sound-play" aria-label="Play sound 2">
+							<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+						</button>
+						<input type="radio" name="q2" value="b">
+						<audio preload="none" src="assets/louiseVIP/placeholder-sound-b.wav"></audio>
+					</label>
+				</div>
+			</section>
+
+			<!-- Q3: bird sound -->
+			<section class="screen card" data-q="2">
+				<h2>3. Which sound is a bird?</h2>
+				<div class="sound-rows">
+					<label class="sound-row">
+						<button type="button" class="sound-play" aria-label="Play sound 1">
+							<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+						</button>
+						<input type="radio" name="q3" value="a" required>
+						<audio preload="none" src="assets/louiseVIP/placeholder-sound-a.wav"></audio>
+					</label>
+					<label class="sound-row">
+						<button type="button" class="sound-play" aria-label="Play sound 2">
+							<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+						</button>
+						<input type="radio" name="q3" value="b">
+						<audio preload="none" src="assets/louiseVIP/placeholder-sound-b.wav"></audio>
+					</label>
+				</div>
+			</section>
+
+			<!-- Q4: which is louise -->
+			<section class="screen card" data-q="3">
+				<h2>4. Which one is Louise?</h2>
+				<div class="pair-row">
+					<figure>
+						<img class="placeholder-img" src="assets/louiseVIP/placeholder-louise-a.svg" alt="Picture A (placeholder)">
+						<figcaption>A</figcaption>
+					</figure>
+					<figure>
+						<img class="placeholder-img" src="assets/louiseVIP/placeholder-louise-b.svg" alt="Picture B (placeholder)">
+						<figcaption>B</figcaption>
+					</figure>
+				</div>
+				<div class="options picture-options">
+					<label class="option">
+						<input type="radio" name="q4" value="a" required>
+						<span>A</span>
+					</label>
+					<label class="option">
+						<input type="radio" name="q4" value="b">
+						<span>B</span>
+					</label>
+					<label class="option">
+						<input type="radio" name="q4" value="both">
+						<span>A and B</span>
+					</label>
+					<label class="option">
+						<input type="radio" name="q4" value="none">
+						<span>None</span>
+					</label>
+				</div>
+			</section>
+
+			<!-- Q5: who would win -->
+			<section class="screen card" data-q="4">
+				<h2>5. Who would win?</h2>
+				<div class="vs-row">
+					<figure>
+						<img class="placeholder-img" src="assets/louiseVIP/placeholder-louise-fight.svg" alt="Louise (placeholder)">
+						<figcaption>Louise</figcaption>
+					</figure>
+					<span class="vs">VS</span>
+					<figure>
+						<img class="placeholder-img" src="assets/louiseVIP/placeholder-cat.svg" alt="Cat (placeholder)">
+						<figcaption>Cat</figcaption>
+					</figure>
+				</div>
+				<div class="options">
+					<label class="option">
+						<input type="radio" name="q5" value="louise" required>
+						<span>Louise</span>
+					</label>
+					<label class="option">
+						<input type="radio" name="q5" value="cat">
+						<span>Cat</span>
+					</label>
+				</div>
+			</section>
+
+			<section class="screen card result" id="result" data-q="5">
+				<h2 id="result-title">Results</h2>
+				<p class="score" id="result-score"></p>
+				<p id="result-message"></p>
+				<a id="vip-link" href="https://chat.whatsapp.com/HLCRq26lntAEPGCFOBVSFG" target="_blank" rel="noopener" hidden>
+					Join Louise bestbof VIP on WhatsApp
+				</a>
+			</section>
+
+			<div class="actions" id="nav-actions">
+				<button type="button" class="btn-ghost" id="btn-prev" hidden>Back</button>
+				<button type="button" class="btn-primary" id="btn-next">Next</button>
+			</div>
+			<p class="hint" id="hint">Answer to continue</p>
+		</form>
+	</div>
+
+	<script>
+		// TODO: set correct answers when real assets are ready
+		const ANSWERS = {
+			q1: "green",
+			q2: "a",
+			q3: "b",
+			q4: "a",
+			q5: "louise",
+		};
+
+		const MAX_MISTAKES = 1;
+		const TOTAL = 5;
+
+		const screens = [...document.querySelectorAll(".screen")];
+		const progressEl = document.getElementById("progress");
+		const btnPrev = document.getElementById("btn-prev");
+		const btnNext = document.getElementById("btn-next");
+		const hint = document.getElementById("hint");
+		const navActions = document.getElementById("nav-actions");
+		const resultEl = document.getElementById("result");
+		const resultTitle = document.getElementById("result-title");
+		const resultScore = document.getElementById("result-score");
+		const resultMessage = document.getElementById("result-message");
+		const vipLink = document.getElementById("vip-link");
+
+		let step = 0;
+
+		for (let i = 0; i < TOTAL; i++) {
+			const dot = document.createElement("span");
+			progressEl.appendChild(dot);
+		}
+
+		function currentQuestionScreen() {
+			return screens[step];
+		}
+
+		function questionName() {
+			return "q" + (step + 1);
+		}
+
+		function isAnswered() {
+			if (step >= TOTAL) return true;
+			return !!document.querySelector('input[name="' + questionName() + '"]:checked');
+		}
+
+		function updateProgress() {
+			[...progressEl.children].forEach((dot, i) => {
+				dot.classList.toggle("done", i < step);
+			});
+		}
+
+		function showStep(index) {
+			if (pauseAllSounds) pauseAllSounds();
+			step = index;
+			screens.forEach((s, i) => s.classList.toggle("active", i === step));
+			updateProgress();
+
+			const onResult = step >= TOTAL;
+			btnPrev.hidden = step === 0 || onResult;
+			btnNext.textContent = step === TOTAL - 1 ? "See results" : "Next";
+			btnNext.hidden = onResult;
+			navActions.hidden = onResult;
+			hint.hidden = onResult;
+
+			if (!onResult) {
+				btnNext.disabled = !isAnswered();
+				hint.textContent = isAnswered() ? "" : "Answer to continue";
+			}
+		}
+
+		function scoreQuiz() {
+			let correct = 0;
+			for (let i = 1; i <= TOTAL; i++) {
+				const name = "q" + i;
+				const picked = document.querySelector('input[name="' + name + '"]:checked');
+				if (picked && picked.value === ANSWERS[name]) correct++;
+			}
+			return correct;
+		}
+
+		function showResults() {
+			const correct = scoreQuiz();
+			const mistakes = TOTAL - correct;
+			const passed = mistakes <= MAX_MISTAKES;
+
+			resultEl.classList.toggle("pass", passed);
+			resultEl.classList.toggle("fail", !passed);
+			resultTitle.textContent = passed ? "You passed!" : "Not quite…";
+			resultScore.textContent = correct + " / " + TOTAL;
+			resultMessage.textContent = passed
+				? "Welcome to the VIP club. One mistake is fine — you made " + mistakes + "."
+				: mistakes + " mistake" + (mistakes > 1 ? "s" : "") + ". Only one is allowed. Try again!";
+
+			vipLink.hidden = !passed;
+			retryBtn.hidden = passed;
+			showStep(TOTAL);
+		}
+
+		document.getElementById("quiz").addEventListener("change", () => {
+			if (step < TOTAL) btnNext.disabled = !isAnswered();
+		});
+
+		btnNext.addEventListener("click", () => {
+			if (!isAnswered()) return;
+			if (step === TOTAL - 1) {
+				showResults();
+			} else {
+				showStep(step + 1);
+			}
+		});
+
+		btnPrev.addEventListener("click", () => {
+			if (step > 0) showStep(step - 1);
+		});
+
+		// retry for failed attempts
+		const retryBtn = document.createElement("button");
+		retryBtn.type = "button";
+		retryBtn.className = "btn-ghost";
+		retryBtn.id = "retry";
+		retryBtn.textContent = "Try again";
+		retryBtn.style.marginTop = "1rem";
+		retryBtn.addEventListener("click", () => {
+			document.getElementById("quiz").reset();
+			resultEl.classList.remove("pass", "fail");
+			vipLink.hidden = true;
+			retryBtn.hidden = true;
+			navActions.hidden = false;
+			showStep(0);
+		});
+		resultMessage.after(retryBtn);
+
+		const playIcon = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>';
+		const pauseIcon = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 5h4v14H6zm8 0h4v14h-4z"/></svg>';
+		let pauseAllSounds = function (except) {
+			document.querySelectorAll(".sound-row audio").forEach((audio) => {
+				if (audio !== except) {
+					audio.pause();
+					audio.currentTime = 0;
+				}
+			});
+			document.querySelectorAll(".sound-play").forEach((btn) => {
+				if (!except || btn.closest(".sound-row")?.querySelector("audio") !== except) {
+					btn.classList.remove("is-playing");
+					btn.innerHTML = playIcon;
+				}
+			});
+		};
+
+		const initSoundRows = () => document.querySelectorAll(".sound-row").forEach((row) => {
+			const btn = row.querySelector(".sound-play");
+			const audio = row.querySelector("audio");
+			if (!btn || !audio) return;
+
+			btn.addEventListener("click", (e) => {
+				e.preventDefault();
+				e.stopPropagation();
+				if (audio.paused) {
+					pauseAllSounds(audio);
+					audio.play();
+					btn.classList.add("is-playing");
+					btn.innerHTML = pauseIcon;
+				} else {
+					audio.pause();
+					btn.classList.remove("is-playing");
+					btn.innerHTML = playIcon;
+				}
+			});
+
+			audio.addEventListener("ended", () => {
+				btn.classList.remove("is-playing");
+				btn.innerHTML = playIcon;
+			});
+		});
+		initSoundRows();
+
+		showStep(0);
+	</script>
+</body>
+</html>

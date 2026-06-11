@@ -3,6 +3,7 @@
  * Loaded as an ES module after Template / particle globals are registered.
  */
 import { Navigation } from './Navigation.mjs';
+import { CameraManager } from './CameraManager.mjs';
 import { introSpaceshipController } from './intro/IntroSpaceshipController.mjs';
 import { ParticleGroupFunkyCreation, ParticleGroupFlyer } from './ParticleGroup/ParticleGroupFunkyCreation.mjs';
 import { ParticleGroupWebExperiment } from './ParticleGroup/ParticleGroupWebExperiment.mjs';
@@ -20,7 +21,8 @@ import { ParticleGroupWebExperiment } from './ParticleGroup/ParticleGroupWebExpe
 	var container; // WebGL canvas container.
 	var camera, scene, projector, renderer; // three.js components.
 	var sceneInfo; // scene to display static informations.
-	var cameraManager; // camera manager.
+	/** @type {InstanceType<typeof CameraManager> | undefined} */
+	var cameraManager;
 
 	var mousePosition = new THREE.Vector3(); // position of the mouse.
 	var cameraTarget = new THREE.Vector3(); // where the camera needs to go in the end.
@@ -138,15 +140,14 @@ import { ParticleGroupWebExperiment } from './ParticleGroup/ParticleGroupWebExpe
 		// creations type
 		var flyer = [];
 		var lFunky = new ParticleGroupFunkyCreation(lMenuPosition.clone().addSelf(new THREE.Vector3(600, 1300, -1700)), flyer, "funkyCreation", sTools.ParticleGroup.PART_FUNKY_CREATION);
-		var particleWebExp = { particle: new ParticleCircleNavigate(lFunky.positionCenter.clone().addSelf(new THREE.Vector3(sWIDTH * 1., sWIDTH * 0.5, 0.)), { name: "web exploration", target: sTools.ParticleGroup.PART_WEB }) };
-		var monsterNoise = new MonsterNoise(lFunky.positionCenter.clone().addSelf(new THREE.Vector3(-sWIDTH * 1.6, 0., 0.)), window.innerWidth * 0.06, { name: "sound monsters", target: sTools.ParticleGroup.PART_SOUND_MONSTER });
+		// var particleWebExp = { particle: new ParticleCircleNavigate(lFunky.positionCenter.clone().addSelf(new THREE.Vector3(sWIDTH * 1., sWIDTH * 0.5, 0.)), { name: "web exploration", target: sTools.ParticleGroup.PART_WEB }) };
+		var monsterNoise = new MonsterNoise(lFunky.positionCenter.clone().addSelf(new THREE.Vector3(-sWIDTH * 1.6, 0., 0.)), window.innerWidth * 0.06, { name: "sounds", target: sTools.ParticleGroup.PART_SOUND_MONSTER });
 		var monsterVideo = new MonsterVideo(lFunky.positionCenter.clone().addSelf(new THREE.Vector3(0, -sWIDTH * .3, sWIDTH * 1.6)), window.innerWidth * 0.06, { name: "comics", target: sTools.ParticleGroup.PART_COMICS });
-		var monsterProjects = new MonsterProjects(lFunky.positionCenter.clone().addSelf(new THREE.Vector3(-sWIDTH * 0., sWIDTH * .3, 0.)), window.innerWidth * 0.06, { name: "projects", target: sTools.ParticleGroup.PART_OTHER, scale: 1.5 });
+		var monsterProjects = new MonsterProjects(lFunky.positionCenter.clone().addSelf(new THREE.Vector3(sWIDTH * 1., sWIDTH * 0.5, 0.)), window.innerWidth * 0.06, { name: "interactive", target: sTools.ParticleGroup.PART_OTHER, scale: 1.5 });
 
 		lFunky.AddParticle(monsterNoise);
 		lFunky.AddParticle(monsterVideo);
 		lFunky.AddParticle(monsterProjects);
-		lFunky.AddParticle(particleWebExp);
 		lFunky.SetShortDistance();
 
 		// sound monsters

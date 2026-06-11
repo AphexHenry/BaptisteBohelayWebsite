@@ -28,7 +28,7 @@ export function ParticleGroupIntro(positionCenter, name) {
 
 	this.width = (window.innerWidth + window.innerHeight) * 0.5 * 0.3;
 	this.cameraDistance = this.width * 3.;
-	this.positionCenter = positionCenter;
+	this.positionCenter = positionCenter.clone();
 	this.positionCenterInitial = positionCenter.clone();
 	this.name = name;
 	this.id = sTools.ParticleGroup.PART_INTRO;
@@ -687,7 +687,7 @@ ParticleGroupIntro.prototype.UpdateCamera = function (delta) {
 	t = t * t * (3. - 2. * t);
 	this.cameraZRatio = 0.7 + 0.3 * t;
 
-	globalThis.cameraTarget = sTools.ParticleGroups[sTools.ParticleGroup.PART_INTRO].positionCenter;
+	globalThis.cameraTarget = sTools.ParticleGroups[sTools.ParticleGroup.PART_INTRO].positionCenter.clone();
 	if (!this.isIntro) {
 		globalThis.cameraTarget.z = -window.innerWidth * 0.15;	
 	}
