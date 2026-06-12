@@ -461,6 +461,11 @@
 			padding: 1rem 0;
 		}
 
+		#result-title {
+			font-size: clamp(1.75rem, 7vw, 2.75rem);
+			font-weight: 800;
+		}
+
 		.result .score {
 			font-size: 2.5rem;
 			font-weight: 700;
@@ -480,6 +485,19 @@
 			line-height: 1.45;
 			color: var(--muted);
 			font-size: 1rem;
+		}
+
+		.result-denied {
+			margin: 0.75rem 0 0;
+			font-size: clamp(1.75rem, 7vw, 2.75rem);
+			font-weight: 800;
+			color: var(--fail);
+			text-align: center;
+			letter-spacing: 0.03em;
+		}
+
+		.result-denied[hidden] {
+			display: none;
 		}
 
 		.result-vip-box {
@@ -639,15 +657,99 @@
 			text-align: center;
 		}
 
-		.melody-play {
+		.melody-staff-row {
+			position: relative;
+			width: 100%;
+			max-width: calc(340px + 2.75rem);
+			padding-right: 2.75rem;
+		}
+
+		.melody-staff-row .melody-staff {
+			display: block;
+			width: 100%;
+			max-width: none;
+		}
+
+		.melody-preview-btn {
+			position: absolute;
+			right: 0;
+			top: 50%;
+			width: 2.25rem;
+			height: 2.25rem;
+			min-width: 2.25rem;
+			min-height: 2.25rem;
+			aspect-ratio: 1;
+			border: none;
+			border-radius: 50%;
+			background: var(--accent);
+			color: #fff;
+			cursor: pointer;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			padding: 0;
+			line-height: 0;
+			transform: translateY(-50%);
+			transition: background 0.15s ease, transform 0.12s ease;
+		}
+
+		.melody-preview-btn:hover:not(:disabled) {
+			background: var(--accent-dim);
+		}
+
+		.melody-preview-btn:active:not(:disabled) {
+			transform: translateY(-50%) scale(0.94);
+		}
+
+		.melody-preview-btn:disabled {
+			opacity: 0.45;
+			cursor: not-allowed;
+		}
+
+		.melody-preview-btn svg {
+			display: block;
+			width: 0.9rem;
+			height: 0.9rem;
+			fill: currentColor;
+			margin-left: 0.1rem;
+		}
+
+		.melody-done {
 			flex: 0 0 auto;
 			min-width: 10rem;
 			padding: 0.65rem 1.25rem;
 		}
 
-		.melody-play:disabled {
+		.melody-done:disabled {
 			opacity: 0.45;
 			cursor: not-allowed;
+		}
+
+		.melody-progress {
+			width: 100%;
+			max-width: 340px;
+		}
+
+		.melody-progress__track {
+			height: 0.5rem;
+			border-radius: 999px;
+			background: rgba(61, 53, 72, 0.12);
+			overflow: hidden;
+		}
+
+		.melody-progress__fill {
+			height: 100%;
+			width: 0%;
+			border-radius: 999px;
+			background: var(--accent);
+		}
+
+		.melody-progress__label {
+			margin: 0.5rem 0 0;
+			font-size: 1.05rem;
+			font-weight: 700;
+			color: var(--text);
+			text-align: center;
 		}
 
 		.melody-feedback {
@@ -672,23 +774,35 @@
 			display: flex;
 			align-items: center;
 			justify-content: center;
-			pointer-events: none;
+			padding: 1rem;
 		}
 
 		.melody-celebration[hidden] {
 			display: none;
 		}
 
-		.melody-celebration__text {
-			margin: 0;
-			padding: 1.1rem 2rem;
-			font-size: clamp(1.75rem, 8vw, 3rem);
-			font-weight: 800;
-			color: var(--ok);
+		.melody-celebration__panel {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			gap: 1.25rem;
+			padding: 1.5rem 2rem;
 			background: rgba(255, 255, 255, 0.96);
 			border-radius: 1.25rem;
 			box-shadow: 0 12px 36px rgba(61, 53, 72, 0.22);
-			animation: melody-celebrate 2.2s ease-out forwards;
+			animation: melody-celebrate 0.65s ease-out forwards;
+		}
+
+		.melody-celebration__text {
+			margin: 0;
+			font-size: clamp(1.75rem, 8vw, 3rem);
+			font-weight: 800;
+			color: var(--ok);
+			text-align: center;
+		}
+
+		.melody-celebration__btn {
+			min-width: 10rem;
 		}
 
 		@keyframes melody-celebrate {
@@ -697,23 +811,14 @@
 				transform: scale(0.3);
 			}
 
-			18% {
+			55% {
 				opacity: 1;
-				transform: scale(1.12);
-			}
-
-			32% {
-				transform: scale(1);
-			}
-
-			70% {
-				opacity: 1;
-				transform: scale(1);
+				transform: scale(1.08);
 			}
 
 			100% {
-				opacity: 0;
-				transform: scale(1.15);
+				opacity: 1;
+				transform: scale(1);
 			}
 		}
 
@@ -850,16 +955,30 @@
 					<h2>4. Make a melody Louise would like</h2>
 					<div class="melody-wrap">
 						<p class="melody-staff-hint">Tap each slot on the staff to place a note (5 notes)</p>
-						<svg class="melody-staff" id="melody-staff" viewBox="0 0 340 120" aria-label="Musical staff">
-							<line class="staff-line" x1="16" y1="28" x2="324" y2="28" />
-							<line class="staff-line" x1="16" y1="44" x2="324" y2="44" />
-							<line class="staff-line" x1="16" y1="60" x2="324" y2="60" />
-							<line class="staff-line" x1="16" y1="76" x2="324" y2="76" />
-							<line class="staff-line" x1="16" y1="92" x2="324" y2="92" />
-							<g id="melody-notes"></g>
-						</svg>
-						<button type="button" class="btn-primary melody-play" id="melody-play" disabled>Play
-							melody</button>
+						<div class="melody-staff-row">
+							<svg class="melody-staff" id="melody-staff" viewBox="0 0 340 120"
+								aria-label="Musical staff">
+								<line class="staff-line" x1="16" y1="28" x2="324" y2="28" />
+								<line class="staff-line" x1="16" y1="44" x2="324" y2="44" />
+								<line class="staff-line" x1="16" y1="60" x2="324" y2="60" />
+								<line class="staff-line" x1="16" y1="76" x2="324" y2="76" />
+								<line class="staff-line" x1="16" y1="92" x2="324" y2="92" />
+								<g id="melody-notes"></g>
+							</svg>
+							<button type="button" class="melody-preview-btn" id="melody-preview" disabled
+								aria-label="Play melody">
+								<svg viewBox="0 0 24 24" aria-hidden="true">
+									<polygon points="8,5 19,12 8,19" />
+								</svg>
+							</button>
+						</div>
+						<button type="button" class="btn-primary melody-done" id="melody-done" disabled>Done</button>
+						<div class="melody-progress" id="melody-progress" hidden>
+							<div class="melody-progress__track">
+								<div class="melody-progress__fill" id="melody-progress-fill"></div>
+							</div>
+							<p class="melody-progress__label" id="melody-progress-label"></p>
+						</div>
 						<p class="melody-feedback" id="melody-feedback" hidden></p>
 					</div>
 					<input type="hidden" name="q3" id="melody-answer" value="">
@@ -870,10 +989,11 @@
 					<img class="result-lose-img" id="result-lose-img" src="assets/louiseVIP/youLose.jpeg" alt="" hidden>
 					<p class="score" id="result-score"></p>
 					<p id="result-message"></p>
+					<p id="result-denied" class="result-denied" hidden>Access Denied</p>
 					<div id="result-vip-box" class="result-vip-box" hidden>
 						<p class="result-vip-box__title">🎉 Welcome to Louise's VIP group! 🎉</p>
 						<a id="vip-link" class="result-vip-box__btn"
-							href="https://chat.whatsapp.com/HLCRq26lntAEPGCFOBVSFG" target="_blank" rel="noopener">
+							href="https://chat.whatsapp.com/GtuDHbvevKr2CzGOcRlRhU" target="_blank" rel="noopener">
 							Join on WhatsApp
 						</a>
 					</div>
@@ -889,7 +1009,10 @@
 	</div>
 
 	<div id="melody-celebration" class="melody-celebration" hidden aria-live="polite">
-		<p class="melody-celebration__text">Louise liked it!</p>
+		<div class="melody-celebration__panel">
+			<p class="melody-celebration__text">Louise liked it!</p>
+			<button type="button" class="btn-primary melody-celebration__btn" id="melody-see-result">See Result</button>
+		</div>
 	</div>
 	<canvas id="confetti-canvas" class="confetti-canvas" hidden aria-hidden="true"></canvas>
 
@@ -917,6 +1040,7 @@
 		const resultTitle = document.getElementById("result-title");
 		const resultScore = document.getElementById("result-score");
 		const resultMessage = document.getElementById("result-message");
+		const resultDenied = document.getElementById("result-denied");
 		const resultVipBox = document.getElementById("result-vip-box");
 		const resultLoseImg = document.getElementById("result-lose-img");
 
@@ -942,7 +1066,7 @@
 				return document.querySelectorAll('input[name="q4"]:checked').length > 0;
 			}
 			if (name === "q3") {
-				return melodyPlayed && melodyNotes.every((note) => note !== null);
+				return melodySubmitted && melodyNotes.every((note) => note !== null);
 			}
 			return !!document.querySelector('input[name="' + name + '"]:checked');
 		}
@@ -953,8 +1077,22 @@
 			return new Set(filled).size > 1;
 		}
 
+		function countLouiseMistakes(picked) {
+			const expected = new Set(ANSWERS.q4);
+			const selected = new Set(picked);
+			let mistakes = 0;
+			for (const value of expected) {
+				if (!selected.has(value)) mistakes++;
+			}
+			for (const value of selected) {
+				if (!expected.has(value)) mistakes++;
+			}
+			return mistakes;
+		}
+
 		function selectionMatchesAnswer(name, picked) {
 			if (name === "q3") return isMelodyCorrect();
+			if (name === "q4") return countLouiseMistakes(picked) <= 2;
 			const expected = ANSWERS[name];
 			if (Array.isArray(expected)) {
 				if (picked.length !== expected.length) return false;
@@ -979,8 +1117,8 @@
 
 			const onResult = step >= TOTAL;
 			btnPrev.hidden = step === 0 || onResult;
-			btnNext.textContent = step === TOTAL - 1 ? "See results" : "Next";
-			btnNext.hidden = onResult;
+			btnNext.textContent = "Next";
+			btnNext.hidden = onResult || step === TOTAL - 1;
 			navActions.hidden = onResult;
 			hint.hidden = onResult;
 
@@ -990,8 +1128,8 @@
 					const allPlaced = melodyNotes.every((note) => note !== null);
 					hint.textContent = !allPlaced
 						? "Place all 5 notes on the staff"
-						: !melodyPlayed
-							? "Play your melody to continue"
+						: !melodySubmitted
+							? "Tap Done when you're happy with your melody"
 							: "";
 				} else if (questionName() === "q4") {
 					hint.textContent = isAnswered() ? "" : "Select at least one Louise to continue";
@@ -1014,6 +1152,7 @@
 		}
 
 		function showResults() {
+			hideMelodyCelebration();
 			const correct = scoreQuiz();
 			const mistakes = TOTAL - correct;
 			const passed = mistakes <= MAX_MISTAKES;
@@ -1025,6 +1164,7 @@
 			resultScore.textContent = correct + " / " + TOTAL;
 			resultMessage.hidden = perfect;
 			resultMessage.textContent = "You need a perfect score to be allowed in Louise's VIP group.";
+			resultDenied.hidden = perfect;
 			resultVipBox.hidden = !perfect;
 
 			if (perfect) {
@@ -1044,11 +1184,7 @@
 
 		btnNext.addEventListener("click", () => {
 			if (!isAnswered()) return;
-			if (step === TOTAL - 1) {
-				showResults();
-			} else {
-				showStep(step + 1);
-			}
+			showStep(step + 1);
 		});
 
 		btnPrev.addEventListener("click", () => {
@@ -1067,6 +1203,7 @@
 			resetMelody();
 			resultEl.classList.remove("pass", "fail");
 			resultMessage.hidden = false;
+			resultDenied.hidden = true;
 			resultVipBox.hidden = true;
 			resultLoseImg.hidden = true;
 			resultLoseImg.classList.remove("result-lose-img--flip");
@@ -1074,7 +1211,7 @@
 			navActions.hidden = false;
 			showStep(0);
 		});
-		resultMessage.after(retryBtn);
+		resultDenied.after(retryBtn);
 
 		const playIcon = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>';
 		const pauseIcon = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 5h4v14H6zm8 0h4v14h-4z"/></svg>';
@@ -1134,17 +1271,30 @@
 		];
 		const MELODY_SLOT_X = [52, 108, 164, 220, 276];
 		const melodyNotes = Array(5).fill(null);
-		let melodyPlayed = false;
+		let melodySubmitted = false;
 		let melodyAudioCtx = null;
 		let melodyAudioUnlocked = false;
 		let melodyPlaying = false;
+		let melodySubmitting = false;
+
+		const MELODY_SUBMIT_STAGES = [
+			{ label: "sending melody...", duration: 1000 },
+			{ label: "playing melody to Louise...", duration: 3000 },
+			{ label: "interpreting Louise reaction...", duration: 2000 },
+		];
 
 		const melodyStaff = document.getElementById("melody-staff");
 		const melodyNotesGroup = document.getElementById("melody-notes");
-		const melodyPlayBtn = document.getElementById("melody-play");
+		const melodyPreviewBtn = document.getElementById("melody-preview");
+		const melodyDoneBtn = document.getElementById("melody-done");
+		const melodyProgress = document.getElementById("melody-progress");
+		const melodyProgressFill = document.getElementById("melody-progress-fill");
+		const melodyProgressLabel = document.getElementById("melody-progress-label");
 		const melodyFeedback = document.getElementById("melody-feedback");
 		const melodyAnswerInput = document.getElementById("melody-answer");
 		const melodyCelebration = document.getElementById("melody-celebration");
+		const melodySeeResultBtn = document.getElementById("melody-see-result");
+		let melodyFailTimeout = null;
 		const confettiCanvas = document.getElementById("confetti-canvas");
 		let confettiRaf = null;
 		let celebrationTimeout = null;
@@ -1185,7 +1335,9 @@
 			});
 
 			const allPlaced = melodyNotes.every((note) => note !== null);
-			melodyPlayBtn.disabled = !allPlaced || melodyPlaying;
+			const melodyBusy = melodyPlaying || melodySubmitting;
+			melodyPreviewBtn.disabled = !allPlaced || melodyBusy;
+			melodyDoneBtn.disabled = !allPlaced || melodyBusy;
 			syncMelodyAnswer();
 
 			if (step < TOTAL && questionName() === "q3") {
@@ -1193,9 +1345,16 @@
 				const allNotes = melodyNotes.every((note) => note !== null);
 				hint.textContent = !allNotes
 					? "Place all 5 notes on the staff"
-					: !melodyPlayed
-						? "Play your melody to continue"
+					: !melodySubmitted
+						? "Tap Done when you're happy with your melody"
 						: "";
+			}
+		}
+
+		function clearMelodyFailTimeout() {
+			if (melodyFailTimeout) {
+				window.clearTimeout(melodyFailTimeout);
+				melodyFailTimeout = null;
 			}
 		}
 
@@ -1204,6 +1363,7 @@
 				window.clearTimeout(celebrationTimeout);
 				celebrationTimeout = null;
 			}
+			clearMelodyFailTimeout();
 			if (confettiRaf) {
 				cancelAnimationFrame(confettiRaf);
 				confettiRaf = null;
@@ -1268,31 +1428,41 @@
 		}
 
 		function showMelodyCelebration() {
-			const text = melodyCelebration.querySelector(".melody-celebration__text");
-			text.style.animation = "none";
-			void text.offsetWidth;
-			text.style.animation = "";
+			const panel = melodyCelebration.querySelector(".melody-celebration__panel");
+			panel.style.animation = "none";
+			void panel.offsetWidth;
+			panel.style.animation = "";
 			melodyCelebration.hidden = false;
 			burstConfetti();
-			celebrationTimeout = window.setTimeout(hideMelodyCelebration, 2200);
 		}
 
 		function setMelodySlot(index, pitch) {
 			melodyNotes[index] = pitch;
-			melodyPlayed = false;
+			melodySubmitted = false;
 			melodyFeedback.hidden = true;
 			hideMelodyCelebration();
+			resetMelodyProgress();
 			updateMelodyUI();
+		}
+
+		function resetMelodyProgress() {
+			melodyProgress.hidden = true;
+			melodyDoneBtn.hidden = false;
+			melodyProgressFill.style.transition = "none";
+			melodyProgressFill.style.width = "0%";
+			melodyProgressLabel.textContent = "";
 		}
 
 		function resetMelody() {
 			for (let i = 0; i < melodyNotes.length; i++) melodyNotes[i] = null;
-			melodyPlayed = false;
+			melodySubmitted = false;
 			melodyPlaying = false;
+			melodySubmitting = false;
 			melodyFeedback.hidden = true;
 			melodyFeedback.textContent = "";
 			melodyFeedback.className = "melody-feedback";
 			hideMelodyCelebration();
+			resetMelodyProgress();
 			updateMelodyUI();
 		}
 
@@ -1347,36 +1517,81 @@
 			hideMelodyCelebration();
 			melodyFeedback.hidden = false;
 			melodyFeedback.className = "melody-feedback disliked";
-			melodyFeedback.textContent = "Louise didn't like it… (try varying the notes)";
+			melodyFeedback.textContent = "Louise didn't like it…";
+			clearMelodyFailTimeout();
+			melodyFailTimeout = window.setTimeout(() => {
+				melodyFailTimeout = null;
+				showResults();
+			}, 2500);
 		}
 
-		async function playMelody() {
-			if (!melodyNotes.every((note) => note !== null) || melodyPlaying) return;
-			await unlockMelodyAudio();
+		function scheduleMelodyTones(startDelayMs = 50) {
 			const ctx = getMelodyAudioCtx();
-
-			melodyPlaying = true;
-			melodyPlayed = false;
-			melodyFeedback.hidden = true;
-			hideMelodyCelebration();
-			melodyPlayBtn.disabled = true;
-			melodyPlayBtn.textContent = "Playing…";
-
 			const noteDuration = 0.42;
 			const gap = 0.08;
-			const start = ctx.currentTime + 0.05;
+			const start = ctx.currentTime + startDelayMs / 1000;
 			melodyNotes.forEach((pitch, index) => {
 				playTone(pitch.freq, start + index * (noteDuration + gap), noteDuration);
 			});
+			return (noteDuration + gap) * 5 * 1000 + 120;
+		}
 
-			const totalMs = (noteDuration + gap) * 5 * 1000 + 120;
-			window.setTimeout(() => {
-				melodyPlaying = false;
-				melodyPlayed = true;
-				melodyPlayBtn.textContent = "Play again";
-				showMelodyFeedback();
-				updateMelodyUI();
-			}, totalMs);
+		function wait(ms) {
+			return new Promise((resolve) => window.setTimeout(resolve, ms));
+		}
+
+		async function previewMelody() {
+			if (!melodyNotes.every((note) => note !== null) || melodyPlaying || melodySubmitting) return;
+			await unlockMelodyAudio();
+
+			melodyPlaying = true;
+			updateMelodyUI();
+
+			const totalMs = scheduleMelodyTones();
+			await wait(totalMs);
+			melodyPlaying = false;
+			updateMelodyUI();
+		}
+
+		async function submitMelody() {
+			if (!melodyNotes.every((note) => note !== null) || melodyPlaying || melodySubmitting) return;
+
+			melodySubmitting = true;
+			melodySubmitted = false;
+			melodyFeedback.hidden = true;
+			hideMelodyCelebration();
+			melodyDoneBtn.hidden = true;
+			melodyProgress.hidden = false;
+			melodyProgressFill.style.transition = "none";
+			melodyProgressFill.style.width = "0%";
+			updateMelodyUI();
+
+			await unlockMelodyAudio();
+			scheduleMelodyTones();
+
+			const totalDuration = MELODY_SUBMIT_STAGES.reduce((sum, stage) => sum + stage.duration, 0);
+			let elapsed = 0;
+
+			for (const stage of MELODY_SUBMIT_STAGES) {
+				melodyProgressLabel.textContent = stage.label;
+				const startPct = (elapsed / totalDuration) * 100;
+				elapsed += stage.duration;
+				const endPct = (elapsed / totalDuration) * 100;
+
+				melodyProgressFill.style.transition = "none";
+				melodyProgressFill.style.width = startPct + "%";
+				void melodyProgressFill.offsetWidth;
+				melodyProgressFill.style.transition = "width " + stage.duration + "ms linear";
+				melodyProgressFill.style.width = endPct + "%";
+
+				await wait(stage.duration);
+			}
+
+			melodySubmitting = false;
+			melodySubmitted = true;
+			resetMelodyProgress();
+			showMelodyFeedback();
+			updateMelodyUI();
 		}
 
 		melodyStaff.addEventListener("pointerup", (event) => {
@@ -1393,8 +1608,16 @@
 			void previewTone(pitch.freq);
 		});
 
-		melodyPlayBtn.addEventListener("click", () => {
-			playMelody();
+		melodyPreviewBtn.addEventListener("click", () => {
+			void previewMelody();
+		});
+
+		melodyDoneBtn.addEventListener("click", () => {
+			void submitMelody();
+		});
+
+		melodySeeResultBtn.addEventListener("click", () => {
+			showResults();
 		});
 
 		updateMelodyUI();
