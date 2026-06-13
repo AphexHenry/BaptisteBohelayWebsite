@@ -126,7 +126,7 @@ import { ParticleGroupWebExperiment } from './ParticleGroup/ParticleGroupWebExpe
 
 		var aboutMe = new MonsterTournicoti(aboutMePos, 0.4, { name: "About Me", target: sTools.ParticleGroup.PART_ABOUT_ME, size: 1. * menuScale }, 1, false, 0xf97316);
 		var programmingTarget = { name: "programming", target: sTools.ParticleGroup.PART_PROGRAMMING, size: 0.9 * menuScale };
-		var programmingMonster = new MonsterRandom(programmingPos, window.innerWidth * 0.06 * menuScale, programmingTarget);
+		var programmingMonster = new MonsterRandom(programmingPos, 0.3, programmingTarget);
 		
 		// var randomLastProject = new MonsterTournicoti(new THREE.Vector3(lMenuPosition.x + sWIDTH * 1., lMenuPosition.y - 1. * sWIDTH / getRatio(), lMenuPosition.z + sWIDTH * 0.3), window.innerWidth * 0.06, sProjectsLast, 1);
 		var funkyCreation = new MonsterTournicoti(funkyCreationPos, 0.4, { name: "creations", target: sTools.ParticleGroup.PART_FUNKY_CREATION, size: 1.5 * menuScale }, -1, false, 0xf97316);
@@ -141,9 +141,9 @@ import { ParticleGroupWebExperiment } from './ParticleGroup/ParticleGroupWebExpe
 		var flyer = [];
 		var lFunky = new ParticleGroupFunkyCreation(lMenuPosition.clone().addSelf(new THREE.Vector3(600, 1300, -1700)), flyer, "funkyCreation", sTools.ParticleGroup.PART_FUNKY_CREATION);
 		// var particleWebExp = { particle: new ParticleCircleNavigate(lFunky.positionCenter.clone().addSelf(new THREE.Vector3(sWIDTH * 1., sWIDTH * 0.5, 0.)), { name: "web exploration", target: sTools.ParticleGroup.PART_WEB }) };
-		var monsterNoise = new MonsterNoise(lFunky.positionCenter.clone().addSelf(new THREE.Vector3(-sWIDTH * 1.6, 0., 0.)), window.innerWidth * 0.06, { name: "sounds", target: sTools.ParticleGroup.PART_SOUND_MONSTER });
-		var monsterVideo = new MonsterVideo(lFunky.positionCenter.clone().addSelf(new THREE.Vector3(0, -sWIDTH * .3, sWIDTH * 1.6)), window.innerWidth * 0.06, { name: "comics", target: sTools.ParticleGroup.PART_COMICS });
-		var monsterProjects = new MonsterProjects(lFunky.positionCenter.clone().addSelf(new THREE.Vector3(sWIDTH * 1., sWIDTH * 0.5, 0.)), window.innerWidth * 0.06, { name: "interactive", target: sTools.ParticleGroup.PART_OTHER, scale: 1.5 });
+		var monsterNoise = new MonsterNoise(lFunky.positionCenter.clone().addSelf(new THREE.Vector3(-sWIDTH * 1.6, 0., 0.)), 0.3, { name: "sounds", target: sTools.ParticleGroup.PART_SOUND_MONSTER });
+		var monsterVideo = new MonsterVideo(lFunky.positionCenter.clone().addSelf(new THREE.Vector3(0, -sWIDTH * .3, sWIDTH * 1.6)), 0.3, { name: "comics", target: sTools.ParticleGroup.PART_COMICS });
+		var monsterProjects = new MonsterProjects(lFunky.positionCenter.clone().addSelf(new THREE.Vector3(sWIDTH * 1., sWIDTH * 0.5, 0.)), 0.99, { name: "interactive", target: sTools.ParticleGroup.PART_OTHER, scale: 1.5 });
 
 		lFunky.AddParticle(monsterNoise);
 		lFunky.AddParticle(monsterVideo);
