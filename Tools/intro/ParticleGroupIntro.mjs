@@ -751,6 +751,22 @@ ParticleGroupIntro.prototype.GetSpaceshipGravityBodies = function () {
 	return bodies;
 };
 
+ParticleGroupIntro.prototype.GetSpaceshipPlanetColliders = function () {
+	var colliders = [];
+	for (var i = 0; i < this.menuParticlesToUpdate.length; i++) {
+		var planet = this.menuParticlesToUpdate[i];
+		if (!planet || !planet.particle) {
+			continue;
+		}
+		colliders.push({
+			particle: planet.particle,
+			name: (planet.target && planet.target.name) || 'planet',
+			radius: planet.getWorldRadius(),
+		});
+	}
+	return colliders;
+};
+
 ParticleGroupIntro.prototype.AreIntroLettersSettled = function () {
 	for (var i = 0; i < this.foodArray.length; i++) {
 		var target = this.foodArray[i].TargetObject.positionTarget;

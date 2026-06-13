@@ -80,6 +80,7 @@ export function IntroSpaceship(position, size) {
 	this.maxSpeed = size * 5;
 	// speed.x / speed.y = velocity along camera right / up (screen plane)
 	this.speed = { x: 0, y: 0 };
+	this.landedPlanet = null;
 	this._basisRight = null;
 	this._basisUp = null;
 	this.controls = {
@@ -103,6 +104,7 @@ export function IntroSpaceship(position, size) {
 	this.particle.scale.x = this.particle.scale.y = size;
 	this.particle.rotation.z = 0;
 	this.particle.boundRadiusScale = 0.7;
+	this.hullRadiusScale = 0.7;
 	scene.add(this.particle);
 
 	// Console: DEBUG_SPACESHIP_GRAVITY = true to show gravity-body crosshairs on particles.
@@ -296,6 +298,18 @@ IntroSpaceship.prototype.Update = function (delta, planeBounds, gravityBodies, p
 	}
 
 	var basis = getViewPlaneBasis(planeAnchor);
+
+	if (this.landedPlanet && !this.controls.up) {
+		var turn = 0;
+		if (this.controls.left) turn += 1;
+		if (this.controls.right) turn -= 1;
+		this.angle += turn * this.rotationSpeed * delta;
+		this.speed.x = 0;
+		this.speed.y = 0;
+		this.particle.rotation.z = -this.angle;
+		return;
+	}
+
 	this.reprojectSpeedToBasis(basis);
 
 	if (gravityBodies) {

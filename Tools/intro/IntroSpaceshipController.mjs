@@ -3,6 +3,11 @@
  * On navigation: stash off-screen during the camera move, then enter from bottom-left at the group's z.
  */
 import { IntroSpaceship, getViewPlaneBasis } from './IntroSpaceship.mjs';
+import {
+	getPlanetCollidersFromGroup,
+	maintainLandedSpaceship,
+	updateSpaceshipPlanetLanding,
+} from './IntroSpaceshipPlanetLanding.mjs';
 
 var REVEAL_DELAY = 1.5;
 var PLAYFIELD_CENTER_LERP_SPEED = 0.65;
@@ -139,6 +144,7 @@ export const introSpaceshipController = {
 		var basis = getViewPlaneBasis(anchor);
 		this.spaceship.setPlaneOffset(anchor, basis, -window.innerWidth * 0.95, -window.innerHeight * 0.55);
 		this.spaceship.speed = { x: 0, y: 0 };
+		this.spaceship.landedPlanet = null;
 		this.spaceship._basisRight = null;
 		this.spaceship._basisUp = null;
 	},
@@ -154,6 +160,7 @@ export const introSpaceshipController = {
 		var offset = getSpawnPlaneOffset(group);
 		this.spaceship.setPlaneOffset(anchor, basis, offset.right, offset.up);
 		this.spaceship.speed = { x: 0, y: 0 };
+		this.spaceship.landedPlanet = null;
 		this.spaceship._basisRight = null;
 		this.spaceship._basisUp = null;
 	},
@@ -192,7 +199,15 @@ export const introSpaceshipController = {
 		if (!anchor) {
 			return;
 		}
+		var basis = getViewPlaneBasis(anchor);
+		var planetColliders = getPlanetCollidersFromGroup(this.activeGroup);
+
+		if (this.spaceship.landedPlanet && !this.spaceship.controls.up) {
+			maintainLandedSpaceship(this.spaceship, anchor, basis);
+		}
+
 		this.spaceship.Update(delta, this.getBounds(), getGravityBodies(this.activeGroup), anchor);
+		updateSpaceshipPlanetLanding(this.spaceship, planetColliders, anchor, basis);
 
 		if (typeof this.activeGroup.UpdateSpaceshipLetterInteractions === 'function') {
 			this.activeGroup.UpdateSpaceshipLetterInteractions(this.spaceship, anchor, delta);

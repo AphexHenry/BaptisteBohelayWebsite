@@ -23,6 +23,8 @@ export function PlanetParticle(aPosition, aSize, aTarget, particleOptions = {}) 
 		this.particle.scale.y *= 3.;
 	}
 
+	this.particle.planetParticle = this;
+
 	if (particleOptions.autonomous !== false) {
 		this.particle.SetAutonomous(true);
 	}
@@ -45,6 +47,11 @@ export function PlanetParticle(aPosition, aSize, aTarget, particleOptions = {}) 
 
 	this.info = this.particle.TargetObject.info;
 }
+
+/** World-space display radius (local canvas size × particle scale). */
+PlanetParticle.prototype.getWorldRadius = function () {
+	return this.size * this.particle.scale.x;
+};
 
 PlanetParticle.prototype.onMouseOn = function () {
 	this.mouseOn = true;
