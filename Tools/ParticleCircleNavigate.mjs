@@ -4,7 +4,7 @@
  */
 import { programDoNothing, programStroke } from './Template.mjs';
 
-export function ParticleCircleNavigate(position, aTargetObject, aColor, putInfoInBack = false) {
+export function ParticleCircleNavigate(position, aTargetObject, aColor, putInfoInBack = false, infoCircleRadius) {
 	var THREE = globalThis.THREE;
 	var scene = globalThis.scene;
 	var sWIDTH = globalThis.sWIDTH;
@@ -45,6 +45,15 @@ export function ParticleCircleNavigate(position, aTargetObject, aColor, putInfoI
 
 	var infoText = BuildInfoText(this.name, this.subTitle);
 
+	// Local canvas radius of the bubble. Scales label x-offset only, not font size.
+	var circleRadius = 0.3;
+	if (isdefined(infoCircleRadius)) {
+		circleRadius = infoCircleRadius;
+	} else if (isdefined(aTargetObject.infoCircleRadius)) {
+		circleRadius = aTargetObject.infoCircleRadius;
+	}
+	var textOffsetX = 4 * circleRadius / 0.3;
+
 	var DrawInfoText = function (context, text) {
 		var totalHeight = 0;
 		var lineHeights = [];
@@ -64,7 +73,7 @@ export function ParticleCircleNavigate(position, aTargetObject, aColor, putInfoI
 		for (var drawIndex = 0; drawIndex < text.length; drawIndex++) {
 			y += lineHeights[drawIndex] * 0.5;
 			context.font = text[drawIndex].size + 'pt TitleText';
-			context.fillText(text[drawIndex].string, 4, y);
+			context.fillText(text[drawIndex].string, textOffsetX, y);
 			y += lineHeights[drawIndex] * 0.5;
 		}
 	};
@@ -111,6 +120,10 @@ export function ParticleCircleNavigate(position, aTargetObject, aColor, putInfoI
 
 	particle.SetName = function (aName, aSubTitle) {
 		infoText = BuildInfoText(aName, aSubTitle);
+	};
+
+	particle.SetInfoCircleRadius = function (aRadius) {
+		textOffsetX = 4 * aRadius / 0.3;
 	};
 
 	particle.SetAutonomous = function (aValue) {

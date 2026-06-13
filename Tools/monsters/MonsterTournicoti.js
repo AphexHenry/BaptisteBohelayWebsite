@@ -3,6 +3,7 @@ function MonsterTournicoti(aPosition, aSize, aTarget, aDrawParam, aStayAwake, aC
 {
 	var that = this;
 	this.target = aTarget;
+	this.size = aSize;
 	this.drawParam = aDrawParam;
 
 	this.stayAwake = isdefined(aStayAwake) ? aStayAwake : false;
@@ -12,6 +13,7 @@ function MonsterTournicoti(aPosition, aSize, aTarget, aDrawParam, aStayAwake, aC
 	    var centerX = 0.;
 	    var centerY = 0.;
 		context.lineWidth = 0.01;
+		// drawWavyBottomHalfFill(context, 0.3);
 		if(that.distanceLastProject > 0.01)
 		{
 		    drawOneArmLastProject(context, Math.PI * 0 );
@@ -21,15 +23,15 @@ function MonsterTournicoti(aPosition, aSize, aTarget, aDrawParam, aStayAwake, aC
 		}
 
 	    context.beginPath();
-	    context.arc( centerX, centerY, 0.3, 0, PI2, true );
+	    context.arc( centerX, centerY, aSize, 0, PI2, true );
 	    context.closePath();
 	    context.stroke();
 	}
 
 	function drawOneArmLastProject(context, angle)
 	{
-	  var px = Math.cos(angle) * 0.3;
-	  var py = Math.sin(angle) * 0.3;
+	  var px = Math.cos(angle) * that.size;
+	  var py = Math.sin(angle) * that.size;
 	  var lNumPt = 100;
 	  var theta = 0;
 	  context.beginPath();
@@ -50,7 +52,7 @@ function MonsterTournicoti(aPosition, aSize, aTarget, aDrawParam, aStayAwake, aC
 	  context.stroke();
 	}
 
-	this.particle = new ParticleCircleNavigate(aPosition, aTarget, aColor);
+	this.particle = new ParticleCircleNavigate(aPosition, aTarget, aColor, false, aSize);
 	this.particle.material.program = programLastProject;
 	this.particle.scale.x *= 3.;
 	this.particle.scale.y *= 3.;

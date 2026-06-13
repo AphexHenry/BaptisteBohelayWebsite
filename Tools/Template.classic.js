@@ -96,6 +96,69 @@
 		context.fill();
 	}
 
+	function parseColorStyle(colorStyle) {
+		if (typeof colorStyle !== 'string') {
+			return { r: 0, g: 0, b: 0 };
+		}
+		var rgb = colorStyle.match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/);
+		if (rgb) {
+			return { r: +rgb[1], g: +rgb[2], b: +rgb[3] };
+		}
+		if (colorStyle.charAt(0) === '#') {
+			var hex =
+				colorStyle.length === 4
+					? colorStyle
+							.slice(1)
+							.split('')
+							.map(function (c) {
+								return c + c;
+							})
+							.join('')
+					: colorStyle.slice(1);
+			return {
+				r: parseInt(hex.slice(0, 2), 16),
+				g: parseInt(hex.slice(2, 4), 16),
+				b: parseInt(hex.slice(4, 6), 16),
+			};
+		}
+		return { r: 0, g: 0, b: 0 };
+	}
+
+	function lightenColorStyle(colorStyle, mixTowardWhite) {
+		if (mixTowardWhite == null) {
+			mixTowardWhite = 0.55;
+		}
+		var rgb = parseColorStyle(colorStyle);
+		var lr = Math.round(rgb.r + (255 - rgb.r) * mixTowardWhite);
+		var lg = Math.round(rgb.g + (255 - rgb.g) * mixTowardWhite);
+		var lb = Math.round(rgb.b + (255 - rgb.b) * mixTowardWhite);
+		return 'rgb(' + lr + ',' + lg + ',' + lb + ')';
+	}
+
+	function drawWavyBottomHalfFill(context, radius, phase) {
+		var wavePhase = phase != null ? phase : (global.sGeneralTimer || 0) * 2.2;
+		var waveAmplitude = radius * 0.14;
+		var waveCount = 3;
+		var numPoints = 48;
+
+		context.fillStyle = lightenColorStyle(context.strokeStyle);
+
+		context.beginPath();
+		context.moveTo(-radius, 0);
+		context.arc(0, 0, radius, Math.PI, 0, false);
+		for (var i = numPoints; i >= 0; i--) {
+			var t = i / numPoints;
+			var x = -radius + 2 * radius * t;
+			var y =
+				waveAmplitude *
+				Math.sin(waveCount * Math.PI * t + wavePhase) *
+				Math.sin(Math.PI * t);
+			context.lineTo(x, y);
+		}
+		context.closePath();
+		context.fill();
+	}
+
 	function GetTitle() {
 		var canvas = document.createElement('canvas');
 		canvas.width = 512;
@@ -290,6 +353,8 @@
 	global.programStrokeLimited = programStrokeLimited;
 	global.programFill = programFill;
 	global.programFillWater = programFillWater;
+	global.lightenColorStyle = lightenColorStyle;
+	global.drawWavyBottomHalfFill = drawWavyBottomHalfFill;
 	global.GetTitle = GetTitle;
 	global.GetCircle = GetCircle;
 	global.GetCircleColor = GetCircleColor;
