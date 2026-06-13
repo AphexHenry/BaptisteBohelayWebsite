@@ -192,6 +192,21 @@ function ParticleAboutMe_setHoverState(particle, active) {
 	}
 }
 
+function ParticleAboutMe_applySelectedVisual(particle) {
+	if (!particle) {
+		return;
+	}
+	particle.material.program = ParticleAboutMe_particleFillProgram(particle.TargetObject);
+	ParticleAboutMe_setHoverState(particle, true);
+	if (
+		typeof particle.SetResumeCalloutActive === "undefined" &&
+		particle.TargetObject &&
+		particle.TargetObject.info
+	) {
+		particle.TargetObject.info.material.opacity = 1;
+	}
+}
+
 function ParticleAboutMe_updateHoverAnimations(group) {
 	for (var i = 0; i < group.particles.length; i++) {
 		if (typeof group.particles[i].UpdateResumeCallout !== "undefined") {
@@ -559,22 +574,22 @@ ParticleGroupAboutMe.prototype.MouseDown = function()
 		}
 		else if (INTERSECTED.TargetObject.resumeEntry)
 		{
+			if (SELECTED === INTERSECTED) {
+				SELECTED = null;
+				ParticleAboutMe_updateDescriptionPanel(null);
+				INTERSECTED.material.program = ParticleAboutMe_particleFillProgram(INTERSECTED.TargetObject);
+				ParticleAboutMe_setHoverState(INTERSECTED, true);
+				return;
+			}
 			if (SELECTED && SELECTED !== INTERSECTED) {
 				SELECTED.material.program = ParticleAboutMe_particleStrokeProgram(SELECTED.TargetObject);
 				ParticleAboutMe_resetInfo(SELECTED);
 			}
 			SELECTED = INTERSECTED;
-			INTERSECTED.material.program = ParticleAboutMe_particleTriangleProgram(INTERSECTED.TargetObject);
+			ParticleAboutMe_applySelectedVisual(INTERSECTED);
 			ParticleAboutMe_updateDescriptionPanel(INTERSECTED);
 		}
 	}
-	// else if (SELECTED)
-	// {
-	// 	SELECTED.material.program = ParticleAboutMe_particleStrokeProgram(SELECTED.TargetObject);
-	// 	ParticleAboutMe_resetInfo(SELECTED);
-	// 	SELECTED = null;
-	// 	ParticleAboutMe_updateDescriptionPanel(null);
-	// }
 }
 
 ParticleGroupAboutMe.prototype.MouseUp = function()
@@ -599,34 +614,29 @@ ParticleGroupAboutMe.prototype.Update = function()
 	{
 		if ( INTERSECTED != intersects[ 0 ].object ) {
 
-			if ( INTERSECTED ) {
+			if ( INTERSECTED && INTERSECTED !== SELECTED ) {
 				INTERSECTED.material.program = ParticleAboutMe_particleStrokeProgram(INTERSECTED.TargetObject);
 				ParticleAboutMe_setHoverState(INTERSECTED, false);
 			}
 
 			INTERSECTED = intersects[ 0 ].object;
 			ParticleAboutMe_setHoverState(INTERSECTED, true);
-
-			if(INTERSECTED === SELECTED)
-			{
-				INTERSECTED.material.program = ParticleAboutMe_particleTriangleProgram(INTERSECTED.TargetObject);
-			}
-			else
-			{
-				INTERSECTED.material.program = ParticleAboutMe_particleFillProgram(INTERSECTED.TargetObject);
-			}
+			INTERSECTED.material.program = ParticleAboutMe_particleFillProgram(INTERSECTED.TargetObject);
 		}
 
 		ParticleAboutMe_fadeInfoIn(INTERSECTED);
 	} 
 	else 
 	{
-		if ( INTERSECTED ) 
+		if ( INTERSECTED && INTERSECTED !== SELECTED ) 
 		{
 			INTERSECTED.material.program = ParticleAboutMe_particleStrokeProgram(INTERSECTED.TargetObject);
 			ParticleAboutMe_resetInfo(INTERSECTED);
 		}
 		INTERSECTED = null;
+		if (SELECTED) {
+			ParticleAboutMe_applySelectedVisual(SELECTED);
+		}
 	}
 }
 
