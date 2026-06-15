@@ -129,7 +129,7 @@ MonsterIntroLeg.prototype.Update = function (delta, amp) {
 	var decay = this.random;
 	var angle = this.angle;
 	var gotObject = this.gotObject;
-	var isRest = this.state === LegStates.REST;
+	var isRest = this.state === LegStates.REST || this.state === LegStates.IDLE;
 	var sizeTarget = isRest ? 0 : this.sizeMax;
 
 	this.size += (sizeTarget - this.size) * delta * 0.5;
@@ -158,15 +158,16 @@ MonsterIntroLeg.prototype.Update = function (delta, amp) {
 
 	switch (this.state) {
 		case LegStates.REST:
+		case LegStates.IDLE:
 			posElbowX = posShoulderX + size * (COS * 0.5 + amp * Math.cos(lTime2 * 0.01 + decay * 1.5) * SIN);
 			posElbowY = posShoulderY + size * (SIN * 0.5 + amp * Math.cos(lTime2 * 0.01 + decay * 2.1) * -COS);
 			this.posHandTarget.x = posShoulderX + size * (COS * 0.6 + amp * Math.sin(lTime1 + decay * 2.) * SIN);
 			this.posHandTarget.y = posShoulderY + size * (SIN * 0.6 + amp * Math.sin(lTime1 + decay * 2.3) * COS);
 			break;
-		case LegStates.IDLE:
-			this.posHandTarget.x = posShoulderX + size * (COS * size + 1.5 * amp * Math.sin(lTime1 + decay * 2.) * SIN);
-			this.posHandTarget.y = posShoulderY + size * (SIN * size + 1.5 * amp * Math.sin(lTime1 + decay * 2.) * COS);
-			break;
+		// case LegStates.IDLE:
+		// 	this.posHandTarget.x = posShoulderX + size * (COS * size + 1.5 * amp * Math.sin(lTime1 + decay * 2.) * SIN);
+		// 	this.posHandTarget.y = posShoulderY + size * (SIN * size + 1.5 * amp * Math.sin(lTime1 + decay * 2.) * COS);
+		// 	break;
 		case LegStates.SCRATCH:
 			this.scratchCoeff += delta;
 			this.scratchCoeff = Math.min(1, this.scratchCoeff);
