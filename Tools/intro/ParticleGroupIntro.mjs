@@ -6,6 +6,7 @@
  */
 import { MonsterIntro } from '../monsters/MonsterIntro.mjs';
 import { Navigation } from '../Navigation.mjs';
+import { IntroFrameOverlay } from './IntroFrameOverlay.mjs';
 import { ParticleLetter } from './ParticleLetter.mjs';
 import { getViewPlaneBasis } from './IntroSpaceship.mjs';
 import {
@@ -16,6 +17,7 @@ import {
 } from './IntroSpaceshipLetterCollision.mjs';
 
 var INTRO_LETTER_RETURN_TO_POOL_SEC = 1.0;
+var INTRO_CAMERA_PULLBACK_DELAY_SEC = 3.0;
 
 var lIndexStates = 0;
 export var ResumeStates = {
@@ -50,6 +52,7 @@ export function ParticleGroupIntro(positionCenter, name) {
 	this.introSlotOccupants = [];
 	this.nextIntroLetterSlotIndex = 0;
 	this.nextIntroStringIndex = 0;
+	this.introFrameOverlay = new IntroFrameOverlay();
 
 	this.monster = new MonsterIntro(positionCenter, this.width, this);
 	this.spaceshipPlayfieldCenter = null;
@@ -88,6 +91,13 @@ ParticleGroupIntro.prototype.InitSurface = function (width) {
 	this.plane.visible = false;
 	this.plane.position = this.positionCenter;
 	scene.add(this.plane);
+};
+
+ParticleGroupIntro.prototype.UpdateIntroFrameOverlay = function (delta) {
+	if (this.cameraZTimer >= INTRO_CAMERA_PULLBACK_DELAY_SEC) {
+		this.introFrameOverlay.start();
+	}
+	this.introFrameOverlay.update(delta);
 };
 
 ParticleGroupIntro.prototype.AddFood = function (
@@ -682,10 +692,10 @@ ParticleGroupIntro.prototype.UpdateCamera = function (delta) {
 	var sTools = globalThis.sTools;
 
 	this.cameraZTimer += delta;
-	var delay = 3.;
-	var t = Math.min(1., Math.max(0., this.cameraZTimer - delay));
+	var t = Math.min(1., Math.max(0., this.cameraZTimer - INTRO_CAMERA_PULLBACK_DELAY_SEC));
 	t = t * t * (3. - 2. * t);
 	this.cameraZRatio = 0.7 + 0.3 * t;
+	this.UpdateIntroFrameOverlay(delta);
 
 	globalThis.cameraTarget = sTools.ParticleGroups[sTools.ParticleGroup.PART_INTRO].positionCenter.clone();
 	if (!this.isIntro) {
@@ -873,6 +883,7 @@ ParticleGroupIntro.prototype.Init = function()
 };
 ParticleGroupIntro.prototype.Terminate = function()
 {
+	this.introFrameOverlay.out();
 	// for(var i = 0; i < this.foodArray.length; i++)
 	// {
 	// 	scene.remove(this.foodArray[i]);
