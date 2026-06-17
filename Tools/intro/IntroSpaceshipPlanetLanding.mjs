@@ -179,8 +179,20 @@ export function updateSpaceshipPlanetLanding(spaceship, planetColliders, planeAn
 	}
 }
 
+function shouldIgnoreSpaceshipPlanet(ownerOrParticle) {
+	if (!ownerOrParticle) {
+		return true;
+	}
+	if (ownerOrParticle.spaceshipCollides === false) {
+		return true;
+	}
+	var particle = ownerOrParticle.particle || ownerOrParticle;
+	var planetParticle = particle.planetParticle;
+	return !!(planetParticle && planetParticle.spaceshipCollides === false);
+}
+
 function colliderFromPlanetOwner(owner) {
-	if (!owner || !owner.particle) {
+	if (!owner || !owner.particle || shouldIgnoreSpaceshipPlanet(owner)) {
 		return null;
 	}
 	var target = owner.target || owner.particle.TargetObject || {};
@@ -219,7 +231,7 @@ export function getPlanetCollidersFromGroup(group) {
 	}
 	for (var j = 0; j < group.particles.length; j++) {
 		var particle = group.particles[j];
-		if (!particle || !particle.position) {
+		if (!particle || !particle.position || shouldIgnoreSpaceshipPlanet(particle)) {
 			continue;
 		}
 		colliders.push({

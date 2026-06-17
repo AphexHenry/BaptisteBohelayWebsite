@@ -6,6 +6,7 @@
  */
 import { MonsterIntro } from '../monsters/MonsterIntro.mjs';
 import { Navigation } from '../Navigation.mjs';
+import { ParticleLetter } from './ParticleLetter.mjs';
 import { getViewPlaneBasis } from './IntroSpaceship.mjs';
 import {
 	computeSpaceshipLetterPushVelocity,
@@ -102,7 +103,6 @@ ParticleGroupIntro.prototype.AddFood = function (
 ) {
 	var THREE = globalThis.THREE;
 	var scene = globalThis.scene;
-	var ParticleLetter = globalThis.ParticleLetter;
 
 	var lPosition = position.clone();
 	lPosition.z = this.positionCenter.z;

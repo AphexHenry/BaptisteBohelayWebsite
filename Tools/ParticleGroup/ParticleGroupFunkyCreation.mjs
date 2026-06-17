@@ -154,8 +154,11 @@ ParticleGroupFunkyCreation.prototype.Update = function () {
 	var OPACITY_INFO = globalThis.OPACITY_INFO;
 	var IS_PHONE = globalThis.IS_PHONE;
 	var sTools = globalThis.sTools;
+	var cameraManager = globalThis.cameraManager;
 
-	globalThis.controlAuto = sTools.CameraControlType.MOUSE_MOVE;
+	if (cameraManager.controlMode !== sTools.CameraControlType.MOUSE_MOVE) {
+		cameraManager.SetControlMode(sTools.CameraControlType.MOUSE_MOVE);
+	}
 
 	for (var i = 0; i < this.particlesToUpdate.length; i++) {
 		if (isdefined(this.particlesToUpdate[i].Update)) {

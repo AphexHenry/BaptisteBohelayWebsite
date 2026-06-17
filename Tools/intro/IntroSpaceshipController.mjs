@@ -72,6 +72,10 @@ function getGravityBodies(group) {
 	}
 	for (var i = 0; i < group.particles.length; i++) {
 		var particle = group.particles[i];
+		var planetParticle = particle.planetParticle;
+		if (planetParticle && planetParticle.spaceshipCollides === false) {
+			continue;
+		}
 		var target = particle.TargetObject || {};
 		bodies.push({
 			x: particle.position.x,

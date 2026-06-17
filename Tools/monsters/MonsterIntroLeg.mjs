@@ -193,8 +193,41 @@ MonsterIntroLeg.prototype.Update = function (delta, amp) {
 			break;
 	}
 
-	var posHandX = this.posHandInit.x + actualCoeffMove * (this.posHandTarget.x - this.posHandInit.x);
-	var posHandY = this.posHandInit.y + actualCoeffMove * (this.posHandTarget.y - this.posHandInit.y);
+	var posHandX;
+	var posHandY;
+	if (this.state === LegStates.GRABBING_FOOD) {
+		var t = actualCoeffMove;
+		var oneMinusT = 1 - t;
+		var initX = this.posHandInit.x;
+		var initY = this.posHandInit.y;
+		var targetX = this.posHandTarget.x;
+		var targetY = this.posHandTarget.y;
+		var reachDx = targetX - initX;
+		var reachDy = targetY - initY;
+		var reachLen = Math.sqrt(reachDx * reachDx + reachDy * reachDy);
+		var midX = (initX + targetX) * 0.5;
+		var midY = (initY + targetY) * 0.5;
+		var arcAmount = size * 0.75;
+		var perpX = reachLen > 1e-6 ? -reachDy / reachLen : -SIN;
+		var perpY = reachLen > 1e-6 ? reachDx / reachLen : COS;
+		var arcSign = decay > 0.5 ? 1 : -1;
+		var midLen = Math.sqrt(midX * midX + midY * midY);
+		var outX = midLen > 1e-6 ? midX / midLen : COS;
+		var outY = midLen > 1e-6 ? midY / midLen : SIN;
+		var ctrlX = midX + perpX * arcAmount * arcSign + outX * size * 0.25;
+		var ctrlY = midY + perpY * arcAmount * arcSign + outY * size * 0.25;
+		posHandX = oneMinusT * oneMinusT * initX + 2 * oneMinusT * t * ctrlX + t * t * targetX;
+		posHandY = oneMinusT * oneMinusT * initY + 2 * oneMinusT * t * ctrlY + t * t * targetY;
+
+		var elbowPush = Math.sin(t * Math.PI);
+		posElbowX = posShoulderX + size * (COS * 0.5 + amp * Math.cos(lTime2 * 0.01 + decay * 1.5) * SIN);
+		posElbowY = posShoulderY + size * (SIN * 0.5 + amp * Math.cos(lTime2 * 0.01 + decay * 2.1) * -COS);
+		posElbowX += (ctrlX - midX) * 1.2 * elbowPush + outX * size * 0.4 * elbowPush;
+		posElbowY += (ctrlY - midY) * 1.2 * elbowPush + outY * size * 0.4 * elbowPush;
+	} else {
+		posHandX = this.posHandInit.x + actualCoeffMove * (this.posHandTarget.x - this.posHandInit.x);
+		posHandY = this.posHandInit.y + actualCoeffMove * (this.posHandTarget.y - this.posHandInit.y);
+	}
 	this.posHandCurrent.x = posHandX;
 	this.posHandCurrent.y = posHandY;
 

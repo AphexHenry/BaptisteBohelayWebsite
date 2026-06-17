@@ -6,6 +6,7 @@ import { PlanetParticle, inheritPlanetParticle } from './PlanetParticle.mjs';
 
 export function MonsterVideo(aPosition, aSize, aTarget) {
 	var that = this;
+	that.timer = 0;
 
 	PlanetParticle.call(this, aPosition, aSize, aTarget);
 
@@ -36,14 +37,14 @@ export function MonsterVideo(aPosition, aSize, aTarget) {
 
 			context.closePath();
 			context.fill();
-
-			var xmove = Math.cos(globalThis.sGeneralTimer * 2.);
-			xmove *= xmove * xmove;
-			centerX = 0.03 + 0.1 * xmove;
-			centerY = 0.05 + 0.1 * Math.sin(globalThis.sGeneralTimer);
+			that.timer += 0.01 * (0.5 + Math.abs(Math.sin(globalThis.sGeneralTimer)) * Math.abs(Math.sin(globalThis.sGeneralTimer * 0.1)));
+			var xmove = Math.cos(that.timer * 2.) * Math.sin(globalThis.sGeneralTimer);
+			// xmove *= xmove * xmove;
+			centerX = 0.17 * xmove;
+			centerY = - 0.1 * (1 + Math.sin(that.timer)) * 0.5 - 0.01;
 
 			context.beginPath();
-			context.arc(centerX, centerY, that.size * 0.4 * that.distanceLastProject, 0, PI2, true);
+			context.arc(centerX, centerY, that.size * aSize * that.distanceLastProject, 0, PI2, true);
 			context.closePath();
 			context.fill();
 		}

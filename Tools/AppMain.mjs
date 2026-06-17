@@ -144,6 +144,9 @@ import { ParticleGroupWebExperiment } from './ParticleGroup/ParticleGroupWebExpe
 		var monsterNoise = new MonsterNoise(lFunky.positionCenter.clone().addSelf(new THREE.Vector3(-sWIDTH * 1.6, 0., 0.)), 0.3, { name: "sounds", target: sTools.ParticleGroup.PART_SOUND_MONSTER });
 		var monsterVideo = new MonsterVideo(lFunky.positionCenter.clone().addSelf(new THREE.Vector3(0, -sWIDTH * .3, sWIDTH * 1.6)), 0.3, { name: "comics", target: sTools.ParticleGroup.PART_COMICS });
 		var monsterProjects = new MonsterProjects(lFunky.positionCenter.clone().addSelf(new THREE.Vector3(sWIDTH * 1., sWIDTH * 0.5, 0.)), 0.99, { name: "interactive", target: sTools.ParticleGroup.PART_OTHER, scale: 1.5 });
+		monsterNoise.spaceshipCollides = false;
+		monsterVideo.spaceshipCollides = false;
+		monsterProjects.spaceshipCollides = false;
 
 		lFunky.AddParticle(monsterNoise);
 		lFunky.AddParticle(monsterVideo);
