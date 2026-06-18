@@ -1,6 +1,6 @@
 /**
  * Single intro spaceship shared across particle groups.
- * On navigation: park at the previous group, then enter from left of the new group after the camera move.
+ * On navigation: park at the previous group, then enter from bottom-left at 30° after the camera move.
  */
 import { IntroSpaceship, getViewPlaneBasis } from './IntroSpaceship.mjs';
 import {
@@ -10,7 +10,10 @@ import {
 } from './IntroSpaceshipPlanetLanding.mjs';
 
 var PLAYFIELD_CENTER_LERP_SPEED = 0.65;
-var ENTER_STOP_DISTANCE = 24;
+var ENTRY_DURATION = 2.8;
+var ENTRY_STOP_FROM_LEFT = 0.2;
+var ENTRY_CRUISE_FRACTION = 0.72;
+var ENTRY_APPROACH_ANGLE = Math.PI / 6;
 
 var SpaceshipTransitionState = {
 	IDLE: 'idle',
@@ -20,6 +23,39 @@ var SpaceshipTransitionState = {
 
 function smoothstep(t) {
 	return t * t * (3 - 2 * t);
+}
+
+/** Slow cruise, then sharp ease-out for the final approach to the stop point. */
+function entryEase(t) {
+	if (t <= ENTRY_CRUISE_FRACTION) {
+		return (t / ENTRY_CRUISE_FRACTION) * 0.82;
+	}
+	var u = (t - ENTRY_CRUISE_FRACTION) / (1 - ENTRY_CRUISE_FRACTION);
+	return 0.82 + 0.18 * (1 - Math.pow(1 - u, 4));
+}
+
+function getEntryStopOffset(bounds) {
+	return {
+		right: -bounds.halfRight + bounds.halfRight * 2 * ENTRY_STOP_FROM_LEFT,
+		up: 0,
+	};
+}
+
+function getEntryStartOffset(bounds, target) {
+	var cosA = Math.cos(ENTRY_APPROACH_ANGLE);
+	var sinA = Math.sin(ENTRY_APPROACH_ANGLE);
+	var margin = Math.max(window.innerWidth * 0.12, window.innerHeight * 0.1);
+	var span = bounds.halfRight * 2 + bounds.halfUp + margin;
+	return {
+		right: target.right - span * cosA,
+		up: target.up - span * sinA,
+	};
+}
+
+function getEntryHeadingAngle() {
+	var cosA = Math.cos(ENTRY_APPROACH_ANGLE);
+	var sinA = Math.sin(ENTRY_APPROACH_ANGLE);
+	return Math.atan2(cosA, -sinA);
 }
 
 function getPlayfieldCenter(group) {
@@ -101,7 +137,11 @@ export const introSpaceshipController = {
 	playfieldCenterTarget: null,
 	playfieldCenterFrom: null,
 	playfieldLerp: 1,
+	entryStartOffset: null,
 	entryTargetOffset: null,
+	entryTimer: 0,
+	entryDuration: ENTRY_DURATION,
+	entryHeadingAngle: 0,
 
 	init(introGroup) {
 		var THREE = globalThis.THREE;
@@ -118,6 +158,7 @@ export const introSpaceshipController = {
 		this.spaceship.inputEnabled = false;
 		this.spaceship.resetControls();
 		this.spaceship.autoThrustTimer = 0;
+		this.spaceship.scriptedThrust = false;
 		this.spaceship.speed = { x: 0, y: 0 };
 		this.spaceship.landedPlanet = null;
 		this.activeGroup = group || this.activeGroup;
@@ -198,29 +239,18 @@ export const introSpaceshipController = {
 		anchor.z = getPlayfieldZ(group, this.playfieldCenterTarget);
 		var basis = getViewPlaneBasis(anchor);
 		var bounds = getPlayfieldBounds(group);
-		var leftMargin = Math.max(window.innerWidth * 0.08, this.spaceship.size * 2.2);
-		var startOffset = {
-			right: -bounds.halfRight - leftMargin,
-			up: 0,
-		};
-		this.entryTargetOffset = {
-			right: 0,
-			up: 0,
-		};
+		this.entryTargetOffset = getEntryStopOffset(bounds);
+		this.entryStartOffset = getEntryStartOffset(bounds, this.entryTargetOffset);
+		this.entryHeadingAngle = getEntryHeadingAngle();
+		this.entryTimer = 0;
+		this.entryDuration = ENTRY_DURATION;
 
-		this.spaceship.setPlaneOffset(anchor, basis, startOffset.right, startOffset.up);
-		var targetDx = this.entryTargetOffset.right - startOffset.right;
-		var targetDy = this.entryTargetOffset.up - startOffset.up;
-		var len = Math.max(0.001, Math.sqrt(targetDx * targetDx + targetDy * targetDy));
-		var dirX = targetDx / len;
-		var dirY = targetDy / len;
-		this.spaceship.angle = Math.atan2(dirX, -dirY);
+		this.spaceship.setPlaneOffset(anchor, basis, this.entryStartOffset.right, this.entryStartOffset.up);
+		this.spaceship.angle = this.entryHeadingAngle;
 		this.spaceship.particle.rotation.z = -this.spaceship.angle;
-		this.spaceship.speed = {
-			x: dirX * this.spaceship.maxSpeed * 0.62,
-			y: dirY * this.spaceship.maxSpeed * 0.62,
-		};
-		this.spaceship.autoThrustTimer = 0.5;
+		this.spaceship.speed = { x: 0, y: 0 };
+		this.spaceship.autoThrustTimer = 0;
+		this.spaceship.scriptedThrust = true;
 		this.spaceship.landedPlanet = null;
 		this.spaceship._basisRight = null;
 		this.spaceship._basisUp = null;
@@ -250,9 +280,12 @@ export const introSpaceshipController = {
 		}
 		this.spaceship.speed = { x: 0, y: 0 };
 		this.spaceship.autoThrustTimer = 0;
+		this.spaceship.scriptedThrust = false;
 		this.spaceship.inputEnabled = true;
 		this.transitionState = SpaceshipTransitionState.IDLE;
+		this.entryStartOffset = null;
 		this.entryTargetOffset = null;
+		this.entryTimer = 0;
 	},
 
 	update(delta) {
@@ -286,12 +319,18 @@ export const introSpaceshipController = {
 		}
 
 		if (this.isEnteringGroup()) {
-			this.spaceship.Update(delta, this.getBounds(), [], anchor);
-			var coords = this.spaceship.getPlaneCoords(anchor, basis);
-			var target = this.entryTargetOffset || { right: 0, up: 0 };
-			var dx = target.right - coords.right;
-			var dy = target.up - coords.up;
-			if (Math.sqrt(dx * dx + dy * dy) < ENTER_STOP_DISTANCE || coords.right >= target.right) {
+			this.entryTimer += delta;
+			var progress = Math.min(1, this.entryTimer / this.entryDuration);
+			var eased = entryEase(progress);
+			var from = this.entryStartOffset;
+			var to = this.entryTargetOffset;
+			var right = from.right + (to.right - from.right) * eased;
+			var up = from.up + (to.up - from.up) * eased;
+			this.spaceship.scriptedThrust = progress < 1;
+			this.spaceship.setPlaneOffset(anchor, basis, right, up);
+			this.spaceship.angle = this.entryHeadingAngle;
+			this.spaceship.particle.rotation.z = -this.spaceship.angle;
+			if (progress >= 1) {
 				this.finishEntry(anchor, basis);
 			}
 			return;

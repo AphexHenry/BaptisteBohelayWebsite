@@ -85,6 +85,7 @@ export function IntroSpaceship(position, size) {
 	this._basisUp = null;
 	this.inputEnabled = true;
 	this.autoThrustTimer = 0;
+	this.scriptedThrust = false;
 	this.controls = {
 		left: false,
 		right: false,
@@ -378,7 +379,7 @@ IntroSpaceship.prototype.programSpaceship = function (context) {
 	context.lineJoin = 'round';
 	context.lineCap = 'round';
 
-	if (this.controls.up || this.autoThrustTimer > 0) {
+	if (this.controls.up || this.autoThrustTimer > 0 || this.scriptedThrust) {
 		var flamePulse = 0.9 + 0.25 * Math.sin(globalThis.sGeneralTimer * 30);
 		context.beginPath();
 		context.moveTo(-0.16, 0.28);
