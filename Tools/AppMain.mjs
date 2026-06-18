@@ -390,7 +390,8 @@ import { ParticleGroupWebExperiment } from './ParticleGroup/ParticleGroupWebExpe
 		delta *= sDrawSpeed;
 		sGeneralTimer += delta;
 
-		if (canInteract) {
+		var isNavigationTransitionActive = Navigation.isTransitionActive();
+		if (canInteract && !isNavigationTransitionActive) {
 			sTools.ParticleGroups[Navigation.groupCurrent].Update(delta);
 		}
 
@@ -398,7 +399,7 @@ import { ParticleGroupWebExperiment } from './ParticleGroup/ParticleGroupWebExpe
 
 		cameraManager.Update(delta);
 
-		if (!SELECTED) {
+		if (!SELECTED && !isNavigationTransitionActive) {
 			cameraManager.UpdateAutoControl(
 				sTools.ParticleGroups[Navigation.groupCurrent], radius, sGeneralTimer, mouse,
 				cameraPosition, cameraTarget
@@ -413,7 +414,8 @@ import { ParticleGroupWebExperiment } from './ParticleGroup/ParticleGroupWebExpe
 
 		camera.updateMatrixWorld();
 
-		if (canInteract) {
+		Navigation.update(delta);
+		if (canInteract || introSpaceshipController.isEnteringGroup()) {
 			introSpaceshipController.update(delta);
 		}
 

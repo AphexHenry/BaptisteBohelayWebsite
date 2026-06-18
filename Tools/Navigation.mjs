@@ -10,8 +10,62 @@ let isInHTML = false;
 let currentGroup;
 let groupCurrent = globalThis.sTools?.ParticleGroup?.PART_INTRO ?? 1;
 
+const TransitionState = {
+	IDLE: 'idle',
+	CAMERA_MOVING: 'cameraMoving',
+	SPACESHIP_ENTERING: 'spaceshipEntering',
+};
+
+const NAVIGATION_CAMERA_DURATION = 1.5;
+
+let transition = {
+	state: TransitionState.IDLE,
+	fromIndex: null,
+	toIndex: null,
+	fromGroup: null,
+	toGroup: null,
+};
+
 function setGroupCurrentIndex(index) {
 	groupCurrent = +index;
+}
+
+function callGroupNavigationHook(group, hookName, context) {
+	if (group && typeof group[hookName] === 'function') {
+		group[hookName](context);
+	}
+}
+
+function getCameraDestination(group) {
+	var THREE = globalThis.THREE;
+	var lookAt = group.positionCenter.clone();
+	var position;
+
+	if (typeof group.GetCameraPosition === 'function') {
+		position = group.GetCameraPosition();
+	} else {
+		var distance = group.cameraDistance || window.innerWidth * 0.5;
+		position = new THREE.Vector3(
+			group.positionCenter.x,
+			group.positionCenter.y,
+			group.positionCenter.z + distance
+		);
+	}
+
+	return {
+		position: position,
+		lookAt: lookAt,
+	};
+}
+
+function setNavigationCameraDestination(group) {
+	var destination = getCameraDestination(group);
+	globalThis.cameraPosition = destination.position.clone();
+	globalThis.cameraTarget = destination.lookAt.clone();
+	if (globalThis.cameraManager) {
+		globalThis.cameraManager.SetControlMode(globalThis.sTools.CameraControlType.NONE);
+		globalThis.cameraManager.GoTo(destination.position.clone(), destination.lookAt.clone(), NAVIGATION_CAMERA_DURATION);
+	}
 }
 
 export const Navigation = {
@@ -24,6 +78,55 @@ export const Navigation = {
 
 	get groupCurrent() {
 		return groupCurrent;
+	},
+
+	isTransitionActive() {
+		return transition.state !== TransitionState.IDLE;
+	},
+
+	update(delta) {
+		if (transition.state === TransitionState.IDLE) {
+			return;
+		}
+
+		if (transition.state === TransitionState.CAMERA_MOVING) {
+			if (!globalThis.cameraManager || !globalThis.cameraManager.IsMovementComplete()) {
+				return;
+			}
+
+			transition.state = TransitionState.SPACESHIP_ENTERING;
+			introSpaceshipController.startGroupEntry(transition.toGroup);
+			callGroupNavigationHook(transition.toGroup, 'OnNavigationCameraArrive', transition);
+			return;
+		}
+
+		if (transition.state === TransitionState.SPACESHIP_ENTERING && introSpaceshipController.isEntryComplete()) {
+			this.finishTransition();
+		}
+	},
+
+	finishTransition() {
+		if (transition.state === TransitionState.IDLE) {
+			return;
+		}
+
+		callGroupNavigationHook(transition.fromGroup, 'OnNavigationTransitionEnd', transition);
+		callGroupNavigationHook(transition.toGroup, 'OnNavigationTransitionEnd', transition);
+
+		var intro = globalThis.sTools.ParticleGroup.PART_INTRO;
+		var programming = globalThis.sTools.ParticleGroup.PART_PROGRAMMING;
+		if (groupCurrent !== intro && groupCurrent !== programming) {
+			globalThis.cameraManager.SetControlMode(globalThis.sTools.CameraControlType.SATTELITE);
+		}
+
+		globalThis.canInteract = true;
+		transition = {
+			state: TransitionState.IDLE,
+			fromIndex: null,
+			toIndex: null,
+			fromGroup: null,
+			toGroup: null,
+		};
 	},
 
 	goToIndex(index) {
@@ -40,39 +143,56 @@ export const Navigation = {
 		}
 
 		var prevIndex = groupCurrent;
+		if (index === prevIndex) {
+			if (!this.isTransitionActive()) {
+				introSpaceshipController.onGroupDidChange(groups[groupCurrent], true);
+			}
+			logNav('exit (same group)');
+			return;
+		}
+
 		logNav('enter (from ' + (groups?.[prevIndex]?.name ?? prevIndex) + ')');
 
-		if (index != groupCurrent) {
-			if (groupCurrent >= 0) {
-				introSpaceshipController.onGroupWillChange(groups[groupCurrent]);
-				this.globalGroupTerminate();
-			}
-			setGroupCurrentIndex(index);
-			this.globalGroupInit();
-
-			this.setHashGroup(globalThis.sTools.ParticleGroups[groupCurrent].name);
-			globalThis.SELECTED = globalThis.INTERSECTED = null;
-			globalThis.sCoeffCameraMove = 0;
-			globalThis.sButtonsBack.OnChange();
-			var prev = globalThis.Organigram.GetFather(groupCurrent);
-			if (prev < 0) {
-				globalThis.isRoot = true;
-				this.setBackButton(false);
-			} else {
-				globalThis.isRoot = false;
-				this.setBackButton(true);
-			}
+		if (this.isTransitionActive()) {
+			this.finishTransition();
 		}
 
-		var intro = globalThis.sTools.ParticleGroup.PART_INTRO;
-		var programming = globalThis.sTools.ParticleGroup.PART_PROGRAMMING;
-		if (index !== intro && index !== programming) {
-			globalThis.cameraManager.SetControlMode(globalThis.sTools.CameraControlType.SATTELITE);
+		var fromGroup = groups[prevIndex];
+		var toGroup = groups[index];
+		transition = {
+			state: TransitionState.CAMERA_MOVING,
+			fromIndex: prevIndex,
+			toIndex: index,
+			fromGroup: fromGroup,
+			toGroup: toGroup,
+		};
+
+		globalThis.canInteract = false;
+		if (groupCurrent >= 0) {
+			introSpaceshipController.onNavigationStart(fromGroup);
+			callGroupNavigationHook(fromGroup, 'OnNavigationTransitionStart', transition);
+			this.globalGroupTerminate();
+		}
+		setGroupCurrentIndex(index);
+		this.globalGroupInit();
+
+		this.setHashGroup(globalThis.sTools.ParticleGroups[groupCurrent].name);
+		globalThis.SELECTED = globalThis.INTERSECTED = null;
+		globalThis.sCoeffCameraMove = 0;
+		globalThis.sButtonsBack.OnChange();
+		var prev = globalThis.Organigram.GetFather(groupCurrent);
+		if (prev < 0) {
+			globalThis.isRoot = true;
+			this.setBackButton(false);
+		} else {
+			globalThis.isRoot = false;
+			this.setBackButton(true);
 		}
 
-		introSpaceshipController.onGroupDidChange(groups[groupCurrent], index === prevIndex);
+		callGroupNavigationHook(toGroup, 'OnNavigationTransitionStart', transition);
+		setNavigationCameraDestination(toGroup);
 
-		logNav(index !== prevIndex ? 'exit (changed)' : 'exit (same group)');
+		logNav('exit (changed)');
 	},
 
 	goBack() {

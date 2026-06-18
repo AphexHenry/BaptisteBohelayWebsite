@@ -145,6 +145,19 @@ CameraManager.prototype.GoTo = function(aPosition, aLookAt, aDuration)
 	}
 }
 
+CameraManager.prototype.IsMovementComplete = function()
+{
+	if (this.mCameraMovementTimer < 1) {
+		return false;
+	}
+	var posDist = this.camera.position.distanceTo(this.mTarget);
+	var lookDist = this.mCameraLookAt.distanceTo(this.mCameraLookAtTarget);
+	var initDist = this.mPositionInit.distanceTo(this.mTarget);
+	// Interpolation uses lCoeffMov * 0.95, so position can stop ~5% short of mTarget.
+	var tolerance = Math.max(2, initDist * 0.06);
+	return posDist < tolerance && lookDist < tolerance;
+}
+
 CameraManager.prototype.UpdateGoTo = function(aPosition, aLookAt)
 {
 	aPosition = aPosition.clone();

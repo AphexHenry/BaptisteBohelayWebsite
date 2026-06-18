@@ -83,6 +83,8 @@ export function IntroSpaceship(position, size) {
 	this.landedPlanet = null;
 	this._basisRight = null;
 	this._basisUp = null;
+	this.inputEnabled = true;
+	this.autoThrustTimer = 0;
 	this.controls = {
 		left: false,
 		right: false,
@@ -125,6 +127,9 @@ IntroSpaceship.prototype.onKeyDown = function (event) {
 		return;
 	}
 	event.preventDefault();
+	if (!this.inputEnabled) {
+		return;
+	}
 	if (event.keyCode === 37) this.controls.left = true;
 	if (event.keyCode === 39) this.controls.right = true;
 	if (event.keyCode === 38) this.controls.up = true;
@@ -138,6 +143,12 @@ IntroSpaceship.prototype.onKeyUp = function (event) {
 	if (event.keyCode === 37) this.controls.left = false;
 	if (event.keyCode === 39) this.controls.right = false;
 	if (event.keyCode === 38) this.controls.up = false;
+};
+
+IntroSpaceship.prototype.resetControls = function () {
+	this.controls.left = false;
+	this.controls.right = false;
+	this.controls.up = false;
 };
 
 IntroSpaceship.prototype.snapToViewPlane = function (anchor, basis) {
@@ -322,7 +333,11 @@ IntroSpaceship.prototype.Update = function (delta, planeBounds, gravityBodies, p
 	this.angle += turn * this.rotationSpeed * delta;
 
 	this.applyPlanetGravity(delta, gravityBodies, basis);
-	if (this.controls.up) {
+	var thrusting = this.controls.up || this.autoThrustTimer > 0;
+	if (this.autoThrustTimer > 0) {
+		this.autoThrustTimer = Math.max(0, this.autoThrustTimer - delta);
+	}
+	if (thrusting) {
 		this.speed.x += Math.sin(this.angle) * this.thrust * delta;
 		this.speed.y -= Math.cos(this.angle) * this.thrust * delta;
 	}
@@ -363,7 +378,7 @@ IntroSpaceship.prototype.programSpaceship = function (context) {
 	context.lineJoin = 'round';
 	context.lineCap = 'round';
 
-	if (this.controls.up) {
+	if (this.controls.up || this.autoThrustTimer > 0) {
 		var flamePulse = 0.9 + 0.25 * Math.sin(globalThis.sGeneralTimer * 30);
 		context.beginPath();
 		context.moveTo(-0.16, 0.28);

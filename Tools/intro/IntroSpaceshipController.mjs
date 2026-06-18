@@ -1,6 +1,6 @@
 /**
  * Single intro spaceship shared across particle groups.
- * On navigation: stash off-screen during the camera move, then enter from bottom-left at the group's z.
+ * On navigation: park at the previous group, then enter from left of the new group after the camera move.
  */
 import { IntroSpaceship, getViewPlaneBasis } from './IntroSpaceship.mjs';
 import {
@@ -9,8 +9,14 @@ import {
 	updateSpaceshipPlanetLanding,
 } from './IntroSpaceshipPlanetLanding.mjs';
 
-var REVEAL_DELAY = 1.5;
 var PLAYFIELD_CENTER_LERP_SPEED = 0.65;
+var ENTER_STOP_DISTANCE = 24;
+
+var SpaceshipTransitionState = {
+	IDLE: 'idle',
+	PARKED_DURING_NAVIGATION: 'parkedDuringNavigation',
+	ENTERING_GROUP: 'enteringGroup',
+};
 
 function smoothstep(t) {
 	return t * t * (3 - 2 * t);
@@ -90,12 +96,12 @@ function getGravityBodies(group) {
 export const introSpaceshipController = {
 	spaceship: null,
 	activeGroup: null,
+	transitionState: SpaceshipTransitionState.IDLE,
 	playfieldCenter: null,
 	playfieldCenterTarget: null,
 	playfieldCenterFrom: null,
 	playfieldLerp: 1,
-	hidden: false,
-	revealTimer: 0,
+	entryTargetOffset: null,
 
 	init(introGroup) {
 		var THREE = globalThis.THREE;
@@ -104,13 +110,21 @@ export const introSpaceshipController = {
 		this.activeGroup = introGroup;
 	},
 
-	onGroupWillChange(group) {
+	onNavigationStart(group) {
 		if (!this.spaceship) {
 			return;
 		}
-		this.stashOffScreen(group);
-		this.hidden = true;
-		this.revealTimer = REVEAL_DELAY;
+		this.transitionState = SpaceshipTransitionState.PARKED_DURING_NAVIGATION;
+		this.spaceship.inputEnabled = false;
+		this.spaceship.resetControls();
+		this.spaceship.autoThrustTimer = 0;
+		this.spaceship.speed = { x: 0, y: 0 };
+		this.spaceship.landedPlanet = null;
+		this.activeGroup = group || this.activeGroup;
+	},
+
+	onGroupWillChange(group) {
+		this.onNavigationStart(group);
 	},
 
 	onGroupDidChange(group, immediate) {
@@ -126,16 +140,14 @@ export const introSpaceshipController = {
 		this.playfieldLerp = 0;
 
 		if (immediate) {
-			this.hidden = false;
-			this.revealTimer = 0;
+			this.transitionState = SpaceshipTransitionState.IDLE;
+			this.spaceship.inputEnabled = true;
 			this.playfieldLerp = 1;
 			this.playfieldCenter = this.playfieldCenterTarget.clone();
 			this.placeAtSpawn(group);
 			return;
 		}
-		this.hidden = true;
-		this.revealTimer = REVEAL_DELAY;
-		this.stashOffScreen(group);
+		this.startGroupEntry(group);
 	},
 
 	stashOffScreen(group) {
@@ -169,8 +181,78 @@ export const introSpaceshipController = {
 		this.spaceship._basisUp = null;
 	},
 
+	startGroupEntry(group) {
+		if (!this.spaceship) {
+			return;
+		}
+		this.activeGroup = group;
+		this.playfieldCenterTarget = getPlayfieldCenter(group);
+		if (!this.playfieldCenterTarget) {
+			return;
+		}
+		this.playfieldCenterFrom = this.playfieldCenterTarget.clone();
+		this.playfieldCenter = this.playfieldCenterFrom.clone();
+		this.playfieldLerp = 1;
+
+		var anchor = this.playfieldCenterTarget.clone();
+		anchor.z = getPlayfieldZ(group, this.playfieldCenterTarget);
+		var basis = getViewPlaneBasis(anchor);
+		var bounds = getPlayfieldBounds(group);
+		var leftMargin = Math.max(window.innerWidth * 0.08, this.spaceship.size * 2.2);
+		var startOffset = {
+			right: -bounds.halfRight - leftMargin,
+			up: 0,
+		};
+		this.entryTargetOffset = {
+			right: 0,
+			up: 0,
+		};
+
+		this.spaceship.setPlaneOffset(anchor, basis, startOffset.right, startOffset.up);
+		var targetDx = this.entryTargetOffset.right - startOffset.right;
+		var targetDy = this.entryTargetOffset.up - startOffset.up;
+		var len = Math.max(0.001, Math.sqrt(targetDx * targetDx + targetDy * targetDy));
+		var dirX = targetDx / len;
+		var dirY = targetDy / len;
+		this.spaceship.angle = Math.atan2(dirX, -dirY);
+		this.spaceship.particle.rotation.z = -this.spaceship.angle;
+		this.spaceship.speed = {
+			x: dirX * this.spaceship.maxSpeed * 0.62,
+			y: dirY * this.spaceship.maxSpeed * 0.62,
+		};
+		this.spaceship.autoThrustTimer = 0.5;
+		this.spaceship.landedPlanet = null;
+		this.spaceship._basisRight = null;
+		this.spaceship._basisUp = null;
+		this.spaceship.inputEnabled = false;
+		this.transitionState = SpaceshipTransitionState.ENTERING_GROUP;
+	},
+
 	getBounds() {
 		return getPlayfieldBounds(this.activeGroup);
+	},
+
+	isParkedDuringNavigation() {
+		return this.transitionState === SpaceshipTransitionState.PARKED_DURING_NAVIGATION;
+	},
+
+	isEnteringGroup() {
+		return this.transitionState === SpaceshipTransitionState.ENTERING_GROUP;
+	},
+
+	isEntryComplete() {
+		return this.transitionState === SpaceshipTransitionState.IDLE;
+	},
+
+	finishEntry(anchor, basis) {
+		if (this.entryTargetOffset) {
+			this.spaceship.setPlaneOffset(anchor, basis, this.entryTargetOffset.right, this.entryTargetOffset.up);
+		}
+		this.spaceship.speed = { x: 0, y: 0 };
+		this.spaceship.autoThrustTimer = 0;
+		this.spaceship.inputEnabled = true;
+		this.transitionState = SpaceshipTransitionState.IDLE;
+		this.entryTargetOffset = null;
 	},
 
 	update(delta) {
@@ -178,15 +260,8 @@ export const introSpaceshipController = {
 			return;
 		}
 
-		if (this.hidden) {
-			this.revealTimer -= delta;
-			if (this.revealTimer > 0) {
-				return;
-			}
-			this.hidden = false;
-			this.playfieldLerp = 0;
-			this.playfieldCenter = this.playfieldCenterFrom.clone();
-			this.placeAtSpawn(this.activeGroup);
+		if (this.isParkedDuringNavigation()) {
+			return;
 		}
 
 		if (this.playfieldCenterTarget && this.playfieldCenterFrom && this.playfieldLerp < 1) {
@@ -208,6 +283,18 @@ export const introSpaceshipController = {
 
 		if (this.spaceship.landedPlanet && !this.spaceship.controls.up) {
 			maintainLandedSpaceship(this.spaceship, anchor, basis);
+		}
+
+		if (this.isEnteringGroup()) {
+			this.spaceship.Update(delta, this.getBounds(), [], anchor);
+			var coords = this.spaceship.getPlaneCoords(anchor, basis);
+			var target = this.entryTargetOffset || { right: 0, up: 0 };
+			var dx = target.right - coords.right;
+			var dy = target.up - coords.up;
+			if (Math.sqrt(dx * dx + dy * dy) < ENTER_STOP_DISTANCE || coords.right >= target.right) {
+				this.finishEntry(anchor, basis);
+			}
+			return;
 		}
 
 		this.spaceship.Update(delta, this.getBounds(), getGravityBodies(this.activeGroup), anchor);
