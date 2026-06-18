@@ -2,6 +2,7 @@
  * Camera movement, look-at, and auto-control for the main 3D scene.
  * Uses globalThis for shared app state (scene, sTools, cameraManager, etc.).
  */
+import { introSpaceshipController } from './intro/IntroSpaceshipController.mjs';
 
 var CAMERA_DISTANCE_SECURITY = 0.4;
 var CAMERA_DEPTH = 3000;
@@ -259,8 +260,9 @@ CameraManager.prototype.UpdateAutoControl = function(particleGroup, radius, gene
 		var isdefined = globalThis.isdefined;
 		var lAngleAmp = isdefined(particleGroup.mAngleAmplitude) ? particleGroup.mAngleAmplitude : Math.PI / 2.;
 		var lVerticalAmp = isdefined(particleGroup.mVerticalAngleAmplitude) ? particleGroup.mVerticalAngleAmplitude : 0.;
-		var theta = mouse.x * lAngleAmp;
-		var phi = mouse.y * lVerticalAmp;
+		var lookInput = introSpaceshipController.getMouseMoveLookInput(mouse);
+		var theta = lookInput.x * lAngleAmp;
+		var phi = lookInput.y * lVerticalAmp;
 		var phiClamp = Math.PI * 0.42;
 		if (phi > phiClamp) phi = phiClamp;
 		if (phi < -phiClamp) phi = -phiClamp;

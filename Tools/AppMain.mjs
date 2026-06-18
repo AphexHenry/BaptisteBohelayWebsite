@@ -397,6 +397,10 @@ import { ParticleGroupWebExperiment } from './ParticleGroup/ParticleGroupWebExpe
 
 		infoDisplay.Update(delta);
 
+		if (canInteract || introSpaceshipController.isEnteringGroup()) {
+			introSpaceshipController.update(delta);
+		}
+
 		cameraManager.Update(delta);
 
 		if (!SELECTED && !isNavigationTransitionActive) {
@@ -415,9 +419,6 @@ import { ParticleGroupWebExperiment } from './ParticleGroup/ParticleGroupWebExpe
 		camera.updateMatrixWorld();
 
 		Navigation.update(delta);
-		if (canInteract || introSpaceshipController.isEnteringGroup()) {
-			introSpaceshipController.update(delta);
-		}
 
 		// rotate camera
 		renderer.clear(true, true, true);

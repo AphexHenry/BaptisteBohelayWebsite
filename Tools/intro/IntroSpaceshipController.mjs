@@ -129,6 +129,8 @@ function getGravityBodies(group) {
 	return bodies;
 }
 
+var LOOK_INPUT_MOVE_EPS = 1e-8;
+
 export const introSpaceshipController = {
 	spaceship: null,
 	activeGroup: null,
@@ -142,6 +144,11 @@ export const introSpaceshipController = {
 	entryTimer: 0,
 	entryDuration: ENTRY_DURATION,
 	entryHeadingAngle: 0,
+	_lookInputLastMouseX: null,
+	_lookInputLastMouseY: null,
+	_lookInputLastShipX: null,
+	_lookInputLastShipY: null,
+	_lookInputSource: 'mouse',
 
 	init(introGroup) {
 		var THREE = globalThis.THREE;
@@ -150,10 +157,19 @@ export const introSpaceshipController = {
 		this.activeGroup = introGroup;
 	},
 
+	resetLookInputTracking() {
+		this._lookInputLastMouseX = null;
+		this._lookInputLastMouseY = null;
+		this._lookInputLastShipX = null;
+		this._lookInputLastShipY = null;
+		this._lookInputSource = 'mouse';
+	},
+
 	onNavigationStart(group) {
 		if (!this.spaceship) {
 			return;
 		}
+		this.resetLookInputTracking();
 		this.transitionState = SpaceshipTransitionState.PARKED_DURING_NAVIGATION;
 		this.spaceship.inputEnabled = false;
 		this.spaceship.resetControls();
@@ -274,6 +290,59 @@ export const introSpaceshipController = {
 		return this.transitionState === SpaceshipTransitionState.IDLE;
 	},
 
+	getMouseMoveLookInput(mouse) {
+		if (!mouse || !this.spaceship || this.isParkedDuringNavigation() || this.isEnteringGroup()) {
+			return { x: mouse ? mouse.x : 0, y: mouse ? mouse.y : 0 };
+		}
+
+		var anchor = this.playfieldCenter || getPlayfieldCenter(this.activeGroup);
+		if (!anchor) {
+			return { x: mouse.x, y: mouse.y };
+		}
+
+		var basis = getViewPlaneBasis(anchor);
+		var bounds = this.getBounds();
+		var coords = this.spaceship.getPlaneCoords(anchor, basis);
+		var halfRight = bounds.halfRight || 1;
+		var halfUp = bounds.halfUp || 1;
+		var shipX = globalThis.myClamp(coords.right / halfRight, -1, 1);
+		var shipY = globalThis.myClamp(coords.up / halfUp, -1, 1);
+
+		var lastMouseX = this._lookInputLastMouseX;
+		var lastMouseY = this._lookInputLastMouseY;
+		var lastShipX = this._lookInputLastShipX;
+		var lastShipY = this._lookInputLastShipY;
+		this._lookInputLastMouseX = mouse.x;
+		this._lookInputLastMouseY = mouse.y;
+		this._lookInputLastShipX = shipX * 0.5;
+		this._lookInputLastShipY = shipY * 0.5;
+
+		if (lastMouseX === null || lastMouseY === null || lastShipX === null || lastShipY === null) {
+			return { x: mouse.x, y: mouse.y };
+		}
+
+		var mouseDx = mouse.x - lastMouseX;
+		var mouseDy = mouse.y - lastMouseY;
+		var shipDx = shipX - lastShipX;
+		var shipDy = shipY - lastShipY;
+		var mouseMove = mouseDx * mouseDx + mouseDy * mouseDy;
+		var shipMove = shipDx * shipDx + shipDy * shipDy;
+		var shipControls = this.spaceship.controls.left
+			|| this.spaceship.controls.right
+			|| this.spaceship.controls.up;
+
+		if (shipControls || shipMove > mouseMove + LOOK_INPUT_MOVE_EPS) {
+			this._lookInputSource = 'spaceship';
+		} else if (mouseMove > shipMove + LOOK_INPUT_MOVE_EPS) {
+			this._lookInputSource = 'mouse';
+		}
+
+		if (this._lookInputSource === 'spaceship') {
+			return { x: shipX, y: shipY };
+		}
+		return { x: mouse.x, y: mouse.y };
+	},
+
 	finishEntry(anchor, basis) {
 		if (this.entryTargetOffset) {
 			this.spaceship.setPlaneOffset(anchor, basis, this.entryTargetOffset.right, this.entryTargetOffset.up);
@@ -283,6 +352,7 @@ export const introSpaceshipController = {
 		this.spaceship.scriptedThrust = false;
 		this.spaceship.inputEnabled = true;
 		this.transitionState = SpaceshipTransitionState.IDLE;
+		this.resetLookInputTracking();
 		this.entryStartOffset = null;
 		this.entryTargetOffset = null;
 		this.entryTimer = 0;
