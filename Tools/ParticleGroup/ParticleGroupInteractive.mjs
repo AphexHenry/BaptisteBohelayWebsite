@@ -1,14 +1,13 @@
 /**
- * Funky-creation particle group: circular navigators and monster sub-bubbles.
+ * Interactive projects particle group: projects scattered at random positions.
  */
-export function ParticleGroupFunkyCreation(positionCenter, flyer, name, id) {
+export function ParticleGroupInteractive(positionCenter, flyer, name, id) {
 	var THREE = globalThis.THREE;
 	var sTools = globalThis.sTools;
 	var Organigram = globalThis.Organigram;
 	var isdefined = globalThis.isdefined;
 	var sProjectsToRandom = globalThis.sProjectsToRandom;
 	var sWIDTH = globalThis.sWIDTH;
-	var getRatio = globalThis.getRatio;
 	var ParticleCircleNavigate = globalThis.ParticleCircleNavigate;
 
 	this.name = name;
@@ -22,7 +21,7 @@ export function ParticleGroupFunkyCreation(positionCenter, flyer, name, id) {
 	this.SetShortDistance();
 
 	this.positionCenter = positionCenter;
-	var angleDecay = 1 * Math.PI / flyer.length + Math.random() * 0.2;
+	var spread = sWIDTH * 2.5;
 
 	for (var i = 0; i < flyer.length; i++) {
 		if (isdefined(flyer[i].target)) {
@@ -31,32 +30,24 @@ export function ParticleGroupFunkyCreation(positionCenter, flyer, name, id) {
 		if ((isdefined(flyer[i].targetURL) || isdefined(flyer[i].targetHTML)) && !isdefined(flyer[i].addRandom)) {
 			sProjectsToRandom.push(flyer[i]);
 		}
-		var lPosition = new THREE.Vector3();
 
-		if (isdefined(flyer[i].position)) {
-			lPosition.x = positionCenter.x + flyer[i].position.x;
-			lPosition.y = positionCenter.y + flyer[i].position.y;
-			lPosition.z = positionCenter.z + flyer[i].position.z;
-		} else {
-			var lAngle = i * angleDecay - Math.PI * 0.5;
-			lPosition.x = positionCenter.x + 2. * sWIDTH * Math.sin(lAngle) - sWIDTH * 0.4;
-			lPosition.y = positionCenter.y + Math.cos(lAngle * 2.) * .9 * sWIDTH / getRatio();
-			lPosition.z = positionCenter.z + 2. * sWIDTH * Math.cos(lAngle);
-			this.cameraDistance = window.innerWidth * .37;
-			this.cameraDistanceNormal = this.cameraDistance;
-		}
+		var lPosition = new THREE.Vector3(
+			positionCenter.x + (Math.random() - 0.5) * spread,
+			positionCenter.y + (Math.random() - 0.5) * spread,
+			positionCenter.z + (Math.random() - 0.5) * spread,
+		);
 
 		var particle = new ParticleCircleNavigate(lPosition, flyer[i]);
 		this.particles.push(particle);
 	}
 }
 
-ParticleGroupFunkyCreation.prototype.SetShortDistance = function () {
+ParticleGroupInteractive.prototype.SetShortDistance = function () {
 	this.cameraDistance = window.innerWidth * 0.27;
 	this.cameraDistanceNormal = this.cameraDistance;
 };
 
-ParticleGroupFunkyCreation.prototype.MouseDown = function () {
+ParticleGroupInteractive.prototype.MouseDown = function () {
 	var INTERSECTED = globalThis.INTERSECTED;
 	var isdefined = globalThis.isdefined;
 	var programStroke = globalThis.programStroke;
@@ -95,7 +86,7 @@ ParticleGroupFunkyCreation.prototype.MouseDown = function () {
 	}
 };
 
-ParticleGroupFunkyCreation.prototype.AddParticle = function (aParticleObject) {
+ParticleGroupInteractive.prototype.AddParticle = function (aParticleObject) {
 	var Organigram = globalThis.Organigram;
 	var isdefined = globalThis.isdefined;
 
@@ -108,14 +99,14 @@ ParticleGroupFunkyCreation.prototype.AddParticle = function (aParticleObject) {
 	}
 };
 
-ParticleGroupFunkyCreation.prototype.MouseUp = function () {
+ParticleGroupInteractive.prototype.MouseUp = function () {
 };
 
-ParticleGroupFunkyCreation.prototype.BackFromHTML = function () {
+ParticleGroupInteractive.prototype.BackFromHTML = function () {
 	this.cameraDistance = this.cameraDistanceNormal;
 };
 
-ParticleGroupFunkyCreation.prototype.GetParticleThatLeadTo = function (aTarget) {
+ParticleGroupInteractive.prototype.GetParticleThatLeadTo = function (aTarget) {
 	for (var i = 0; i < this.particles.length; i++) {
 		if (this.particles[i].TargetObject.target == aTarget) {
 			return this.particles[i];
@@ -123,7 +114,7 @@ ParticleGroupFunkyCreation.prototype.GetParticleThatLeadTo = function (aTarget) 
 	}
 };
 
-ParticleGroupFunkyCreation.prototype.Init = function () {
+ParticleGroupInteractive.prototype.Init = function () {
 	var isdefined = globalThis.isdefined;
 
 	for (var i in this.particles) {
@@ -133,7 +124,7 @@ ParticleGroupFunkyCreation.prototype.Init = function () {
 	}
 };
 
-ParticleGroupFunkyCreation.prototype.Terminate = function () {
+ParticleGroupInteractive.prototype.Terminate = function () {
 	var INTERSECTED = globalThis.INTERSECTED;
 	var isdefined = globalThis.isdefined;
 	var programStroke = globalThis.programStroke;
@@ -143,7 +134,7 @@ ParticleGroupFunkyCreation.prototype.Terminate = function () {
 	}
 };
 
-ParticleGroupFunkyCreation.prototype.Update = function () {
+ParticleGroupInteractive.prototype.Update = function () {
 	var THREE = globalThis.THREE;
 	var mouse = globalThis.mouse;
 	var projector = globalThis.projector;

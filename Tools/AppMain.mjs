@@ -5,7 +5,8 @@
 import { Navigation } from './Navigation.mjs';
 import { CameraManager } from './CameraManager.mjs';
 import { introSpaceshipController } from './intro/IntroSpaceshipController.mjs';
-import { ParticleGroupFunkyCreation, ParticleGroupFlyer } from './ParticleGroup/ParticleGroupFunkyCreation.mjs';
+import { ParticleGroupFunkyCreation } from './ParticleGroup/ParticleGroupFunkyCreation.mjs';
+import { ParticleGroupInteractive } from './ParticleGroup/ParticleGroupInteractive.mjs';
 import { ParticleGroupWebExperiment } from './ParticleGroup/ParticleGroupWebExperiment.mjs';
 
 (function () {
@@ -105,7 +106,7 @@ import { ParticleGroupWebExperiment } from './ParticleGroup/ParticleGroupWebExpe
 		flyer.push({ name: "interactive dance", targetHTML: "html/other/InteractiveDance.html" });
 		flyer.push({ name: "PIP - interactive installation", targetHTML: "html/other/pip.html" });
 		// sProjectsLast = { name: "last project", targetHTML: "html/other/Cocoons.html" };
-		var lBProjects = new ParticleGroupFlyer(new THREE.Vector3(0, 2000, 2000), flyer, "projects", sTools.ParticleGroup.PART_OTHER);
+		var lBProjects = new ParticleGroupInteractive(new THREE.Vector3(0, 2000, 2000), flyer, "projects", sTools.ParticleGroup.PART_OTHER);
 		lBProjects.mAngleAmplitude = Math.PI * .4;
 
 		// Let's get all the particles group initialized each group at a time.
