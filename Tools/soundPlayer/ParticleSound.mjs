@@ -8,7 +8,6 @@ import {
 	programDoNothing,
 	programPauseStroke,
 	programStroke,
-	programTriangle,
 	programTriangleStroke,
 } from '../Template.mjs';
 
@@ -233,12 +232,35 @@ export function ParticleSound(aPositionHome, volume, aTargetObject) {
 	info.position = new THREE.Vector3(particle.position.x + sWIDTH, particle.position.y, particle.position.z);
 	info.visible = false;
 
-	particle.scale.x = particle.scale.y = 3 * sWIDTH * 0.07 * size;
+	var baseScale = 3 * sWIDTH * 0.07 * size;
+	particle.scale.x = particle.scale.y = baseScale;
+	particle.scaleBase = baseScale;
+	particle.mouseOn = false;
+	particle.hoverAmount = 0;
+	particle.hoverPulse = Math.random() * Math.PI * 2;
 	info.scale.x = particle.scale.x * 0.3;
 	info.scale.y = -info.scale.x;
 	aTargetObject.info = info;
 	particle.TargetObject = aTargetObject;
 	this.mParticle = particle;
+
+	function getIdleProgram() {
+		return particle.TargetObject.info.visible ? programTriangleStroke : programStroke;
+	}
+
+	particle.updateHoverVisual = function (delta) {
+		var target = this.mouseOn ? 1 : 0;
+		this.hoverAmount += (target - this.hoverAmount) * Math.min(1, delta * 10);
+
+		if (this.hoverAmount > 0.001) {
+			this.hoverPulse += delta * 6;
+			var pulse = Math.sin(this.hoverPulse) * 0.025 * this.hoverAmount;
+			var scale = this.scaleBase * (1 + 0.07 * this.hoverAmount + pulse);
+			this.scale.x = this.scale.y = scale;
+		} else {
+			this.scale.x = this.scale.y = this.scaleBase;
+		}
+	};
 
 	this.particleClear = new THREE.Particle(
 		new THREE.ParticleCanvasMaterial({
@@ -274,19 +296,19 @@ export function ParticleSound(aPositionHome, volume, aTargetObject) {
 	};
 
 	particle.MyMouseOn = function (intersect) {
-		if (isdefined(this.mParent.sound)) {
-			if (this.mParent.sound.playState == 0) {
-				this.material.program = programTriangle;
-			} else {
-				this.material.program = programPauseStroke;
-			}
-		} else {
-			this.material.program = programTriangle;
+		this.mouseOn = true;
+		if (isdefined(this.mParent.sound) && this.mParent.sound.playState > 0) {
+			this.material.program = programPauseStroke;
 		}
 	};
 
 	particle.MyMouseOff = function (intersect) {
-		this.material.program = programTriangleStroke;
+		this.mouseOn = false;
+		if (isdefined(this.mParent.sound) && this.mParent.sound.playState > 0) {
+			this.material.program = programPauseStroke;
+		} else {
+			this.material.program = getIdleProgram();
+		}
 	};
 
 	particle.MyMouseDown = function () {
@@ -329,6 +351,7 @@ export function ParticleSound(aPositionHome, volume, aTargetObject) {
 	};
 
 	particle.Update = function (delta) {
+		particle.updateHoverVisual(delta);
 		particle.mParent.Update(delta);
 	};
 
