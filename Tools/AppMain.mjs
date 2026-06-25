@@ -127,7 +127,7 @@ import { ParticleGroupWebExperiment } from './ParticleGroup/ParticleGroupWebExpe
 
 		var aboutMe = new MonsterTournicoti(aboutMePos, 0.4, { name: "About Me", target: sTools.ParticleGroup.PART_ABOUT_ME, size: 1. * menuScale }, 1, false, 0xf97316);
 		var programmingTarget = { name: "programming", target: sTools.ParticleGroup.PART_PROGRAMMING, size: 0.9 * menuScale };
-		var programmingMonster = new MonsterRandom(programmingPos, 0.3, programmingTarget);
+		var programmingMonster = new MonsterProgramming(programmingPos, 0.4, programmingTarget);
 		
 		// var randomLastProject = new MonsterTournicoti(new THREE.Vector3(lMenuPosition.x + sWIDTH * 1., lMenuPosition.y - 1. * sWIDTH / getRatio(), lMenuPosition.z + sWIDTH * 0.3), window.innerWidth * 0.06, sProjectsLast, 1);
 		var funkyCreation = new MonsterTournicoti(funkyCreationPos, 0.4, { name: "creations", target: sTools.ParticleGroup.PART_FUNKY_CREATION, size: 1.5 * menuScale }, -1, false, 0xf97316);
