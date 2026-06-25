@@ -13,7 +13,6 @@ let groupCurrent = globalThis.sTools?.ParticleGroup?.PART_INTRO ?? 1;
 const TransitionState = {
 	IDLE: 'idle',
 	CAMERA_MOVING: 'cameraMoving',
-	SPACESHIP_ENTERING: 'spaceshipEntering',
 };
 
 const NAVIGATION_CAMERA_DURATION = 1.5;
@@ -94,13 +93,8 @@ export const Navigation = {
 				return;
 			}
 
-			transition.state = TransitionState.SPACESHIP_ENTERING;
 			introSpaceshipController.startGroupEntry(transition.toGroup);
 			callGroupNavigationHook(transition.toGroup, 'OnNavigationCameraArrive', transition);
-			return;
-		}
-
-		if (transition.state === TransitionState.SPACESHIP_ENTERING && introSpaceshipController.isEntryComplete()) {
 			this.finishTransition();
 		}
 	},
