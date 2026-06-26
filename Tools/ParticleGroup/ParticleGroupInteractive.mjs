@@ -4,11 +4,12 @@
  * The camera stays fixed on the group center; the level, items, and background
  * scroll in world-space as the blob moves right and up.
  */
+import { organigram } from '../Organigram.mjs';
+
 export function ParticleGroupInteractive(positionCenter, flyer, name, id) {
 	var THREE = globalThis.THREE;
 	var scene = globalThis.scene;
 	var sTools = globalThis.sTools;
-	var Organigram = globalThis.Organigram;
 	var isdefined = globalThis.isdefined;
 	var sProjectsToRandom = globalThis.sProjectsToRandom;
 
@@ -69,7 +70,7 @@ export function ParticleGroupInteractive(positionCenter, flyer, name, id) {
 
 	for (var i = 0; i < flyer.length; i++) {
 		if (isdefined(flyer[i].target)) {
-			Organigram.Map(this.id, flyer[i].target);
+			organigram.Map(this.id, flyer[i].target);
 		}
 		if ((isdefined(flyer[i].targetURL) || isdefined(flyer[i].targetHTML)) && !isdefined(flyer[i].addRandom)) {
 			sProjectsToRandom.push(flyer[i]);

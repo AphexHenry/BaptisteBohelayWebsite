@@ -5,6 +5,7 @@
  * and legacy globalThis.sGroupCurrent (setter routes through goToIndex).
  */
 import { introSpaceshipController } from './intro/IntroSpaceshipController.mjs';
+import { organigram } from './Organigram.mjs';
 
 let isInHTML = false;
 let currentGroup;
@@ -174,7 +175,7 @@ export const Navigation = {
 		globalThis.SELECTED = globalThis.INTERSECTED = null;
 		globalThis.sCoeffCameraMove = 0;
 		globalThis.sButtonsBack.OnChange();
-		var prev = globalThis.Organigram.GetFather(groupCurrent);
+		var prev = organigram.GetFather(groupCurrent);
 		if (prev < 0) {
 			globalThis.isRoot = true;
 			this.setBackButton(false);
@@ -190,7 +191,7 @@ export const Navigation = {
 	},
 
 	goBack() {
-		this.goToIndex(globalThis.Organigram.GetFather(groupCurrent));
+		this.goToIndex(organigram.GetFather(groupCurrent));
 	},
 
 	globalGroupInit() {
@@ -350,7 +351,7 @@ export const Navigation = {
 		if (isInHTML) {
 			this.htmlToCircles();
 		} else {
-			var prev = globalThis.Organigram.GetFather(groupCurrent);
+			var prev = organigram.GetFather(groupCurrent);
 			if (prev > -1) {
 				this.goToIndex(prev);
 			}

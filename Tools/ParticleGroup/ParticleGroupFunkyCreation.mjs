@@ -1,10 +1,11 @@
 /**
  * Funky-creation particle group: circular navigators and monster sub-bubbles.
  */
+import { organigram } from '../Organigram.mjs';
+
 export function ParticleGroupFunkyCreation(positionCenter, flyer, name, id) {
 	var THREE = globalThis.THREE;
 	var sTools = globalThis.sTools;
-	var Organigram = globalThis.Organigram;
 	var isdefined = globalThis.isdefined;
 	var sProjectsToRandom = globalThis.sProjectsToRandom;
 	var sWIDTH = globalThis.sWIDTH;
@@ -26,7 +27,7 @@ export function ParticleGroupFunkyCreation(positionCenter, flyer, name, id) {
 
 	for (var i = 0; i < flyer.length; i++) {
 		if (isdefined(flyer[i].target)) {
-			Organigram.Map(this.id, flyer[i].target);
+			organigram.Map(this.id, flyer[i].target);
 		}
 		if ((isdefined(flyer[i].targetURL) || isdefined(flyer[i].targetHTML)) && !isdefined(flyer[i].addRandom)) {
 			sProjectsToRandom.push(flyer[i]);
@@ -96,14 +97,13 @@ ParticleGroupFunkyCreation.prototype.MouseDown = function () {
 };
 
 ParticleGroupFunkyCreation.prototype.AddParticle = function (aParticleObject) {
-	var Organigram = globalThis.Organigram;
 	var isdefined = globalThis.isdefined;
 
 	this.particles.push(aParticleObject.particle);
 	this.particlesToUpdate.push(aParticleObject);
 	if (isdefined(aParticleObject.target)) {
 		if (isdefined(aParticleObject.target.target)) {
-			Organigram.Map(this.id, aParticleObject.target.target);
+			organigram.Map(this.id, aParticleObject.target.target);
 		}
 	}
 };

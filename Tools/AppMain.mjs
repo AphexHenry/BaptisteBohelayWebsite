@@ -3,6 +3,7 @@
  * Loaded as an ES module after Template / particle globals are registered.
  */
 import { Navigation } from './Navigation.mjs';
+import { organigram } from './Organigram.mjs';
 import { CameraManager } from './CameraManager.mjs';
 import { introSpaceshipController } from './intro/IntroSpaceshipController.mjs';
 import { ParticleGroupFunkyCreation } from './ParticleGroup/ParticleGroupFunkyCreation.mjs';
@@ -31,7 +32,7 @@ import { ParticleGroupWebExperiment } from './ParticleGroup/ParticleGroupWebExpe
 	var cameraPosition = new THREE.Vector3(); // where the camera is.
 	var canInteract = true; // if false, the user can't interact with the website (like for animations states).
 	var SELECTED = null; // current bubble selected.
-	var organigram = new globalThis.Organigram(); // tree of relations between "pages" or actually group of bubbles.
+	// tree of relations between "pages" or actually group of bubbles.
 	var isRoot = false; // if true, we actually are at the home "page".
 	var sMinLoading = 1.;
 
@@ -62,7 +63,6 @@ import { ParticleGroupWebExperiment } from './ParticleGroup/ParticleGroupWebExpe
 	expose('cameraPosition', function () { return cameraPosition; }, function (v) { cameraPosition = v; });
 	expose('canInteract', function () { return canInteract; }, function (v) { canInteract = v; });
 	expose('SELECTED', function () { return SELECTED; }, function (v) { SELECTED = v; });
-	// Organigram.js already defines the constructor on globalThis; replace with the live instance.
 	globalThis.Organigram = organigram;
 	expose('isRoot', function () { return isRoot; }, function (v) { isRoot = v; });
 	expose('sMinLoading', function () { return sMinLoading; }, function (v) { sMinLoading = v; });

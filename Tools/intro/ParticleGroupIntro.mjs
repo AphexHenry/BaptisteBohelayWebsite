@@ -6,6 +6,7 @@
  */
 import { MonsterIntro } from '../monsters/MonsterIntro.mjs';
 import { Navigation } from '../Navigation.mjs';
+import { organigram } from '../Organigram.mjs';
 import { IntroFrameOverlay } from './IntroFrameOverlay.mjs';
 import { ParticleLetter } from './ParticleLetter.mjs';
 import { getViewPlaneBasis } from './IntroSpaceship.mjs';
@@ -506,7 +507,6 @@ ParticleGroupIntro.prototype.SetMenuParticleVisible = function (aParticle, aVisi
 
 ParticleGroupIntro.prototype.AddParticle = function (aParticleObject) {
 	var isdefined = globalThis.isdefined;
-	var Organigram = globalThis.Organigram;
 
 	var particle = aParticleObject.particle;
 	particle.positionTargetIntro = particle.position.clone();
@@ -525,7 +525,7 @@ ParticleGroupIntro.prototype.AddParticle = function (aParticleObject) {
 	this.particles = this.menuParticles;
 	if(isdefined(aParticleObject.target) && isdefined(aParticleObject.target.target))
 	{
-		Organigram.Map(this.id, aParticleObject.target.target);
+		organigram.Map(this.id, aParticleObject.target.target);
 	}
 }
 
